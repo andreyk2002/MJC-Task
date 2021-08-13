@@ -2,7 +2,8 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.GiftTag;
-import com.epam.esm.mapping.TagEntityDtoMapper;
+import com.epam.esm.mappers.TagEntityDtoMapper;
+import com.epam.esm.repository.CertificateTagRepository;
 import com.epam.esm.repository.TagRepository;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class GitTagService {
 
     private final TagRepository tagRepo;
+    private final CertificateTagRepository certificateTagRepo;
     private final TagEntityDtoMapper mapper;
 
     public List<TagDto> getAllTags() {
@@ -23,6 +25,7 @@ public class GitTagService {
 
 
     public void deleteById(long id) {
+        certificateTagRepo.deleteByTagId(id);
         tagRepo.deleteById(id);
     }
 

@@ -1,4 +1,4 @@
-package com.epam.esm.mapping;
+package com.epam.esm.mappers;
 
 import com.epam.esm.dto.GiftCertificateDto;
 import com.epam.esm.validation.CertificateModel;

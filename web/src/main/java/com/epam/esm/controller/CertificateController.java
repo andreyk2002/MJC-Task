@@ -2,7 +2,7 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.GiftCertificateDto;
-import com.epam.esm.mapping.CertificateModelDtoMapper;
+import com.epam.esm.mappers.CertificateModelDtoMapper;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.validation.CertificateModel;
 import lombok.AllArgsConstructor;

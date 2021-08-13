@@ -2,7 +2,7 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.mapping.TagModelDtoMapper;
+import com.epam.esm.mappers.TagModelDtoMapper;
 import com.epam.esm.service.GitTagService;
 import com.epam.esm.validation.TagModel;
 import lombok.AllArgsConstructor;
