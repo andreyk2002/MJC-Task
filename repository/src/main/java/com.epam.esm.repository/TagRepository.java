@@ -1,6 +1,6 @@
 package com.epam.esm.repository;
 
-import com.epam.esm.entity.GitTag;
+import com.epam.esm.entity.GiftTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -25,7 +25,7 @@ public class TagRepository {
         this.tagRowMapper = tagRowMapper;
     }
 
-    public int saveTag(GitTag tag){
+    public int saveTag(GiftTag tag){
         return jdbcTemplate.update(SAVE_QUERY, tag.getName());
     }
 
@@ -38,11 +38,11 @@ public class TagRepository {
         return jdbcTemplate.update(DELETE_ALL_QUERY);
     }
 
-    public GitTag getById(long id) {
+    public GiftTag getById(long id) {
         return jdbcTemplate.queryForObject(FIND_BY_ID, tagRowMapper, id);
     }
 
-    public List<GitTag> getAll() {
+    public List<GiftTag> getAll() {
         return jdbcTemplate.query(FIND_ALL, tagRowMapper);
     }
 }

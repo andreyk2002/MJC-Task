@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class GitTag {
+public class GiftTag {
     
     private long id;
     
