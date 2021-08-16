@@ -2,10 +2,12 @@ package com.epam.esm.repository;
 
 import com.epam.esm.entity.GiftTag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class TagRepository {
@@ -25,11 +27,11 @@ public class TagRepository {
         this.tagRowMapper = tagRowMapper;
     }
 
-    public int saveTag(GiftTag tag){
+    public int saveTag(GiftTag tag) {
         return jdbcTemplate.update(SAVE_QUERY, tag.getName());
     }
 
-    public int deleteById(long tagId){
+    public int deleteById(long tagId) {
         return jdbcTemplate.update(DELETE_QUERY, tagId);
     }
 
@@ -38,9 +40,16 @@ public class TagRepository {
         return jdbcTemplate.update(DELETE_ALL_QUERY);
     }
 
-    public GiftTag getById(long id) {
-        return jdbcTemplate.queryForObject(FIND_BY_ID, tagRowMapper, id);
+    public Optional<GiftTag> getById(long id) {
+        try {
+            GiftTag giftTag = jdbcTemplate.queryForObject(FIND_BY_ID, tagRowMapper, id);
+            return Optional.of(giftTag);
+        } catch (EmptyResultDataAccessException e) {
+            //Do we need a logger
+            return Optional.empty();
+        }
     }
+
 
     public List<GiftTag> getAll() {
         return jdbcTemplate.query(FIND_ALL, tagRowMapper);

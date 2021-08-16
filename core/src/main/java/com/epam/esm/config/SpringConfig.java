@@ -28,7 +28,6 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
     public DataSource dataSource() {
-        //TODO: resolve properties problem
 //        HikariConfig config = new HikariConfig("db.properties");
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("com.mysql.jdbc.Driver");

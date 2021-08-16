@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class GiftCertificate {
 
     private long id;

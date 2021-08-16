@@ -6,7 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -16,10 +19,8 @@ import java.time.LocalDateTime;
 @Setter
 public class CertificateModel {
 
-    @NotNull(message = "Name cannot be null")
-    @NotBlank(message = "Name cannot be empty")
+    @NotEmpty(message = "Name cannot be empty")
     private String name;
-
 
     @NotNull(message = "Description cannot be null")
     private String description;
@@ -30,11 +31,12 @@ public class CertificateModel {
     @PositiveOrZero(message = "duration can't be less than 0")
     private int duration;
 
+    @NotEmpty(message = "Create date should be not empty")
     @Past
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime createDate;
 
-    @PastOrPresent
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime lastUpdateDate;
 

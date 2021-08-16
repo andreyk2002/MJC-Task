@@ -11,11 +11,12 @@ import com.epam.esm.repository.CertificateTagRepository;
 import com.epam.esm.repository.TagRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 
-//May be not working (autowired)
 @AllArgsConstructor
 @Service
 public class CertificateService {
@@ -26,9 +27,10 @@ public class CertificateService {
     private final CertificateEntityDtoMapper certificateMapper;
     private final CertificateTagRepository certificateTagRepository;
 
+    @Transactional
     public void addCertificate(GiftCertificateDto certificateDto) {
         List<TagDto> tags = certificateDto.getTags();
-        for(TagDto tagDto : tags){
+        for (TagDto tagDto : tags) {
             GiftTag giftTag = tagMapper.tagDtoToTag(tagDto);
             tagRepo.saveTag(giftTag);
         }
@@ -36,16 +38,31 @@ public class CertificateService {
         certificateRepo.addCertificate(giftCertificate);
     }
 
+    @Transactional
     public void deleteById(long id) {
-        //Transactions
         certificateTagRepository.deleteByCertificateId(id);
         certificateRepo.deleteById(id);
     }
 
 
     //TODO: update only not nullable fields
-    public void updateCertificate(GiftCertificateDto giftCertificate) {
-
+    @Transactional
+    public void updateCertificate(long id, GiftCertificateDto giftCertificate) {
+        Optional<GiftCertificate> optionalUpdated = certificateRepo.getById(id);
+        if (optionalUpdated.isEmpty()) {
+            addCertificate(giftCertificate);
+            return;
+        }
+        GiftCertificate updated = optionalUpdated.get();
+        String newName = giftCertificate.getName();
+        if (newName != null) {
+            updated.setName(newName);
+        }
+        String newDescription = giftCertificate.getDescription();
+        if (newDescription != null) {
+            updated.setDescription(newDescription);
+        }
+        //...
     }
 
     public List<GiftCertificateDto> getAll() {
@@ -53,8 +70,30 @@ public class CertificateService {
         return certificateMapper.certificatesToCertificatesDto(certificates);
     }
 
-    public GiftCertificateDto getById(long id) {
-        GiftCertificate certificate = certificateRepo.getById(id);
-        return certificateMapper.certificateToCertificateDto(certificate);
+    public Optional<GiftCertificateDto> getById(long id) {
+        Optional<GiftCertificate> optionalGiftCertificate = certificateRepo.getById(id);
+        if (optionalGiftCertificate.isEmpty()) {
+            return Optional.empty();
+        }
+        GiftCertificate giftCertificate = optionalGiftCertificate.get();
+        GiftCertificateDto giftCertificateDto = certificateMapper.certificateToCertificateDto(giftCertificate);
+        return Optional.of(giftCertificateDto);
+    }
+
+    public List<GiftCertificateDto> getCertificates(String tagName, String keyword, String sortString) {
+        String[] sort = sortString.split(",");
+        String sortOrder = sort[1];
+        String field = sort[0];
+        List<GiftCertificate> certificates;
+        if (tagName == null && keyword == null) {
+            certificates = certificateRepo.getAllSorted(sortOrder, field);
+        } else if (keyword == null) {
+            certificates = certificateRepo.getByTagName(tagName, sortOrder, field);
+        } else if (tagName == null) {
+            certificates = certificateRepo.getByKeyword(keyword, sortOrder, field);
+        } else {
+            certificates = certificateRepo.getByTagNameAndKeyword(keyword, tagName, sortOrder, field);
+        }
+        return certificateMapper.certificatesToCertificatesDto(certificates);
     }
 }

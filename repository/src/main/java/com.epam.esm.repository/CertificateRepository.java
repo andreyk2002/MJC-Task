@@ -3,6 +3,7 @@ package com.epam.esm.repository;
 
 import com.epam.esm.entity.GiftCertificate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class CertificateRepository {
@@ -18,12 +20,15 @@ public class CertificateRepository {
     private static final String FIND_ALL = "SELECT * FROM gift_certificate";
     private static final String UPDATE = "UPDATE * FROM gift_certificate WHERE id = ? SET name = ?," +
             "description = ?, price = ?, duration = ?, creation_date = ?, last_update_date = ?";
-    private static final String FIND_BY_TAG_NAME = "SELECT * FROM  gift_certificate gc " +
-            "JOIN certificate_tag ct " +
-            "ON ct.certificate_id = gc.id " +
-            "JOIN tag t " +
-            "ON ct.tag_id = t.id " +
-            "WHERE t.name = ?";
+    private static final String FIND_SORTED = "SELECT * FROM gift_certificate ORDER BY ? ?";
+    private static final String FIND_BY_KEYWORD = "SELECT * FROM gift_certificate WHERE name LIKE " +
+            "concat('%', ?, '%') OR description LIKE concat('%', ?, '%')";
+    private static final String FIND_BY_TAG_NAME = "SELECT * FROM gift_certificate gc JOIN certificate_tag ct ON " +
+            "gc.id = ct.id JOIN tag t ON t.id = ct.tag_id WHERE t.name = ? ";
+    private static final String FIND_BY_TAG_NAME_KEYWORD = "SELECT * FROM gift_certificate gc JOIN certificate_tag ct ON " +
+            "gc.id = ct.certificate_id JOIN tag t ON t.id = ct.tag_id WHERE t.name = ? AND (gc.name LIKE " +
+            "concat('%', ?, '%') OR gc.description LIKE concat('%', ?, '%')) ";
+
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<GiftCertificate> certificateMapper;
 
@@ -49,10 +54,7 @@ public class CertificateRepository {
     }
 
     public void updateCertificate(GiftCertificate giftCertificate) {
-
         long id = giftCertificate.getId();
-        GiftCertificate oldVersion = getById(id);
-
         LocalDateTime createDate = giftCertificate.getCreateDate();
         String description = giftCertificate.getDescription();
         String name = giftCertificate.getName();
@@ -66,11 +68,32 @@ public class CertificateRepository {
         return jdbcTemplate.query(FIND_ALL, certificateMapper);
     }
 
-    public GiftCertificate getById(long id) {
-        return jdbcTemplate.queryForObject(FIND_BY_ID, certificateMapper, id);
+    public Optional<GiftCertificate> getById(long id) {
+        try {
+            GiftCertificate giftCertificate = jdbcTemplate.queryForObject(FIND_BY_ID, certificateMapper, id);
+            return Optional.of(giftCertificate);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
-    public GiftCertificate findByTagName(String tagName) {
-        return jdbcTemplate.queryForObject(FIND_BY_TAG_NAME, certificateMapper, tagName);
+    public List<GiftCertificate> getAllSorted(String sortOrder, String field) {
+        String finalQuery = String.format("%s ORDER BY %s %s", FIND_SORTED, field, sortOrder);
+        return jdbcTemplate.query(finalQuery, certificateMapper);
+    }
+
+    public List<GiftCertificate> getByKeyword(String keyword, String sortOrder, String field) {
+        String finalQuery = String.format("%s ORDER BY %s %s", FIND_BY_KEYWORD, field, sortOrder);
+        return jdbcTemplate.query(finalQuery, certificateMapper, keyword, keyword);
+    }
+
+    public List<GiftCertificate> getByTagName(String tagName, String sortOrder, String field) {
+        String finalQuery = String.format("%s ORDER BY %s %s", FIND_BY_TAG_NAME, field, sortOrder);
+        return jdbcTemplate.query(finalQuery, certificateMapper, tagName);
+    }
+
+    public List<GiftCertificate> getByTagNameAndKeyword(String keyword, String tagName, String sortOrder, String field) {
+        String finalQuery = String.format("%s ORDER BY %s %s", FIND_BY_TAG_NAME_KEYWORD, field, sortOrder);
+        return jdbcTemplate.query(finalQuery, certificateMapper, tagName, keyword, keyword);
     }
 }
