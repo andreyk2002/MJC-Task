@@ -22,6 +22,6 @@ public class ServletInitializer extends
     protected String[] getServletMappings() {
         return new String[]{"/"};
     }
-//     response.setContentType("application/json");
+
 
 }

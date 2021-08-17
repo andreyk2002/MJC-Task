@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,16 +25,20 @@ public class CertificateService {
 
     private final CertificateRepository certificateRepo;
     private final TagEntityDtoMapper tagMapper;
-    private final TagRepository tagRepo;
+    private final GiftTagService tagRepo;
     private final CertificateEntityDtoMapper certificateMapper;
     private final CertificateTagRepository certificateTagRepository;
+
+    //Service
 
     @Transactional
     public void addCertificate(GiftCertificateDto certificateDto) {
         List<TagDto> tags = certificateDto.getTags();
         for (TagDto tagDto : tags) {
-            GiftTag giftTag = tagMapper.tagDtoToTag(tagDto);
-            tagRepo.saveTag(giftTag);
+            tagRepo.addTag(tagDto);
+            long tagId = tagDto.getId();
+            long certificateId = certificateDto.getId();
+            certificateTagRepository.addCertificateTag(tagId, certificateId);
         }
         GiftCertificate giftCertificate = certificateMapper.certificateToCertificateDto(certificateDto);
         certificateRepo.addCertificate(giftCertificate);
@@ -45,7 +51,6 @@ public class CertificateService {
     }
 
 
-    //TODO: update only not nullable fields
     @Transactional
     public void updateCertificate(long id, GiftCertificateDto giftCertificate) {
         Optional<GiftCertificate> optionalUpdated = certificateRepo.getById(id);
@@ -62,7 +67,33 @@ public class CertificateService {
         if (newDescription != null) {
             updated.setDescription(newDescription);
         }
-        //...
+        LocalDateTime createDate = giftCertificate.getCreateDate();
+        if(createDate != null){
+            updated.setCreateDate(createDate);
+        }
+        LocalDateTime lastUpdateDate = giftCertificate.getLastUpdateDate();
+        if (lastUpdateDate != null && lastUpdateDate.isAfter(giftCertificate.getCreateDate())){
+            updated.setLastUpdateDate(lastUpdateDate);
+        }
+        BigDecimal price = giftCertificate.getPrice();
+        if(price != null){
+            giftCertificate.setPrice(price);
+        }
+        Integer duration = giftCertificate.getDuration();
+        if(duration != null){
+            giftCertificate.setDuration(duration);
+        }
+        List<TagDto> tags = giftCertificate.getTags();
+        if(tags != null){
+            certificateTagRepository.deleteByCertificateId(id);
+            for(TagDto tagDto : tags){
+                long tagId = tagDto.getId();
+                tagRepo.addTag(tagDto);
+                certificateTagRepository.addCertificateTag(id, tagId);
+            }
+        }
+        GiftCertificate certificate = certificateMapper.certificateToCertificateDto(giftCertificate);
+        certificateRepo.updateCertificate(certificate);
     }
 
     public List<GiftCertificateDto> getAll() {

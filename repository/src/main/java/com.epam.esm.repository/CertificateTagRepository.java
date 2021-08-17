@@ -15,6 +15,7 @@ public class CertificateTagRepository {
             "JOIN tag t ON ct.tag_id = t.id WHERE ct.certificate_id = ?";
     private static final String DELETE_BY_CERTIFICATE_ID = "DELETE FROM certificate_tag WHERE certificate_id = ?";
     private static final String DELETE_BY_TAG_ID = "DELETE FROM certificate_tag WHERE tag_id = ?";
+    public static final String ADD_CERTIFICATE_TAG = "INSERT INTO certificate_tag (tag_id, certifcate_id) VALUES (? , ?)";
     private final JdbcTemplate jdbcTemplate;
     private final TagRowMapper tagRowMapper;
 
@@ -29,5 +30,9 @@ public class CertificateTagRepository {
 
     public void deleteByCertificateId(long certificateId){
         jdbcTemplate.update(DELETE_BY_CERTIFICATE_ID, certificateId);
+    }
+
+    public void addCertificateTag(long id, long tagId) {
+        jdbcTemplate.update(ADD_CERTIFICATE_TAG);
     }
 }

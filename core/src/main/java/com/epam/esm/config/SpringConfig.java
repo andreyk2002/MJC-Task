@@ -52,6 +52,4 @@ public class SpringConfig implements WebMvcConfigurer {
     public LocalValidatorFactoryBean localValidatorFactoryBean(){
         return new LocalValidatorFactoryBean();
     }
-
-
 }

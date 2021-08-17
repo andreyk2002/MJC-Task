@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class GiftCertificateDto {
+
+    private long id;
     
     private String name;
 
@@ -22,7 +24,7 @@ public class GiftCertificateDto {
     
     private BigDecimal price;
     
-    private int duration;
+    private Integer duration;
 
     private List<TagDto> tags;
 
