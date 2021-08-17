@@ -7,6 +7,7 @@ import com.epam.esm.service.GiftTagService;
 import com.epam.esm.validation.TagModel;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,7 @@ public class TagController {
         return new ResponseEntity<>(tags, HttpStatus.OK);
     }
 
-    @PostMapping("")
+    @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> addTag(@RequestBody @Valid TagModel tagModel) {
         TagDto tagDto = mapper.tagModelToDto(tagModel);
         tagService.addTag(tagDto);

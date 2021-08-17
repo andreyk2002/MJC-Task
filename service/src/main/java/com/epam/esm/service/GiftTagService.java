@@ -43,7 +43,11 @@ public class GiftTagService {
     }
 
     public void addTag(TagDto tagDto) {
-        GiftTag giftTag = mapper.tagDtoToTag(tagDto);
-        tagRepo.saveTag(giftTag);
+        long id = tagDto.getId();
+        Optional<TagDto> tag = getById(id);
+        if(tag.isEmpty()) {
+            GiftTag giftTag = mapper.tagDtoToTag(tagDto);
+            tagRepo.saveTag(giftTag);
+        }
     }
 }

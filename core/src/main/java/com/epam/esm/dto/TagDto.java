@@ -11,6 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TagDto {
 
+    private long id;
+
     private String name;
 
 }
