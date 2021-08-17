@@ -3,6 +3,8 @@ package com.epam.esm.config;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import javax.servlet.Filter;
+
 public class ServletInitializer extends
         AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -20,4 +22,6 @@ public class ServletInitializer extends
     protected String[] getServletMappings() {
         return new String[]{"/"};
     }
+//     response.setContentType("application/json");
+
 }

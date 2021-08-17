@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -28,7 +30,6 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
     public DataSource dataSource() {
-//        HikariConfig config = new HikariConfig("db.properties");
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("com.mysql.jdbc.Driver");
         config.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/gitsertificate");
@@ -40,10 +41,16 @@ public class SpringConfig implements WebMvcConfigurer {
         return new HikariDataSource(config);
     }
 
+
     @Bean
     public JdbcTemplate jdbcTemplate() {
         DataSource dataSource = dataSource();
         return new JdbcTemplate(dataSource);
+    }
+
+    @Bean
+    public LocalValidatorFactoryBean localValidatorFactoryBean(){
+        return new LocalValidatorFactoryBean();
     }
 
 
