@@ -6,11 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -41,13 +45,27 @@ public class CertificateRepository {
         this.certificateMapper = new CertificateRowMapper();
     }
 
-    public int addCertificate(GiftCertificate giftCertificate) {
-        return jdbcTemplate.update(
-                ADD_QUERY, giftCertificate.getName(), giftCertificate.getDescription(),
-                giftCertificate.getPrice(), giftCertificate.getDuration(), giftCertificate.getCreateDate(),
-                giftCertificate.getLastUpdateDate()
-        );
+    public long addCertificate(GiftCertificate giftCertificate) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(
+                (connection) -> {
+                    PreparedStatement statement =
+                            connection.prepareStatement(ADD_QUERY, new String[]{
+                                    "name", "description", "price", "duration", "creation_date", "last_update_date"
+                            });
+                    statement.setString(1, giftCertificate.getName());
+                    statement.setString(2, giftCertificate.getDescription());
+                    statement.setBigDecimal(3, giftCertificate.getPrice());
+                    statement.setObject(4, giftCertificate.getDuration());
+                    statement.setObject(5, LocalDateTime.now());
+                    statement.setObject(6, LocalDateTime.now());
+                    return statement;
+                },
+                keyHolder);
+        Number key = keyHolder.getKey();
+        return Objects.requireNonNull(key).longValue();
     }
+
 
     public int deleteById(long id) {
         return jdbcTemplate.update(DELETE_QUERY, id);
@@ -58,7 +76,7 @@ public class CertificateRepository {
         LocalDateTime createDate = giftCertificate.getCreateDate();
         String description = giftCertificate.getDescription();
         String name = giftCertificate.getName();
-        LocalDateTime lastUpdateDate = giftCertificate.getLastUpdateDate();
+        LocalDateTime lastUpdateDate = LocalDateTime.now();
         BigDecimal price = giftCertificate.getPrice();
         int duration = giftCertificate.getDuration();
         jdbcTemplate.update(UPDATE, id, name, description, price, duration, createDate, lastUpdateDate);

@@ -1,20 +1,18 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.GiftCertificateDto;
-import com.epam.esm.dto.TagDto;
+import com.epam.esm.dto.CertificateResponseDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.GiftTag;
-import com.epam.esm.mappers.CertificateEntityDtoMapper;
-import com.epam.esm.mappers.TagEntityDtoMapper;
+import com.epam.esm.mappers.CertificateRequestMapper;
+import com.epam.esm.mappers.CertificateResponseMapper;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.CertificateTagRepository;
-import com.epam.esm.repository.TagRepository;
+import com.epam.esm.validation.CertificateRequestDto;
+import com.epam.esm.validation.TagRequestDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,24 +22,21 @@ import java.util.Optional;
 public class CertificateService {
 
     private final CertificateRepository certificateRepo;
-    private final TagEntityDtoMapper tagMapper;
-    private final GiftTagService tagRepo;
-    private final CertificateEntityDtoMapper certificateMapper;
+    private final GiftTagService tagService;
+    private final CertificateResponseMapper certificateMapper;
+    private final CertificateRequestMapper requestMapper;
     private final CertificateTagRepository certificateTagRepository;
 
-    //Service
 
     @Transactional
-    public void addCertificate(GiftCertificateDto certificateDto) {
-        List<TagDto> tags = certificateDto.getTags();
-        for (TagDto tagDto : tags) {
-            tagRepo.addTag(tagDto);
-            long tagId = tagDto.getId();
-            long certificateId = certificateDto.getId();
-            certificateTagRepository.addCertificateTag(tagId, certificateId);
+    public void addCertificate(CertificateRequestDto certificateDto) {
+        GiftCertificate giftCertificate = requestMapper.responseToEntity(certificateDto);
+        long insertId = certificateRepo.addCertificate(giftCertificate);
+        List<TagRequestDto> tags = certificateDto.getTags();
+        for (TagRequestDto tagRequestDto : tags) {
+            long tagId = tagService.addTag(tagRequestDto);
+            certificateTagRepository.addCertificateTag(tagId, insertId);
         }
-        GiftCertificate giftCertificate = certificateMapper.certificateToCertificateDto(certificateDto);
-        certificateRepo.addCertificate(giftCertificate);
     }
 
     @Transactional
@@ -52,7 +47,7 @@ public class CertificateService {
 
 
     @Transactional
-    public void updateCertificate(long id, GiftCertificateDto giftCertificate) {
+    public void updateCertificate(long id, CertificateRequestDto giftCertificate) {
         Optional<GiftCertificate> optionalUpdated = certificateRepo.getById(id);
         if (optionalUpdated.isEmpty()) {
             addCertificate(giftCertificate);
@@ -67,51 +62,43 @@ public class CertificateService {
         if (newDescription != null) {
             updated.setDescription(newDescription);
         }
-        LocalDateTime createDate = giftCertificate.getCreateDate();
-        if(createDate != null){
-            updated.setCreateDate(createDate);
-        }
-        LocalDateTime lastUpdateDate = giftCertificate.getLastUpdateDate();
-        if (lastUpdateDate != null && lastUpdateDate.isAfter(giftCertificate.getCreateDate())){
-            updated.setLastUpdateDate(lastUpdateDate);
-        }
         BigDecimal price = giftCertificate.getPrice();
-        if(price != null){
+        if (price != null) {
             giftCertificate.setPrice(price);
         }
         Integer duration = giftCertificate.getDuration();
-        if(duration != null){
+        if (duration != null) {
             giftCertificate.setDuration(duration);
         }
-        List<TagDto> tags = giftCertificate.getTags();
-        if(tags != null){
+        List<TagRequestDto> tags = giftCertificate.getTags();
+        if (tags != null) {
             certificateTagRepository.deleteByCertificateId(id);
-            for(TagDto tagDto : tags){
-                long tagId = tagDto.getId();
-                tagRepo.addTag(tagDto);
+            for (TagRequestDto tagResponseDto : tags) {
+                long tagId = tagResponseDto.getId();
+                tagService.addTag(tagResponseDto);
                 certificateTagRepository.addCertificateTag(id, tagId);
             }
         }
-        GiftCertificate certificate = certificateMapper.certificateToCertificateDto(giftCertificate);
+        GiftCertificate certificate = requestMapper.responseToEntity(giftCertificate);
         certificateRepo.updateCertificate(certificate);
     }
 
-    public List<GiftCertificateDto> getAll() {
+    public List<CertificateResponseDto> getAll() {
         List<GiftCertificate> certificates = certificateRepo.getAll();
-        return certificateMapper.certificatesToCertificatesDto(certificates);
+        return certificateMapper.entitiesToResponses(certificates);
     }
 
-    public Optional<GiftCertificateDto> getById(long id) {
+    public Optional<CertificateResponseDto> getById(long id) {
         Optional<GiftCertificate> optionalGiftCertificate = certificateRepo.getById(id);
         if (optionalGiftCertificate.isEmpty()) {
             return Optional.empty();
         }
         GiftCertificate giftCertificate = optionalGiftCertificate.get();
-        GiftCertificateDto giftCertificateDto = certificateMapper.certificateToCertificateDto(giftCertificate);
-        return Optional.of(giftCertificateDto);
+        CertificateResponseDto certificateResponseDto = certificateMapper.responseToEntity(giftCertificate);
+        return Optional.of(certificateResponseDto);
     }
 
-    public List<GiftCertificateDto> getCertificates(String tagName, String keyword, String sortString) {
+    public List<CertificateResponseDto> getCertificates(String tagName, String keyword, String sortString) {
         String[] sort = sortString.split(",");
         String sortOrder = sort[1];
         String field = sort[0];
@@ -125,6 +112,6 @@ public class CertificateService {
         } else {
             certificates = certificateRepo.getByTagNameAndKeyword(keyword, tagName, sortOrder, field);
         }
-        return certificateMapper.certificatesToCertificatesDto(certificates);
+        return certificateMapper.entitiesToResponses(certificates);
     }
 }

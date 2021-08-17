@@ -23,18 +23,14 @@ class CertificateRepositoryTest {
     private final GiftCertificate giftCertificate = GiftCertificate.builder()
             .id(2)
             .price(new BigDecimal("19"))
+            .duration(0)
             .createDate(LocalDateTime.of(2002, 8, 12, 3, 11))
             .lastUpdateDate(LocalDateTime.of(2005, 8, 12, 3, 11))
             .build();
 
     @BeforeEach
     void setUp() {
-//        HikariConfig config = new HikariConfig("testDb.properties");
-        HikariConfig config = new HikariConfig();
-        config.setDriverClassName("org.h2.Driver");
-        config.setJdbcUrl("jdbc:h2:~/test");
-        config.setPassword("");
-        config.setUsername("sa");
+        HikariConfig config = new HikariConfig("src/test/resources/testDb.properties");
         DataSource dataSource = new HikariDataSource(config);
         JdbcTemplate template = new JdbcTemplate(dataSource);
         repository = new CertificateRepository(template);

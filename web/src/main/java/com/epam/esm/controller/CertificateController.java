@@ -1,10 +1,10 @@
 package com.epam.esm.controller;
 
 
-import com.epam.esm.dto.GiftCertificateDto;
-import com.epam.esm.mappers.CertificateModelDtoMapper;
+import com.epam.esm.dto.CertificateResponseDto;
+import com.epam.esm.mappers.CertificateRequestMapper;
 import com.epam.esm.service.CertificateService;
-import com.epam.esm.validation.CertificateModel;
+import com.epam.esm.validation.CertificateRequestDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ import java.util.Optional;
 public class CertificateController {
 
     private final CertificateService certificateService;
-    private final CertificateModelDtoMapper mapper;
+    private final CertificateRequestMapper mapper;
 
 
     @DeleteMapping("/{id}")
@@ -34,42 +34,40 @@ public class CertificateController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable long id) {
-        Optional<GiftCertificateDto> certificate = certificateService.getById(id);
+        Optional<CertificateResponseDto> certificate = certificateService.getById(id);
         if (certificate.isPresent()) {
-            GiftCertificateDto certificateDto = certificate.get();
+            CertificateResponseDto certificateDto = certificate.get();
             return new ResponseEntity<>(certificateDto, HttpStatus.OK);
         }
         return new ResponseEntity<>(String.format("Certificate with id %d not found", id), HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("")
-    public ResponseEntity<List<GiftCertificateDto>> getAll() {
-        List<GiftCertificateDto> certificates = certificateService.getAll();
+    public ResponseEntity<List<CertificateResponseDto>> getAll() {
+        List<CertificateResponseDto> certificates = certificateService.getAll();
         return new ResponseEntity<>(certificates, HttpStatus.OK);
     }
 
     @GetMapping("/searchTest")
-    public ResponseEntity<List<GiftCertificateDto>> getCertificates(@RequestParam(required = false) String tagName,
-                                                                    @RequestParam(required = false) String keyword,
-                                                                    @RequestParam(defaultValue = "id,desc")
-                                                                    @Pattern(regexp = "(name|createDate),(asc|desc)")
-                                                                    @Valid String sort) {
-        List<GiftCertificateDto> certificates = certificateService.getCertificates(tagName, keyword, sort);
+    public ResponseEntity<List<CertificateResponseDto>> getCertificates(@RequestParam(required = false) String tagName,
+                                                                        @RequestParam(required = false) String keyword,
+                                                                        @RequestParam(defaultValue = "id,desc")
+                                                                        @Pattern(regexp = "(name|createDate),(asc|desc)")
+                                                                        @Valid String sort) {
+        List<CertificateResponseDto> certificates = certificateService.getCertificates(tagName, keyword, sort);
         return new ResponseEntity<>(certificates, HttpStatus.OK);
     }
 
 
     @PostMapping("")
-    public ResponseEntity<?> addCertificate(@RequestBody @Valid CertificateModel certificateModel) {
-        GiftCertificateDto giftCertificateDto = mapper.certificateModelToDto(certificateModel);
-        certificateService.addCertificate(giftCertificateDto);
+    public ResponseEntity<?> addCertificate(@RequestBody @Valid CertificateRequestDto certificateRequestDto) {
+        certificateService.addCertificate(certificateRequestDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCertificate(@PathVariable long id, @RequestBody CertificateModel certificateModel) {
-        GiftCertificateDto giftCertificateDto = mapper.certificateModelToDto(certificateModel);
-        certificateService.updateCertificate(id, giftCertificateDto);
+    public ResponseEntity<?> updateCertificate(@PathVariable long id, @RequestBody CertificateRequestDto certificateRequestDto) {
+        certificateService.updateCertificate(id, certificateRequestDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

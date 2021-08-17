@@ -4,9 +4,13 @@ import com.epam.esm.entity.GiftTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -27,8 +31,18 @@ public class TagRepository {
         this.tagRowMapper = tagRowMapper;
     }
 
-    public int saveTag(GiftTag tag) {
-        return jdbcTemplate.update(SAVE_QUERY, tag.getName());
+    public long addTag(GiftTag tag) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(
+                (connection) -> {
+                    PreparedStatement statement =
+                            connection.prepareStatement(SAVE_QUERY, new String[]{"name"});
+                    statement.setString(1, tag.getName());
+                    return statement;
+                },
+                keyHolder);
+        Number key = keyHolder.getKey();
+        return Objects.requireNonNull(key).longValue();
     }
 
     public int deleteById(long tagId) {

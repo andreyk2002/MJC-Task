@@ -12,7 +12,9 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TagModel {
+public class TagRequestDto {
+
+    private long id;
 
     @NotEmpty(message = "Name cannot be empty")
     private String name;

@@ -1,10 +1,12 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.TagDto;
+import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftTag;
-import com.epam.esm.mappers.TagEntityDtoMapper;
+import com.epam.esm.mappers.TagRequestMapper;
+import com.epam.esm.mappers.TagResponseMapper;
 import com.epam.esm.repository.CertificateTagRepository;
 import com.epam.esm.repository.TagRepository;
+import com.epam.esm.validation.TagRequestDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +20,12 @@ public class GiftTagService {
 
     private final TagRepository tagRepo;
     private final CertificateTagRepository certificateTagRepo;
-    private final TagEntityDtoMapper mapper;
+    private final TagRequestMapper requestMapper;
+    private final TagResponseMapper responseMapper;
 
-    public List<TagDto> getAllTags() {
+    public List<TagResponseDto> getAllTags() {
         List<GiftTag> tags = tagRepo.getAll();
-        return mapper.tagsToTagsDto(tags);
+        return responseMapper.entitiesToRequests(tags);
     }
 
 
@@ -32,22 +35,23 @@ public class GiftTagService {
         tagRepo.deleteById(id);
     }
 
-    public Optional<TagDto> getById(long id) {
+    public Optional<TagResponseDto> getById(long id) {
         Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
         if (optionalGiftTag.isEmpty()) {
             return Optional.empty();
         }
         GiftTag giftTag = optionalGiftTag.get();
-        TagDto tagDto = mapper.tagToTagDto(giftTag);
-        return Optional.of(tagDto);
+        TagResponseDto tagResponseDto = responseMapper.entityToRequest(giftTag);
+        return Optional.of(tagResponseDto);
     }
 
-    public void addTag(TagDto tagDto) {
-        long id = tagDto.getId();
-        Optional<TagDto> tag = getById(id);
-        if(tag.isEmpty()) {
-            GiftTag giftTag = mapper.tagDtoToTag(tagDto);
-            tagRepo.saveTag(giftTag);
+    public long addTag(TagRequestDto tagRequestDto) {
+        long id = tagRequestDto.getId();
+        Optional<TagResponseDto> tag = getById(id);
+        if (tag.isEmpty()) {
+            GiftTag giftTag = requestMapper.requestToEntity(tagRequestDto);
+            return tagRepo.addTag(giftTag);
         }
+        return id;
     }
 }

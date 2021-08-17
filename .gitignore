@@ -3,3 +3,4 @@
 /service/target/
 /web/target/
 /repository/target/
+/web/src/main/resources/db.properties
