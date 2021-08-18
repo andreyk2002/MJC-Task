@@ -2,6 +2,7 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.TagResponseDto;
+import com.epam.esm.localization.Localizer;
 import com.epam.esm.service.GiftTagService;
 import com.epam.esm.validation.TagRequestDto;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,9 @@ import java.util.Optional;
 @Validated
 public class TagController {
 
+    private static final String WRONG_ID = "tag.wrongId";
+    private static final String CANT_DELETE = "tag.cantDelete";
+    private final Localizer localizer;
     private final GiftTagService tagService;
 
 
@@ -27,7 +31,8 @@ public class TagController {
     public ResponseEntity<?> deleteById(@PathVariable long id) {
         Optional<TagResponseDto> deleteTag = tagService.deleteById(id);
         if (!deleteTag.isPresent()) {
-            return new ResponseEntity<>(String.format("Tag with id %d not found", id), HttpStatus.NOT_FOUND);
+            String message = localizer.getLocalizedMessage(CANT_DELETE);
+            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
         }
         TagResponseDto deleted = deleteTag.get();
         return new ResponseEntity<>(deleted, HttpStatus.OK);
@@ -37,7 +42,8 @@ public class TagController {
     public ResponseEntity<?> getById(@PathVariable long id) {
         Optional<TagResponseDto> tag = tagService.getById(id);
         if (!tag.isPresent()) {
-            return new ResponseEntity<>(String.format("Tag with id %d not found", id), HttpStatus.NOT_FOUND);
+            String message = localizer.getLocalizedMessage(WRONG_ID);
+            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
         }
         TagResponseDto tagResponseDto = tag.get();
         return new ResponseEntity<>(tagResponseDto, HttpStatus.OK);

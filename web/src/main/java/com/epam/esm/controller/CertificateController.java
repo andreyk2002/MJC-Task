@@ -2,7 +2,7 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.CertificateResponseDto;
-import com.epam.esm.mappers.CertificateRequestMapper;
+import com.epam.esm.localization.Localizer;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.validation.CertificateRequestDto;
 import lombok.AllArgsConstructor;
@@ -22,17 +22,18 @@ import java.util.Optional;
 @Validated
 public class CertificateController {
 
+    private final Localizer localizer;
     private final CertificateService certificateService;
-    private final CertificateRequestMapper mapper;
+    private static final String WRONG_ID_MSG = "certificate.wrongId";
+    private static final String CANT_DELETE = "certificate.cantDelete";
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCertificate(@PathVariable long id) {
         Optional<CertificateResponseDto> certificate = certificateService.deleteById(id);
         if (!certificate.isPresent()) {
-            return new ResponseEntity<>(
-                    String.format("Can't perform deleting: certificate with id %d not existing", id),
-                    HttpStatus.NOT_FOUND);
+            String message = localizer.getLocalizedMessage(CANT_DELETE);
+            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
         }
         CertificateResponseDto deleted = certificate.get();
         return new ResponseEntity<>(deleted, HttpStatus.OK);
@@ -45,7 +46,7 @@ public class CertificateController {
             CertificateResponseDto certificateDto = certificate.get();
             return new ResponseEntity<>(certificateDto, HttpStatus.OK);
         }
-        return new ResponseEntity<>(String.format("Certificate with id %d not found", id), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(WRONG_ID_MSG, HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("")

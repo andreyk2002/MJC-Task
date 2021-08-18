@@ -7,6 +7,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -17,6 +20,7 @@ import javax.sql.DataSource;
 @Configuration
 @ComponentScan("com.epam.esm")
 @EnableWebMvc
+@EnableTransactionManagement
 public class SpringConfig implements WebMvcConfigurer {
 
 
@@ -38,9 +42,16 @@ public class SpringConfig implements WebMvcConfigurer {
         return new LocalValidatorFactoryBean();
     }
 
+
+    @Bean
+    public TransactionManager transactionManager() {
+        return new JdbcTransactionManager(dataSource());
+    }
+
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer.defaultContentType(MediaType.APPLICATION_JSON);
+        configurer.ignoreAcceptHeader(true);
     }
 
 }
