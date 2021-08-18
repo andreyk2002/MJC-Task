@@ -22,9 +22,9 @@ public class CertificateRepository {
     private static final String DELETE_QUERY = "DELETE FROM gift_certificate WHERE id = ?";
     private static final String FIND_BY_ID = "SELECT * FROM gift_certificate WHERE id = ?";
     private static final String FIND_ALL = "SELECT * FROM gift_certificate";
-    private static final String UPDATE = "UPDATE * FROM gift_certificate WHERE id = ? SET name = ?," +
-            "description = ?, price = ?, duration = ?, creation_date = ?, last_update_date = ?";
-    private static final String FIND_SORTED = "SELECT * FROM gift_certificate ORDER BY ? ?";
+    private static final String UPDATE = "UPDATE gift_certificate SET name = ?," +
+            "description = ?, price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
+    private static final String FIND_SORTED = "SELECT * FROM gift_certificate";
     private static final String FIND_BY_KEYWORD = "SELECT * FROM gift_certificate WHERE name LIKE " +
             "concat('%', ?, '%') OR description LIKE concat('%', ?, '%')";
     private static final String FIND_BY_TAG_NAME = "SELECT * FROM gift_certificate gc JOIN certificate_tag ct ON " +
@@ -79,7 +79,7 @@ public class CertificateRepository {
         LocalDateTime lastUpdateDate = LocalDateTime.now();
         BigDecimal price = giftCertificate.getPrice();
         int duration = giftCertificate.getDuration();
-        jdbcTemplate.update(UPDATE, id, name, description, price, duration, createDate, lastUpdateDate);
+        jdbcTemplate.update(UPDATE, name, description, price, duration, createDate, lastUpdateDate, id);
     }
 
     public List<GiftCertificate> getAll() {

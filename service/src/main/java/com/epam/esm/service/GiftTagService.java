@@ -30,9 +30,11 @@ public class GiftTagService {
 
 
     @Transactional
-    public void deleteById(long id) {
+    public Optional<TagResponseDto> deleteById(long id) {
+        Optional<TagResponseDto> tagToDelete = getById(id);
         certificateTagRepo.deleteByTagId(id);
         tagRepo.deleteById(id);
+        return tagToDelete;
     }
 
     public Optional<TagResponseDto> getById(long id) {
@@ -45,13 +47,10 @@ public class GiftTagService {
         return Optional.of(tagResponseDto);
     }
 
-    public long addTag(TagRequestDto tagRequestDto) {
-        long id = tagRequestDto.getId();
-        Optional<TagResponseDto> tag = getById(id);
-        if (tag.isEmpty()) {
-            GiftTag giftTag = requestMapper.requestToEntity(tagRequestDto);
-            return tagRepo.addTag(giftTag);
-        }
-        return id;
+    public TagResponseDto addTag(TagRequestDto tagRequestDto) {
+        GiftTag giftTag = requestMapper.requestToEntity(tagRequestDto);
+        long insertId = tagRepo.addTag(giftTag);
+        Optional<TagResponseDto> insertedTag = getById(insertId);
+        return insertedTag.get();
     }
 }

@@ -10,7 +10,6 @@ import org.mapstruct.Mappings;
 public interface TagRequestMapper {
 
     @Mappings({
-            @Mapping(target = "id", source = "id"),
             @Mapping(target = "name", source = "name"),
     })
     GiftTag requestToEntity(TagRequestDto tagRequestDto);

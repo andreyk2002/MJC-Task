@@ -14,8 +14,6 @@ import javax.validation.constraints.NotEmpty;
 @Setter
 public class TagRequestDto {
 
-    private long id;
-
     @NotEmpty(message = "Name cannot be empty")
     private String name;
 

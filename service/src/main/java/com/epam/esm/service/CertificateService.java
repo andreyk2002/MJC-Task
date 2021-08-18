@@ -1,6 +1,7 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.CertificateResponseDto;
+import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mappers.CertificateRequestMapper;
 import com.epam.esm.mappers.CertificateResponseMapper;
@@ -29,29 +30,33 @@ public class CertificateService {
 
 
     @Transactional
-    public void addCertificate(CertificateRequestDto certificateDto) {
+    public CertificateResponseDto addCertificate(CertificateRequestDto certificateDto) {
         GiftCertificate giftCertificate = requestMapper.responseToEntity(certificateDto);
         long insertId = certificateRepo.addCertificate(giftCertificate);
         List<TagRequestDto> tags = certificateDto.getTags();
         for (TagRequestDto tagRequestDto : tags) {
-            long tagId = tagService.addTag(tagRequestDto);
+            TagResponseDto tagResponseDto = tagService.addTag(tagRequestDto);
+            long tagId = tagResponseDto.getId();
             certificateTagRepository.addCertificateTag(tagId, insertId);
         }
+        Optional<CertificateResponseDto> certificate = getById(insertId);
+        return certificate.get();
     }
 
     @Transactional
-    public void deleteById(long id) {
+    public Optional<CertificateResponseDto> deleteById(long id) {
+        Optional<CertificateResponseDto> certificateForDeleting = getById(id);
         certificateTagRepository.deleteByCertificateId(id);
         certificateRepo.deleteById(id);
+        return certificateForDeleting;
     }
 
 
     @Transactional
-    public void updateCertificate(long id, CertificateRequestDto giftCertificate) {
-        Optional<GiftCertificate> optionalUpdated = certificateRepo.getById(id);
+    public CertificateResponseDto updateCertificate(long certificateId, CertificateRequestDto giftCertificate) {
+        Optional<GiftCertificate> optionalUpdated = certificateRepo.getById(certificateId);
         if (optionalUpdated.isEmpty()) {
-            addCertificate(giftCertificate);
-            return;
+            return addCertificate(giftCertificate);
         }
         GiftCertificate updated = optionalUpdated.get();
         String newName = giftCertificate.getName();
@@ -64,23 +69,24 @@ public class CertificateService {
         }
         BigDecimal price = giftCertificate.getPrice();
         if (price != null) {
-            giftCertificate.setPrice(price);
+            updated.setPrice(price);
         }
         Integer duration = giftCertificate.getDuration();
         if (duration != null) {
-            giftCertificate.setDuration(duration);
+            updated.setDuration(duration);
         }
         List<TagRequestDto> tags = giftCertificate.getTags();
         if (tags != null) {
-            certificateTagRepository.deleteByCertificateId(id);
+            certificateTagRepository.deleteByCertificateId(certificateId);
             for (TagRequestDto tagResponseDto : tags) {
-                long tagId = tagResponseDto.getId();
-                tagService.addTag(tagResponseDto);
-                certificateTagRepository.addCertificateTag(id, tagId);
+                TagResponseDto inserted = tagService.addTag(tagResponseDto);
+                long tagId = inserted.getId();
+                certificateTagRepository.addCertificateTag(tagId, certificateId);
             }
         }
-        GiftCertificate certificate = requestMapper.responseToEntity(giftCertificate);
-        certificateRepo.updateCertificate(certificate);
+        certificateRepo.updateCertificate(updated);
+        Optional<CertificateResponseDto> result = getById(certificateId);
+        return result.get();
     }
 
     public List<CertificateResponseDto> getAll() {
@@ -94,7 +100,7 @@ public class CertificateService {
             return Optional.empty();
         }
         GiftCertificate giftCertificate = optionalGiftCertificate.get();
-        CertificateResponseDto certificateResponseDto = certificateMapper.responseToEntity(giftCertificate);
+        CertificateResponseDto certificateResponseDto = certificateMapper.entityToResponse(giftCertificate);
         return Optional.of(certificateResponseDto);
     }
 

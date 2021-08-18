@@ -28,8 +28,14 @@ public class CertificateController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCertificate(@PathVariable long id) {
-        certificateService.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.GONE);
+        Optional<CertificateResponseDto> certificate = certificateService.deleteById(id);
+        if (!certificate.isPresent()) {
+            return new ResponseEntity<>(
+                    String.format("Can't perform deleting: certificate with id %d not existing", id),
+                    HttpStatus.NOT_FOUND);
+        }
+        CertificateResponseDto deleted = certificate.get();
+        return new ResponseEntity<>(deleted, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -60,14 +66,15 @@ public class CertificateController {
 
 
     @PostMapping("")
-    public ResponseEntity<?> addCertificate(@RequestBody @Valid CertificateRequestDto certificateRequestDto) {
-        certificateService.addCertificate(certificateRequestDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<CertificateResponseDto> addCertificate(
+            @RequestBody @Valid CertificateRequestDto certificateRequestDto) {
+        CertificateResponseDto certificateResponseDto = certificateService.addCertificate(certificateRequestDto);
+        return new ResponseEntity<>(certificateResponseDto, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCertificate(@PathVariable long id, @RequestBody CertificateRequestDto certificateRequestDto) {
-        certificateService.updateCertificate(id, certificateRequestDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<CertificateResponseDto> updateCertificate(@PathVariable long id, @RequestBody CertificateRequestDto certificateRequestDto) {
+        CertificateResponseDto updated = certificateService.updateCertificate(id, certificateRequestDto);
+        return new ResponseEntity<>(updated, HttpStatus.CREATED);
     }
 }

@@ -16,7 +16,6 @@ import java.util.List;
 @Getter
 @Setter
 public class CertificateRequestDto {
-    private long id;
 
     @NotEmpty(message = "Name cannot be empty")
     private String name;

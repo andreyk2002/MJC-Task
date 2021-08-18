@@ -18,15 +18,6 @@ public abstract class CertificateResponseMapper {
     @Autowired
     protected CertificateTagService service;
 
-    @Mappings({
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "name", source = "name"),
-            @Mapping(target = "price", source = "price"),
-            @Mapping(target = "duration", source = "duration"),
-            @Mapping(target = "createDate", source = "createDate"),
-            @Mapping(target = "lastUpdateDate", source = "lastUpdateDate"),
-    })
-    public abstract GiftCertificate responseToEntity(CertificateResponseDto certificateDto);
 
     @Mappings({
             @Mapping(target = "id", source = "id"),
@@ -37,7 +28,7 @@ public abstract class CertificateResponseMapper {
             @Mapping(target = "lastUpdateDate", source = "lastUpdateDate"),
             @Mapping(target = "tags", expression = "java(service.getTagsByCertificateId(giftCertificate.getId()))")
     })
-    public abstract CertificateResponseDto responseToEntity(GiftCertificate giftCertificate);
+    public abstract CertificateResponseDto entityToResponse(GiftCertificate giftCertificate);
 
     public abstract List<CertificateResponseDto> entitiesToResponses(List<GiftCertificate> certificates);
 }

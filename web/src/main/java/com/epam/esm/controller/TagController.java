@@ -2,12 +2,10 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.TagResponseDto;
-import com.epam.esm.mappers.TagRequestMapper;
 import com.epam.esm.service.GiftTagService;
 import com.epam.esm.validation.TagRequestDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +21,16 @@ import java.util.Optional;
 public class TagController {
 
     private final GiftTagService tagService;
-    private final TagRequestMapper mapper;
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable long id) {
-        tagService.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.GONE);
+        Optional<TagResponseDto> deleteTag = tagService.deleteById(id);
+        if (!deleteTag.isPresent()) {
+            return new ResponseEntity<>(String.format("Tag with id %d not found", id), HttpStatus.NOT_FOUND);
+        }
+        TagResponseDto deleted = deleteTag.get();
+        return new ResponseEntity<>(deleted, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -48,10 +49,10 @@ public class TagController {
         return new ResponseEntity<>(tags, HttpStatus.OK);
     }
 
-    @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addTag(@RequestBody @Valid TagRequestDto tagRequestDto) {
-        tagService.addTag(tagRequestDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    @PostMapping(value = "")
+    public ResponseEntity<TagResponseDto> addTag(@RequestBody @Valid TagRequestDto tagRequestDto) {
+        TagResponseDto tagResponseDto = tagService.addTag(tagRequestDto);
+        return new ResponseEntity<>(tagResponseDto, HttpStatus.CREATED);
     }
 
 }
