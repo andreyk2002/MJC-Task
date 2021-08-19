@@ -1,6 +1,6 @@
 package com.epam.esm.service.excepiton;
 
-public class TagNotFoundException extends RuntimeException {
+public class TagNotFoundException extends CodeException {
     public TagNotFoundException() {
     }
 
@@ -16,7 +16,9 @@ public class TagNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public TagNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    @Override
+    public int getCode() {
+        return 40401;
     }
+
 }

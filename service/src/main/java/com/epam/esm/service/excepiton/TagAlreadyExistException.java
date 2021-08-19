@@ -1,6 +1,7 @@
 package com.epam.esm.service.excepiton;
 
-public class TagAlreadyExistException extends RuntimeException {
+public class TagAlreadyExistException extends CodeException {
+
 
     public TagAlreadyExistException() {
     }
@@ -17,7 +18,8 @@ public class TagAlreadyExistException extends RuntimeException {
         super(cause);
     }
 
-    public TagAlreadyExistException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    @Override
+    public int getCode() {
+        return 40402;
     }
 }

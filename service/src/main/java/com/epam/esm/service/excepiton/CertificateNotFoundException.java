@@ -1,6 +1,6 @@
 package com.epam.esm.service.excepiton;
 
-public class CertificateNotFoundException extends RuntimeException {
+public class CertificateNotFoundException extends CodeException {
     public CertificateNotFoundException() {
     }
 
@@ -16,7 +16,9 @@ public class CertificateNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    public CertificateNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    @Override
+    public int getCode() {
+        return 40411;
     }
+
 }

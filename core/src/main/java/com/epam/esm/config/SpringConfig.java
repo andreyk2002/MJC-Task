@@ -11,11 +11,14 @@ import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import javax.sql.DataSource;
+import java.util.Locale;
 
 @Configuration
 @ComponentScan("com.epam.esm")
@@ -47,6 +50,14 @@ public class SpringConfig implements WebMvcConfigurer {
     public TransactionManager transactionManager() {
         return new JdbcTransactionManager(dataSource());
     }
+
+    @Bean
+    public LocaleResolver localeResolver() {
+        AcceptHeaderLocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
+        localeResolver.setDefaultLocale(new Locale("en", "US"));
+        return localeResolver;
+    }
+
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {

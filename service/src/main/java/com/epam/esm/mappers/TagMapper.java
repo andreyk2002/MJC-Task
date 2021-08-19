@@ -13,6 +13,7 @@ import java.util.List;
 public interface TagMapper {
 
     @Mappings({
+            @Mapping(target = "id", source = "id"),
             @Mapping(target = "name", source = "name"),
     })
     GiftTag requestToEntity(TagRequestDto tagRequestDto);

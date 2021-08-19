@@ -3,6 +3,8 @@ package com.epam.esm.repository;
 
 import com.epam.esm.entity.GiftCertificate;
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -10,7 +12,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +26,7 @@ public class CertificateRepository {
     private static final String UPDATE = "UPDATE gift_certificate SET name = ?," +
             "description = ?, price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
 
-
+    private static final Logger LOGGER = LogManager.getLogger(CertificateRepository.class);
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<GiftCertificate> certificateMapper;
     private final RequestBuilder requestBuilder;
@@ -61,14 +62,16 @@ public class CertificateRepository {
     }
 
     public void updateCertificate(GiftCertificate giftCertificate) {
-        long id = giftCertificate.getId();
-        LocalDateTime createDate = giftCertificate.getCreateDate();
-        String description = giftCertificate.getDescription();
-        String name = giftCertificate.getName();
-        LocalDateTime lastUpdateDate = LocalDateTime.now();
-        BigDecimal price = giftCertificate.getPrice();
-        int duration = giftCertificate.getDuration();
-        jdbcTemplate.update(UPDATE, name, description, price, duration, createDate, lastUpdateDate, id);
+        jdbcTemplate.update(
+                UPDATE,
+                giftCertificate.getName(),
+                giftCertificate.getDescription(),
+                giftCertificate.getPrice(),
+                giftCertificate.getDuration(),
+                giftCertificate.getCreateDate(),
+                LocalDateTime.now(),
+                giftCertificate.getId()
+        );
     }
 
     public List<GiftCertificate> getAll() {
@@ -80,6 +83,7 @@ public class CertificateRepository {
             GiftCertificate giftCertificate = jdbcTemplate.queryForObject(FIND_BY_ID, certificateMapper, id);
             return Optional.ofNullable(giftCertificate);
         } catch (EmptyResultDataAccessException e) {
+            LOGGER.error(e.getLocalizedMessage(), e);
             return Optional.empty();
         }
     }

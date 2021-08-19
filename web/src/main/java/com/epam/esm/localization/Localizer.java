@@ -1,5 +1,6 @@
 package com.epam.esm.localization;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
@@ -11,15 +12,15 @@ public class Localizer {
     //runtime localization
     //switcher global
     //param in HTTP header (servlet filters)
-    private final ResourceBundle localeBundle;
 
     public Localizer() {
-        Locale current = new Locale("ru", "RU");
-        localeBundle = ResourceBundle.getBundle("local", current);
+
     }
 
-    public String getLocalizedMessage(String key) {
-        return localeBundle.getString(key);
+    public String getLocalizedMessage(int errorCode) {
+        Locale locale = LocaleContextHolder.getLocale();
+        ResourceBundle localeBundle = ResourceBundle.getBundle("local", locale);
+        return localeBundle.getString(String.valueOf(errorCode));
     }
 
 
