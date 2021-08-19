@@ -5,6 +5,8 @@ import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateTagRepository;
 import com.epam.esm.repository.TagRepository;
+import com.epam.esm.service.excepiton.TagAlreadyExistException;
+import com.epam.esm.service.excepiton.TagNotFoundException;
 import com.epam.esm.validation.TagRequestDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,29 +30,36 @@ public class GiftTagService {
 
 
     @Transactional
-    public Optional<TagResponseDto> deleteById(long id) {
-        Optional<TagResponseDto> tagToDelete = getById(id);
+    public TagResponseDto deleteById(long id) {
+        TagResponseDto tagToDelete = getById(id);
         certificateTagRepo.deleteByTagId(id);
         tagRepo.deleteById(id);
         return tagToDelete;
     }
 
-    public Optional<TagResponseDto> getById(long id) {
+    public TagResponseDto getById(long id) {
         Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
-        if (optionalGiftTag.isEmpty()) {
-            return Optional.empty();
-        }
-        GiftTag giftTag = optionalGiftTag.get();
-        TagResponseDto tagResponseDto = mapper.entityToRequest(giftTag);
-        return Optional.of(tagResponseDto);
+        return optionalGiftTag.map(mapper::entityToRequest).orElseThrow(TagNotFoundException::new);
     }
 
-    //update
+    TagResponseDto updateTag(TagRequestDto tagRequestDto) {
+        GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
+        long id = tagRequestDto.getId();
+        Optional<GiftTag> optional = tagRepo.getById(id);
+        return optional.map(tag -> {
+            tagRepo.updateTag(giftTag);
+            return getById(id);
+        }).orElse(getById(tagRepo.addTag(giftTag)));
+    }
 
     public TagResponseDto addTag(TagRequestDto tagRequestDto) {
+        long id = tagRequestDto.getId();
+        Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
+        optionalGiftTag.ifPresent(giftTag -> {
+            throw new TagAlreadyExistException();
+        });
         GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
         long insertId = tagRepo.addTag(giftTag);
-        Optional<TagResponseDto> insertedTag = getById(insertId);
-        return insertedTag.get();
+        return getById(insertId);
     }
 }

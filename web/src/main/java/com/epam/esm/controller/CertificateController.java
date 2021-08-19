@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/certificates")
@@ -36,23 +35,14 @@ public class CertificateController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCertificate(@PathVariable long id) {
-        Optional<CertificateResponseDto> certificate = certificateService.deleteById(id);
-        if (!certificate.isPresent()) {
-            String message = localizer.getLocalizedMessage(CANT_DELETE);
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
-        }
-        CertificateResponseDto deleted = certificate.get();
-        return new ResponseEntity<>(deleted, HttpStatus.OK);
+        CertificateResponseDto certificate = certificateService.deleteById(id);
+        return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable long id) {
-        Optional<CertificateResponseDto> certificate = certificateService.getById(id);
-        if (certificate.isPresent()) {
-            CertificateResponseDto certificateDto = certificate.get();
-            return new ResponseEntity<>(certificateDto, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(WRONG_ID_MSG, HttpStatus.NOT_FOUND);
+        CertificateResponseDto certificate = certificateService.getById(id);
+        return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
     @GetMapping("")

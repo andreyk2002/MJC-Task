@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/tags")
@@ -29,24 +28,14 @@ public class TagController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable long id) {
-        Optional<TagResponseDto> deleteTag = tagService.deleteById(id);
-        if (!deleteTag.isPresent()) {
-            String message = localizer.getLocalizedMessage(CANT_DELETE);
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
-        }
-        TagResponseDto deleted = deleteTag.get();
-        return new ResponseEntity<>(deleted, HttpStatus.OK);
+        TagResponseDto deleteTag = tagService.deleteById(id);
+        return new ResponseEntity<>(deleteTag, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable long id) {
-        Optional<TagResponseDto> tag = tagService.getById(id);
-        if (!tag.isPresent()) {
-            String message = localizer.getLocalizedMessage(WRONG_ID);
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
-        }
-        TagResponseDto tagResponseDto = tag.get();
-        return new ResponseEntity<>(tagResponseDto, HttpStatus.OK);
+        TagResponseDto tag = tagService.getById(id);
+        return new ResponseEntity<>(tag, HttpStatus.OK);
     }
 
     @GetMapping("")

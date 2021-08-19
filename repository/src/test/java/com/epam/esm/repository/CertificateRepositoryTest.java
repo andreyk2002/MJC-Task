@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -33,7 +34,9 @@ class CertificateRepositoryTest {
         HikariConfig config = new HikariConfig("src/test/resources/testDb.properties");
         DataSource dataSource = new HikariDataSource(config);
         JdbcTemplate template = new JdbcTemplate(dataSource);
-        repository = new CertificateRepository(template);
+        RequestBuilder builder = new RequestBuilder();
+        RowMapper<GiftCertificate> giftCertificateRowMapper = new CertificateRowMapper();
+        repository = new CertificateRepository(template, giftCertificateRowMapper, builder);
     }
 
     @Test

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +19,7 @@ public class TagRepository {
     private static final String DELETE_ALL_QUERY = "DELETE FROM tag WHERE id > 0";
     private static final String FIND_BY_ID = "SELECT * FROM tag WHERE id = ?";
     private static final String FIND_ALL = "SELECT * FROM tag";
+    public static final String UPDATE_QUERY = "UPDATE tag SET name = ? WHERE = ?";
 
 
     private final JdbcTemplate jdbcTemplate;
@@ -42,17 +42,17 @@ public class TagRepository {
                 },
                 keyHolder);
         Number key = keyHolder.getKey();
-        return Objects.requireNonNull(key).longValue();
+        return key.longValue();
     }
 
-    public int deleteById(long tagId) {
-        return jdbcTemplate.update(DELETE_QUERY, tagId);
+    public void updateTag(GiftTag giftTag) {
+        jdbcTemplate.update(UPDATE_QUERY, giftTag.getName(), giftTag.getId());
     }
 
-
-    public int deleteAll() {
-        return jdbcTemplate.update(DELETE_ALL_QUERY);
+    public void deleteById(long tagId) {
+        jdbcTemplate.update(DELETE_QUERY, tagId);
     }
+
 
     public Optional<GiftTag> getById(long id) {
         try {
@@ -62,6 +62,10 @@ public class TagRepository {
             //Do we need a logger
             return Optional.empty();
         }
+    }
+
+    public void deleteAll() {
+        jdbcTemplate.update(DELETE_ALL_QUERY);
     }
 
 

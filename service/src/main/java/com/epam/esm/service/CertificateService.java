@@ -7,6 +7,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mappers.CertificateMapper;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.CertificateTagRepository;
+import com.epam.esm.service.excepiton.CertificateNotFoundException;
 import com.epam.esm.validation.CertificateRequestDto;
 import com.epam.esm.validation.TagRequestDto;
 import lombok.AllArgsConstructor;
@@ -33,23 +34,21 @@ public class CertificateService {
     public CertificateResponseDto addCertificate(CertificateRequestDto certificateDto) {
         GiftCertificate giftCertificate = mapper.requestToEntity(certificateDto);
         long insertId = certificateRepo.addCertificate(giftCertificate);
-        //Replace with streams here
         List<TagRequestDto> tags = certificateDto.getTags();
         for (TagRequestDto tagRequestDto : tags) {
-            TagResponseDto tagResponseDto = tagService.addTag(tagRequestDto);
+            TagResponseDto tagResponseDto = tagService.updateTag(tagRequestDto);
             long tagId = tagResponseDto.getId();
             certificateTagRepository.addCertificateTag(tagId, insertId);
         }
-        Optional<CertificateResponseDto> certificate = getById(insertId);
-        return certificate.get();
+        return getById(insertId);
     }
 
     @Transactional
-    public Optional<CertificateResponseDto> deleteById(long id) {
-        Optional<CertificateResponseDto> certificateForDeleting = getById(id);
+    public CertificateResponseDto deleteById(long id) {
+        CertificateResponseDto certificate = getById(id);
         certificateTagRepository.deleteByCertificateId(id);
         certificateRepo.deleteById(id);
-        return certificateForDeleting;
+        return certificate;
     }
 
 
@@ -69,8 +68,8 @@ public class CertificateService {
                 }
             }
             certificateRepo.updateCertificate(updated);
-            Optional<CertificateResponseDto> result = getById(certificateId);
-            return result.get();
+            return getById(certificateId);
+
         }).orElse(addCertificate(giftCertificate));
     }
 
@@ -79,15 +78,9 @@ public class CertificateService {
         return mapper.entitiesToResponses(certificates);
     }
 
-    public Optional<CertificateResponseDto> getById(long id) {
-        //Steams
+    public CertificateResponseDto getById(long id) {
         Optional<GiftCertificate> optionalGiftCertificate = certificateRepo.getById(id);
-        if (optionalGiftCertificate.isEmpty()) {
-            return Optional.empty();
-        }
-        GiftCertificate giftCertificate = optionalGiftCertificate.get();
-        CertificateResponseDto certificateResponseDto = mapper.entityToResponse(giftCertificate);
-        return Optional.of(certificateResponseDto);
+        return optionalGiftCertificate.map(mapper::entityToResponse).orElseThrow(CertificateNotFoundException::new);
     }
 
     public List<CertificateResponseDto> getCertificates(String tagName, String keyword, String sortString) {
@@ -95,16 +88,7 @@ public class CertificateService {
         String sortOrder = sort[1];
         String field = sort[0];
         List<GiftCertificate> certificates;
-        // call builder ()
-        if (tagName == null && keyword == null) {
-            certificates = certificateRepo.getAllSorted(sortOrder, field);
-        } else if (keyword == null) {
-            certificates = certificateRepo.getByTagName(tagName, sortOrder, field);
-        } else if (tagName == null) {
-            certificates = certificateRepo.getByKeyword(keyword, sortOrder, field);
-        } else {
-            certificates = certificateRepo.getByTagNameAndKeyword(keyword, tagName, sortOrder, field);
-        }
+        certificates = certificateRepo.getAllSorted(keyword, tagName, sortOrder, field);
         return mapper.entitiesToResponses(certificates);
     }
 }

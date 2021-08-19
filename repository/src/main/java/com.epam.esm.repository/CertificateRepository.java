@@ -2,7 +2,7 @@ package com.epam.esm.repository;
 
 
 import com.epam.esm.entity.GiftCertificate;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,32 +17,22 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@AllArgsConstructor
 public class CertificateRepository {
     private static final String DELETE_QUERY = "DELETE FROM gift_certificate WHERE id = ?";
     private static final String FIND_BY_ID = "SELECT * FROM gift_certificate WHERE id = ?";
     private static final String FIND_ALL = "SELECT * FROM gift_certificate";
     private static final String UPDATE = "UPDATE gift_certificate SET name = ?," +
             "description = ?, price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
-    private static final String FIND_SORTED = "SELECT * FROM gift_certificate";
-    private static final String FIND_BY_KEYWORD = "SELECT * FROM gift_certificate WHERE name LIKE " +
-            "concat('%', ?, '%') OR description LIKE concat('%', ?, '%')";
-    private static final String FIND_BY_TAG_NAME = "SELECT * FROM gift_certificate gc JOIN certificate_tag ct ON " +
-            "gc.id = ct.id JOIN tag t ON t.id = ct.tag_id WHERE t.name = ? ";
-    private static final String FIND_BY_TAG_NAME_KEYWORD = "SELECT * FROM gift_certificate gc JOIN certificate_tag ct ON " +
-            "gc.id = ct.certificate_id JOIN tag t ON t.id = ct.tag_id WHERE t.name = ? AND (gc.name LIKE " +
-            "concat('%', ?, '%') OR gc.description LIKE concat('%', ?, '%')) ";
+
 
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<GiftCertificate> certificateMapper;
+    private final RequestBuilder requestBuilder;
 
     private static final String ADD_QUERY = "INSERT INTO gift_certificate (name, description, price, duration," +
             " create_date, last_update_date) VALUES(?,?,?,?,?,?)";
 
-    @Autowired
-    public CertificateRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.certificateMapper = new CertificateRowMapper();
-    }
 
     public long addCertificate(GiftCertificate giftCertificate) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -94,23 +84,9 @@ public class CertificateRepository {
         }
     }
 
-    public List<GiftCertificate> getAllSorted(String sortOrder, String field) {
-        String finalQuery = String.format("%s ORDER BY %s %s", FIND_SORTED, field, sortOrder);
-        return jdbcTemplate.query(finalQuery, certificateMapper);
+    public List<GiftCertificate> getAllSorted(String keyword, String tagName, String sortOrder, String field) {
+        String query = requestBuilder.buildSortRequest(keyword, tagName, sortOrder, field);
+        return jdbcTemplate.query(query, certificateMapper);
     }
 
-    public List<GiftCertificate> getByKeyword(String keyword, String sortOrder, String field) {
-        String finalQuery = String.format("%s ORDER BY %s %s", FIND_BY_KEYWORD, field, sortOrder);
-        return jdbcTemplate.query(finalQuery, certificateMapper, keyword, keyword);
-    }
-
-    public List<GiftCertificate> getByTagName(String tagName, String sortOrder, String field) {
-        String finalQuery = String.format("%s ORDER BY %s %s", FIND_BY_TAG_NAME, field, sortOrder);
-        return jdbcTemplate.query(finalQuery, certificateMapper, tagName);
-    }
-
-    public List<GiftCertificate> getByTagNameAndKeyword(String keyword, String tagName, String sortOrder, String field) {
-        String finalQuery = String.format("%s ORDER BY %s %s", FIND_BY_TAG_NAME_KEYWORD, field, sortOrder);
-        return jdbcTemplate.query(finalQuery, certificateMapper, tagName, keyword, keyword);
-    }
 }
