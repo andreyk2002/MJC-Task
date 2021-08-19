@@ -8,6 +8,9 @@ import java.util.ResourceBundle;
 @Component
 public class Localizer {
 
+    //runtime localization
+    //switcher global
+    //param in HTTP header (servlet filters)
     private final ResourceBundle localeBundle;
 
     public Localizer() {

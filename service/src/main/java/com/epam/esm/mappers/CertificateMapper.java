@@ -4,6 +4,7 @@ package com.epam.esm.mappers;
 import com.epam.esm.dto.CertificateResponseDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.service.CertificateTagService;
+import com.epam.esm.validation.CertificateRequestDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -13,7 +14,7 @@ import java.util.List;
 
 
 @Mapper(componentModel = "spring")
-public abstract class CertificateResponseMapper {
+public abstract class CertificateMapper {
 
     @Autowired
     protected CertificateTagService service;
@@ -31,4 +32,12 @@ public abstract class CertificateResponseMapper {
     public abstract CertificateResponseDto entityToResponse(GiftCertificate giftCertificate);
 
     public abstract List<CertificateResponseDto> entitiesToResponses(List<GiftCertificate> certificates);
+
+    @Mappings({
+            @Mapping(target = "name", source = "name"),
+            @Mapping(target = "description", source = "description"),
+            @Mapping(target = "price", source = "price"),
+            @Mapping(target = "duration", source = "duration"),
+    })
+    public abstract GiftCertificate requestToEntity(CertificateRequestDto model);
 }

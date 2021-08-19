@@ -2,8 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftTag;
-import com.epam.esm.mappers.TagRequestMapper;
-import com.epam.esm.mappers.TagResponseMapper;
+import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateTagRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.validation.TagRequestDto;
@@ -20,12 +19,11 @@ public class GiftTagService {
 
     private final TagRepository tagRepo;
     private final CertificateTagRepository certificateTagRepo;
-    private final TagRequestMapper requestMapper;
-    private final TagResponseMapper responseMapper;
+    private final TagMapper mapper;
 
     public List<TagResponseDto> getAllTags() {
         List<GiftTag> tags = tagRepo.getAll();
-        return responseMapper.entitiesToRequests(tags);
+        return mapper.entitiesToRequests(tags);
     }
 
 
@@ -43,12 +41,14 @@ public class GiftTagService {
             return Optional.empty();
         }
         GiftTag giftTag = optionalGiftTag.get();
-        TagResponseDto tagResponseDto = responseMapper.entityToRequest(giftTag);
+        TagResponseDto tagResponseDto = mapper.entityToRequest(giftTag);
         return Optional.of(tagResponseDto);
     }
 
+    //update
+
     public TagResponseDto addTag(TagRequestDto tagRequestDto) {
-        GiftTag giftTag = requestMapper.requestToEntity(tagRequestDto);
+        GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
         long insertId = tagRepo.addTag(giftTag);
         Optional<TagResponseDto> insertedTag = getById(insertId);
         return insertedTag.get();

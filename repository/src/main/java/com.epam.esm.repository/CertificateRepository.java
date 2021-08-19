@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -63,7 +62,7 @@ public class CertificateRepository {
                 },
                 keyHolder);
         Number key = keyHolder.getKey();
-        return Objects.requireNonNull(key).longValue();
+        return key.longValue();
     }
 
 
@@ -89,7 +88,7 @@ public class CertificateRepository {
     public Optional<GiftCertificate> getById(long id) {
         try {
             GiftCertificate giftCertificate = jdbcTemplate.queryForObject(FIND_BY_ID, certificateMapper, id);
-            return Optional.of(giftCertificate);
+            return Optional.ofNullable(giftCertificate);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
