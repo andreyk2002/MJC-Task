@@ -16,7 +16,7 @@ public class TagRequestDto {
 
     private long id;
 
-    @NotEmpty(message = "Name cannot be empty")
+    @NotEmpty(message = "40001")
     private String name;
 
 }

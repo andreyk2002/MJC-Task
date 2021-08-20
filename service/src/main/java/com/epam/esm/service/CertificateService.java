@@ -73,6 +73,7 @@ public class CertificateService {
         }).orElse(addCertificate(giftCertificate));
     }
 
+
     public List<CertificateResponseDto> getAll() {
         List<GiftCertificate> certificates = certificateRepo.getAll();
         return mapper.entitiesToResponses(certificates);
@@ -80,7 +81,8 @@ public class CertificateService {
 
     public CertificateResponseDto getById(long id) {
         Optional<GiftCertificate> optionalGiftCertificate = certificateRepo.getById(id);
-        return optionalGiftCertificate.map(mapper::entityToResponse).orElseThrow(CertificateNotFoundException::new);
+        return optionalGiftCertificate.map(mapper::entityToResponse)
+                .orElseThrow(() -> new CertificateNotFoundException(id));
     }
 
     public List<CertificateResponseDto> getCertificates(String tagName, String keyword, String sortString) {

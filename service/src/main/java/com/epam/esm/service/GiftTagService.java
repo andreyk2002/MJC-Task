@@ -39,7 +39,7 @@ public class GiftTagService {
 
     public TagResponseDto getById(long id) {
         Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
-        return optionalGiftTag.map(mapper::entityToRequest).orElseThrow(TagNotFoundException::new);
+        return optionalGiftTag.map(mapper::entityToRequest).orElseThrow(() -> new TagNotFoundException(id));
     }
 
     TagResponseDto updateTag(TagRequestDto tagRequestDto) {

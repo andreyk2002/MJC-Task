@@ -17,19 +17,20 @@ import java.util.List;
 @Setter
 public class CertificateRequestDto {
 
-    @NotEmpty(message = "Name cannot be empty")
+
+    @NotEmpty(message = "40011")
     private String name;
 
-    @NotNull(message = "Description cannot be null")
+    @NotNull(message = "40012")
     private String description;
 
-    @PositiveOrZero(message = "price can't be less than 0")
+    @PositiveOrZero(message = "40013")
     private BigDecimal price;
 
-    @PositiveOrZero(message = "duration can't be less than 0")
+    @PositiveOrZero(message = "40014")
     private Integer duration;
 
-    @NotNull(message = "Tags should be not null")
+    @NotNull(message = "40015")
     private List<TagRequestDto> tags;
 
 }
