@@ -33,7 +33,6 @@ public class ControllerExceptionHandler {
         List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
         LOGGER.error("Exception: {}", allErrors, e);
         return allErrors.stream()
-                //code instead of messages
                 .map(x -> {
                             int code = Integer.parseInt(x.getDefaultMessage());
                             String localizedMessage = localizer.getLocalizedMessage(code);

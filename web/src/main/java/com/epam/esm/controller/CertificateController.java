@@ -26,13 +26,6 @@ public class CertificateController {
     private static final String WRONG_ID_MSG = "certificate.wrongId";
     private static final String CANT_DELETE = "certificate.cantDelete";
 
-    //no buisiness-logic
-
-    //throw exceptions (service)
-    //Service throw exception - (optional.empty()) - error with some unique code
-    //Controller Adviser () - global (catch custom exceptions -> translate code to message(localizer))
-    //Message bundle
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCertificate(@PathVariable long id) {
         CertificateResponseDto certificate = certificateService.deleteById(id);

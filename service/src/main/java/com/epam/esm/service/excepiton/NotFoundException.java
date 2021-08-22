@@ -3,7 +3,6 @@ package com.epam.esm.service.excepiton;
 import lombok.Getter;
 
 
-//rename exception
 @Getter
 public abstract class NotFoundException extends RuntimeException {
 

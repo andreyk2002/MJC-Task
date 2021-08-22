@@ -1,6 +1,8 @@
 package com.epam.esm.repository;
 
 import com.epam.esm.entity.GiftTag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,7 +21,8 @@ public class TagRepository {
     private static final String DELETE_ALL_QUERY = "DELETE FROM tag WHERE id > 0";
     private static final String FIND_BY_ID = "SELECT * FROM tag WHERE id = ?";
     private static final String FIND_ALL = "SELECT * FROM tag";
-    public static final String UPDATE_QUERY = "UPDATE tag SET name = ? WHERE = ?";
+    public static final String UPDATE_QUERY = "UPDATE tag SET name = ? WHERE id = ?";
+    private static final Logger LOGGER = LogManager.getLogger(TagRepository.class);
 
 
     private final JdbcTemplate jdbcTemplate;
@@ -59,7 +62,7 @@ public class TagRepository {
             GiftTag giftTag = jdbcTemplate.queryForObject(FIND_BY_ID, tagRowMapper, id);
             return Optional.of(giftTag);
         } catch (EmptyResultDataAccessException e) {
-            //Do we need a logger
+            LOGGER.error(e.getLocalizedMessage(), e);
             return Optional.empty();
         }
     }
