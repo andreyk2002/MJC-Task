@@ -5,18 +5,18 @@ import org.junit.jupiter.api.Test;
 class GiftTagServiceTest {
 
     @Test
-    void getAllTags() {
+    public void getAllTags() {
     }
 
     @Test
-    void deleteById() {
+    public void deleteById() {
     }
 
     @Test
-    void getById() {
+    public void getById() {
     }
 
     @Test
-    void addTag() {
+    public void addTag() {
     }
 }

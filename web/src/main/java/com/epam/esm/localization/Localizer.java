@@ -17,9 +17,5 @@ public class Localizer {
         return MessageFormat.format(bundleString, params);
     }
 
-    public String getLocalizedMessage(String propertyName) {
-        Locale locale = LocaleContextHolder.getLocale();
-        ResourceBundle localeBundle = ResourceBundle.getBundle("local", locale);
-        return localeBundle.getString(propertyName);
-    }
+
 }

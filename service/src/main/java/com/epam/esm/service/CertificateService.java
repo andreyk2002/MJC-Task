@@ -74,11 +74,6 @@ public class CertificateService {
     }
 
 
-    public List<CertificateResponseDto> getAll() {
-        List<GiftCertificate> certificates = certificateRepo.getAll();
-        return mapper.entitiesToResponses(certificates);
-    }
-
     public CertificateResponseDto getById(long id) {
         Optional<GiftCertificate> optionalGiftCertificate = certificateRepo.getById(id);
         return optionalGiftCertificate.map(mapper::entityToResponse)

@@ -34,7 +34,6 @@ public class CertificateRepository {
     private static final String ADD_QUERY = "INSERT INTO gift_certificate (name, description, price, duration," +
             " create_date, last_update_date) VALUES(?,?,?,?,?,?)";
 
-
     public long addCertificate(GiftCertificate giftCertificate) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
@@ -57,8 +56,8 @@ public class CertificateRepository {
     }
 
 
-    public int deleteById(long id) {
-        return jdbcTemplate.update(DELETE_QUERY, id);
+    public void deleteById(long id) {
+        jdbcTemplate.update(DELETE_QUERY, id);
     }
 
     public void updateCertificate(GiftCertificate giftCertificate) {
@@ -89,8 +88,10 @@ public class CertificateRepository {
     }
 
     public List<GiftCertificate> getAllSorted(String keyword, String tagName, String sortOrder, String field) {
-        String query = requestBuilder.buildSortRequest(keyword, tagName, sortOrder, field);
-        return jdbcTemplate.query(query, certificateMapper);
+        RequestResult requestResult = requestBuilder.buildSortRequest(keyword, tagName, sortOrder, field);
+        String query = requestResult.getQuery();
+        String[] params = requestResult.getParams();
+        return jdbcTemplate.query(query, certificateMapper, (Object[]) params);
     }
 
 }

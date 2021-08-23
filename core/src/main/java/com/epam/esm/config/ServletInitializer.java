@@ -3,8 +3,6 @@ package com.epam.esm.config;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-import javax.servlet.Filter;
-
 public class ServletInitializer extends
         AbstractAnnotationConfigDispatcherServletInitializer {
 

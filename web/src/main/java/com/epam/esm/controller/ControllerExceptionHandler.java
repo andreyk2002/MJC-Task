@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 @RestControllerAdvice
 @AllArgsConstructor
@@ -26,6 +30,22 @@ public class ControllerExceptionHandler {
 
     private final Localizer localizer;
 
+    @ExceptionHandler(value = {ConstraintViolationException.class})
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public List<ErrorMessage> constraintViolationException(ConstraintViolationException e, WebRequest request) {
+        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
+        return constraintViolations.stream().map(constraintViolation -> {
+            int code = Integer.parseInt(constraintViolation.getMessage());
+            Object invalidValue = constraintViolation.getInvalidValue();
+            String localizedMessage = localizer.getLocalizedMessage(code, invalidValue);
+            return new ErrorMessage(
+                    code,
+                    LocalDateTime.now(),
+                    localizedMessage,
+                    request.getDescription(false)
+            );
+        }).collect(toList());
+    }
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
@@ -39,7 +59,7 @@ public class ControllerExceptionHandler {
                             return new ErrorMessage(
                                     code, LocalDateTime.now(), localizedMessage, request.getDescription(false));
                         }
-                ).collect(Collectors.toList());
+                ).collect(toList());
     }
 
 

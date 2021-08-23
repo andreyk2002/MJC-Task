@@ -2,7 +2,6 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.CertificateResponseDto;
-import com.epam.esm.localization.Localizer;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.validation.CertificateRequestDto;
 import lombok.AllArgsConstructor;
@@ -21,10 +20,7 @@ import java.util.List;
 @Validated
 public class CertificateController {
 
-    private final Localizer localizer;
     private final CertificateService certificateService;
-    private static final String WRONG_ID_MSG = "certificate.wrongId";
-    private static final String CANT_DELETE = "certificate.cantDelete";
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCertificate(@PathVariable long id) {
@@ -38,18 +34,14 @@ public class CertificateController {
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<CertificateResponseDto>> getAll() {
-        List<CertificateResponseDto> certificates = certificateService.getAll();
-        return new ResponseEntity<>(certificates, HttpStatus.OK);
-    }
 
-    @GetMapping("/searchTest")
+    @GetMapping("")
     public ResponseEntity<List<CertificateResponseDto>> getCertificates(@RequestParam(required = false) String tagName,
                                                                         @RequestParam(required = false) String keyword,
-                                                                        @RequestParam(defaultValue = "id,desc")
-                                                                        @Pattern(regexp = "(name|createDate),(asc|desc)")
-                                                                        @Valid String sort) {
+                                                                        @RequestParam(defaultValue = "name,asc")
+                                                                        @Pattern(message = "40016",
+                                                                                regexp = "(name|createDate),(asc|desc)")
+                                                                                String sort) {
         List<CertificateResponseDto> certificates = certificateService.getCertificates(tagName, keyword, sort);
         return new ResponseEntity<>(certificates, HttpStatus.OK);
     }
