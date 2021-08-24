@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 
 class GiftCertificateMapperTest {
 
-    public static final List<TagRequestDto> TAGS = Arrays.asList(
+    private static final List<TagRequestDto> TAGS = Arrays.asList(
             new TagRequestDto(1, "name"),
             new TagRequestDto(2, "name")
     );
@@ -29,7 +29,7 @@ class GiftCertificateMapperTest {
             new TagResponseDto(1, "name"),
             new TagResponseDto(2, "name")
     );
-    public static final CertificateRequestDto REQUEST_DTO = new CertificateRequestDto(
+    private static final CertificateRequestDto REQUEST_DTO = new CertificateRequestDto(
             "test", "description", new BigDecimal(1), 10, TAGS
     );
     private static final GiftCertificate GIFT_CERTIFICATE = GiftCertificate.builder()
@@ -38,10 +38,10 @@ class GiftCertificateMapperTest {
     private static final CertificateResponseDto RESPONSE_DTO = CertificateResponseDto.builder()
             .name("test").description("description").price(new BigDecimal(1))
             .duration(10).tags(Collections.EMPTY_LIST).build();
-    public static final int SECOND_ID = 2;
-    public static final GiftCertificate SECOND_CERTIFICATE = GiftCertificate.builder()
+    private static final int SECOND_ID = 2;
+    private static final GiftCertificate SECOND_CERTIFICATE = GiftCertificate.builder()
             .id(SECOND_ID).name("new").build();
-    public static final CertificateResponseDto SECOND_RESPONSE = CertificateResponseDto.builder()
+    private static final CertificateResponseDto SECOND_RESPONSE = CertificateResponseDto.builder()
             .id(SECOND_ID).name("new").tags(TAG_RESPONSES).build();
 
     private CertificateMapper mapper;

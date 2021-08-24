@@ -3,8 +3,6 @@ package com.epam.esm.repository;
 
 import com.epam.esm.entity.GiftCertificate;
 import lombok.AllArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,6 +15,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * CertificateRepository provides functionality for interaction with storage,
+ * which contains data about {@link GiftCertificate} entities
+ */
+
+
 @Repository
 @AllArgsConstructor
 public class CertificateRepository {
@@ -26,7 +30,6 @@ public class CertificateRepository {
     private static final String UPDATE = "UPDATE gift_certificate SET name = ?," +
             "description = ?, price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
 
-    private static final Logger LOGGER = LogManager.getLogger(CertificateRepository.class);
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<GiftCertificate> certificateMapper;
     private final RequestBuilder requestBuilder;
@@ -34,6 +37,13 @@ public class CertificateRepository {
     private static final String ADD_QUERY = "INSERT INTO gift_certificate (name, description, price, duration," +
             " create_date, last_update_date) VALUES(?,?,?,?,?,?)";
 
+
+    /**
+     * Adds an instance of GitftCertificte into the storage
+     *
+     * @param giftCertificate instance of certificate, needed to be added
+     * @return ID of inserted certificate
+     */
     public long addCertificate(GiftCertificate giftCertificate) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
@@ -56,10 +66,20 @@ public class CertificateRepository {
     }
 
 
+    /**
+     * Removes a certificate with specified id from storage if presents
+     *
+     * @param id - ID of certificate to be removed
+     */
     public void deleteById(long id) {
         jdbcTemplate.update(DELETE_QUERY, id);
     }
 
+    /**
+     * Updates an instance of GiftCertificate in the storage
+     *
+     * @param giftCertificate instance of certificate, needed to be updated
+     */
     public void updateCertificate(GiftCertificate giftCertificate) {
         jdbcTemplate.update(
                 UPDATE,
@@ -73,20 +93,42 @@ public class CertificateRepository {
         );
     }
 
+    /**
+     * Returns list of all certificates, which are present in the storage
+     *
+     * @return List of all present certificates
+     */
     public List<GiftCertificate> getAll() {
         return jdbcTemplate.query(FIND_ALL, certificateMapper);
     }
 
+    /**
+     * Searches for certificate with specified if in the storage
+     *
+     * @param id - ID of certificate
+     * @return certificate  wrapped into j
+     */
     public Optional<GiftCertificate> getById(long id) {
         try {
             GiftCertificate giftCertificate = jdbcTemplate.queryForObject(FIND_BY_ID, certificateMapper, id);
             return Optional.ofNullable(giftCertificate);
         } catch (EmptyResultDataAccessException e) {
-            LOGGER.error(e.getLocalizedMessage(), e);
             return Optional.empty();
         }
     }
 
+    /**
+     * Searches list of all certificates depends on keyword (part of name or description) or/and tag name
+     * in specified order
+     *
+     * @param keyword   part of name or description which certificates should contain. In case if keyword is null
+     *                  all certificates are specified to this criteria
+     * @param tagName   name of the tag which certificate should contain. In case if keyword is null
+     *                  all certificates are specified to this criteria
+     * @param sortOrder type of sort order (ascending, descending)
+     * @param field     name of the field by which certificates should be ordered
+     * @return List of certificates which applied to the mentioned criterias
+     */
     public List<GiftCertificate> getAllSorted(String keyword, String tagName, String sortOrder, String field) {
         RequestResult requestResult = requestBuilder.buildSortRequest(keyword, tagName, sortOrder, field);
         String query = requestResult.getQuery();

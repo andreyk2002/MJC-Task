@@ -11,10 +11,10 @@ import java.util.List;
 
 class TagMapperTest {
 
-    public static final GiftTag FIRST_TAG = new GiftTag(1, "name");
-    public static final TagResponseDto RESPONSE = new TagResponseDto(1, "name");
-    public static final GiftTag SECOND_TAG = new GiftTag(2, "second");
-    public static final TagResponseDto SECOND_RESPONSE = new TagResponseDto(2, "second");
+    private static final GiftTag FIRST_TAG = new GiftTag(1, "name");
+    private static final TagResponseDto RESPONSE = new TagResponseDto(1, "name");
+    private static final GiftTag SECOND_TAG = new GiftTag(2, "second");
+    private static final TagResponseDto SECOND_RESPONSE = new TagResponseDto(2, "second");
     private final TagMapper mapper = new TagMapperImpl();
 
     @Test

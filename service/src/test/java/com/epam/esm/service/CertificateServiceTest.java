@@ -34,14 +34,14 @@ class CertificateServiceTest {
     private static final CertificateResponseDto FIRST_RESPONSE = CertificateResponseDto.builder()
             .id(FIRST_ID).name("first").build();
     private static final int SECOND_ID = 2;
-    public static final int TAG_ID = 1;
+    private static final int TAG_ID = 1;
     private static final Long ADDED_ID = 3L;
     private static final CertificateResponseDto SECOND_RESPONSE = CertificateResponseDto.builder().id(SECOND_ID).name("first").build();
     private static final GiftCertificate SECOND_CERTIFICATE = GiftCertificate.builder().id(SECOND_ID).name("first").build();
     private static final List<GiftCertificate> CERTIFICATES = Arrays.asList(FIRST_CERTIFICATE, SECOND_CERTIFICATE);
     private static final List<CertificateResponseDto> CERTIFICATE_RESPONSES = Arrays.asList(FIRST_RESPONSE, SECOND_RESPONSE);
     private static final List<TagRequestDto> TAG_REQUESTS = Collections.singletonList(new TagRequestDto(TAG_ID, "tag"));
-    public static final TagResponseDto TAG_RESPONSE = new TagResponseDto(TAG_ID, "tag");
+    private static final TagResponseDto TAG_RESPONSE = new TagResponseDto(TAG_ID, "tag");
     private static final List<TagResponseDto> TAG_RESPONSES = Collections.singletonList(TAG_RESPONSE);
     private static final CertificateRequestDto TEST_CERTIFICATE = new CertificateRequestDto(
             "newName", "newDescription", new BigDecimal(1), 10, TAG_REQUESTS);

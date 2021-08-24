@@ -21,6 +21,7 @@ class CertificateRepositoryTest {
     private CertificateRepository repository;
     private final long EXISTING_ID = 2;
     private final long NOT_EXISTING_ID = 666;
+    //create method for creating certificates and move into test methods
     private final GiftCertificate giftCertificate = GiftCertificate.builder()
             .id(2)
             .price(new BigDecimal("19"))
@@ -29,6 +30,7 @@ class CertificateRepositoryTest {
             .lastUpdateDate(LocalDateTime.of(2005, 8, 12, 3, 11))
             .build();
 
+    //Remove hikari
     @BeforeEach
     void setUp() {
         HikariConfig config = new HikariConfig("src/test/resources/testDb.properties");

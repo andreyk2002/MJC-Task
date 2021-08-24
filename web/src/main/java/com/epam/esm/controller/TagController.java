@@ -2,9 +2,9 @@ package com.epam.esm.controller;
 
 
 import com.epam.esm.dto.TagResponseDto;
-import com.epam.esm.localization.Localizer;
 import com.epam.esm.service.GiftTagService;
 import com.epam.esm.validation.TagRequestDto;
+import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +20,6 @@ import java.util.List;
 @Validated
 public class TagController {
 
-    private static final String WRONG_ID = "tag.wrongId";
-    private static final String CANT_DELETE = "tag.cantDelete";
-    private final Localizer localizer;
     private final GiftTagService tagService;
 
 
@@ -45,7 +42,9 @@ public class TagController {
     }
 
     @PostMapping(value = "")
-    public ResponseEntity<TagResponseDto> addTag(@RequestBody @Valid TagRequestDto tagRequestDto) {
+    public ResponseEntity<TagResponseDto> addTag(
+            @ApiParam(value = "createRequest", required = true)
+            @RequestBody @Valid TagRequestDto tagRequestDto) {
         TagResponseDto tagResponseDto = tagService.addTag(tagRequestDto);
         return new ResponseEntity<>(tagResponseDto, HttpStatus.CREATED);
     }
