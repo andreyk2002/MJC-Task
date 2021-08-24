@@ -39,7 +39,7 @@ public class GiftTagService {
 
     public TagResponseDto getById(long id) {
         Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
-        return optionalGiftTag.map(mapper::entityToRequest).orElseThrow(() -> new TagNotFoundException(id));
+        return optionalGiftTag.map(mapper::entityToResponse).orElseThrow(() -> new TagNotFoundException(id));
     }
 
     TagResponseDto updateTag(TagRequestDto tagRequestDto) {
@@ -49,7 +49,7 @@ public class GiftTagService {
         return optional.map(tag -> {
             tagRepo.updateTag(giftTag);
             return getById(id);
-        }).orElse(getById(tagRepo.addTag(giftTag)));
+        }).orElseGet(() -> getById(tagRepo.addTag(giftTag)));
     }
 
     public TagResponseDto addTag(TagRequestDto tagRequestDto) {

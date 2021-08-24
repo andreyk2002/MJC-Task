@@ -22,7 +22,7 @@ public interface TagMapper {
             @Mapping(target = "id", source = "id"),
             @Mapping(target = "name", source = "name"),
     })
-    TagResponseDto entityToRequest(GiftTag giftTag);
+    TagResponseDto entityToResponse(GiftTag giftTag);
 
 
     List<TagResponseDto> entitiesToRequests(List<GiftTag> tags);

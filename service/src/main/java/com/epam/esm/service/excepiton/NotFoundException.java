@@ -17,21 +17,7 @@ public abstract class NotFoundException extends RuntimeException {
 
     public NotFoundException(String message, int errorCode, Object... params) {
         super(message);
-        this.errorCode = errorCode;
         this.params = params;
-    }
-
-    public NotFoundException(String message, Throwable cause, int errorCode, Object... params) {
-        super(message, cause);
         this.errorCode = errorCode;
-        this.params = params;
     }
-
-    public NotFoundException(Throwable cause, int errorCode, Object... params) {
-        super(cause);
-        this.errorCode = errorCode;
-        this.params = params;
-    }
-
-
 }

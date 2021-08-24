@@ -1,14 +1,12 @@
 package com.epam.esm.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @AllArgsConstructor
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode
 public class TagResponseDto {
 
     private long id;

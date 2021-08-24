@@ -69,8 +69,7 @@ public class CertificateService {
             }
             certificateRepo.updateCertificate(updated);
             return getById(certificateId);
-
-        }).orElse(addCertificate(giftCertificate));
+        }).orElseGet(() -> addCertificate(giftCertificate));
     }
 
 
