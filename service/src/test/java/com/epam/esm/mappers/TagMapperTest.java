@@ -11,16 +11,14 @@ import java.util.List;
 
 class TagMapperTest {
 
-    private static final GiftTag FIRST_TAG = new GiftTag(1, "name");
-    private static final TagResponseDto RESPONSE = new TagResponseDto(1, "name");
-    private static final GiftTag SECOND_TAG = new GiftTag(2, "second");
-    private static final TagResponseDto SECOND_RESPONSE = new TagResponseDto(2, "second");
     private final TagMapper mapper = new TagMapperImpl();
 
     @Test
     void entityToResponseShouldMapValidEntity() {
-        TagResponseDto tagResponseDto = mapper.entityToResponse(FIRST_TAG);
-        Assertions.assertEquals(RESPONSE, tagResponseDto);
+        GiftTag tag = new GiftTag(1, "name");
+        TagResponseDto response = new TagResponseDto(1, "name");
+        TagResponseDto tagResponseDto = mapper.entityToResponse(tag);
+        Assertions.assertEquals(response, tagResponseDto);
     }
 
     @Test
@@ -31,8 +29,12 @@ class TagMapperTest {
 
     @Test
     void entitiesToResponsesShouldMapValidEntities() {
-        List<TagResponseDto> tags = mapper.entitiesToRequests(Arrays.asList(FIRST_TAG, SECOND_TAG));
-        Assertions.assertEquals(Arrays.asList(RESPONSE, SECOND_RESPONSE), tags);
+        GiftTag firstTag = new GiftTag(1, "name");
+        TagResponseDto firstTagResponse = new TagResponseDto(1, "name");
+        GiftTag secondTag = new GiftTag(2, "second");
+        TagResponseDto secondResponse = new TagResponseDto(2, "second");
+        List<TagResponseDto> tags = mapper.entitiesToRequests(Arrays.asList(firstTag, secondTag));
+        Assertions.assertEquals(Arrays.asList(firstTagResponse, secondResponse), tags);
     }
 
     @Test
@@ -43,8 +45,10 @@ class TagMapperTest {
 
     @Test
     void requestToEntityShouldMapValidRequest() {
+        GiftTag FIRST_TAG = new GiftTag(1, "name");
+        GiftTag firstTag = new GiftTag(1, "name");
         GiftTag tag = mapper.requestToEntity(new TagRequestDto(1, "name"));
-        Assertions.assertEquals(FIRST_TAG, tag);
+        Assertions.assertEquals(firstTag, tag);
     }
 
     @Test

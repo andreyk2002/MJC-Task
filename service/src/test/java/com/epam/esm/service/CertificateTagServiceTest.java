@@ -5,40 +5,45 @@ import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateTagRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class CertificateTagServiceTest {
 
-    private static final int CERTIFICATE_ID = 1;
-    private static final TagResponseDto FIRST_TAG = new TagResponseDto(1, "first");
-    private static final TagResponseDto SECOND_TAG = new TagResponseDto(2, "second");
-    private static final List<TagResponseDto> CERTIFICATE_TAG_RESPONSE = Arrays.asList(FIRST_TAG, SECOND_TAG);
-    private static final List<GiftTag> CERTIFICATE_TAGS = Arrays.asList(
-            new GiftTag(1, "first"), new GiftTag(2, "second")
-    );
 
+    @InjectMocks
     private CertificateTagService service;
 
-    @BeforeEach
-    void setUp() {
-        TagMapper mapper = Mockito.mock(TagMapper.class);
-        when(mapper.entitiesToRequests(CERTIFICATE_TAGS)).thenReturn(CERTIFICATE_TAG_RESPONSE);
-        CertificateTagRepository certificateTagRepository = Mockito.mock(CertificateTagRepository.class);
-        when(certificateTagRepository.getTagByCertificateId(anyLong())).thenReturn(CERTIFICATE_TAGS);
-        service = new CertificateTagService(certificateTagRepository, mapper);
-    }
+    @Mock
+    private final TagMapper mapper = mock(TagMapper.class);
+
+    @Mock
+    private final CertificateTagRepository certificateTagRepository = mock(CertificateTagRepository.class);
 
     @Test
     void getTagsByCertificateId() {
-        List<TagResponseDto> tags = service.getTagsByCertificateId(CERTIFICATE_ID);
-        Assertions.assertEquals(tags, CERTIFICATE_TAG_RESPONSE);
+        int certificateId = 1;
+        TagResponseDto first = new TagResponseDto(1, "first");
+        TagResponseDto second = new TagResponseDto(2, "second");
+        List<TagResponseDto> responseDtoList = Arrays.asList(first, second);
+        List<GiftTag> giftTags = Arrays.asList(
+                new GiftTag(1, "first"), new GiftTag(2, "second")
+        );
+
+        when(mapper.entitiesToRequests(anyList())).thenReturn(responseDtoList);
+        when(certificateTagRepository.getTagByCertificateId(anyLong())).thenReturn(giftTags);
+        service = new CertificateTagService(certificateTagRepository, mapper);
+
+        List<TagResponseDto> tags = service.getTagsByCertificateId(certificateId);
+        Assertions.assertEquals(tags, responseDtoList);
+        verify(mapper).entitiesToRequests(giftTags);
+        verify(certificateTagRepository).getTagByCertificateId(certificateId);
     }
 }

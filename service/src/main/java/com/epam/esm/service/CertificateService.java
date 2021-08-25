@@ -18,9 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-
-@AllArgsConstructor
 @Service
+@AllArgsConstructor
 public class CertificateService {
 
     private final CertificateRepository certificateRepo;
@@ -88,3 +87,4 @@ public class CertificateService {
         return mapper.entitiesToResponses(certificates);
     }
 }
+

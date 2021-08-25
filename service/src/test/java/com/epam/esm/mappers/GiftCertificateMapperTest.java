@@ -7,57 +7,37 @@ import com.epam.esm.service.CertificateTagService;
 import com.epam.esm.validation.CertificateRequestDto;
 import com.epam.esm.validation.TagRequestDto;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.*;
 
 class GiftCertificateMapperTest {
 
-    private static final List<TagRequestDto> TAGS = Arrays.asList(
-            new TagRequestDto(1, "name"),
-            new TagRequestDto(2, "name")
-    );
+    private final CertificateMapper mapper = new CertificateMapperImpl();
 
-    private static final List<TagResponseDto> TAG_RESPONSES = Arrays.asList(
-            new TagResponseDto(1, "name"),
-            new TagResponseDto(2, "name")
-    );
-    private static final CertificateRequestDto REQUEST_DTO = new CertificateRequestDto(
-            "test", "description", new BigDecimal(1), 10, TAGS
-    );
-    private static final GiftCertificate GIFT_CERTIFICATE = GiftCertificate.builder()
-            .name("test").description("description").price(new BigDecimal(1)).duration(10).build();
+    private final CertificateTagService service = mock(CertificateTagService.class);
 
-    private static final CertificateResponseDto RESPONSE_DTO = CertificateResponseDto.builder()
-            .name("test").description("description").price(new BigDecimal(1))
-            .duration(10).tags(Collections.EMPTY_LIST).build();
-    private static final int SECOND_ID = 2;
-    private static final GiftCertificate SECOND_CERTIFICATE = GiftCertificate.builder()
-            .id(SECOND_ID).name("new").build();
-    private static final CertificateResponseDto SECOND_RESPONSE = CertificateResponseDto.builder()
-            .id(SECOND_ID).name("new").tags(TAG_RESPONSES).build();
-
-    private CertificateMapper mapper;
-
-    @BeforeEach
-    void setUp() {
-        CertificateTagService service = Mockito.mock(CertificateTagService.class);
-        when(service.getTagsByCertificateId(SECOND_ID)).thenReturn(TAG_RESPONSES);
-        mapper = new CertificateMapperImpl();
-        mapper.service = service;
-    }
 
     @Test
     void requestToEntityShouldMapValidRequest() {
-        GiftCertificate giftCertificate = mapper.requestToEntity(REQUEST_DTO);
-        Assertions.assertEquals(GIFT_CERTIFICATE, giftCertificate);
+        List<TagRequestDto> tags = Arrays.asList(
+                new TagRequestDto(1, "name"),
+                new TagRequestDto(2, "name")
+        );
+        CertificateRequestDto requestDto = new CertificateRequestDto(
+                "test", "description", new BigDecimal(1), 10, tags
+        );
+        GiftCertificate certificate = GiftCertificate.builder()
+                .name("test").description("description").price(new BigDecimal(1)).duration(10).build();
+
+        GiftCertificate giftCertificate = mapper.requestToEntity(requestDto);
+        Assertions.assertEquals(certificate, giftCertificate);
     }
 
     @Test
@@ -68,7 +48,21 @@ class GiftCertificateMapperTest {
 
     @Test
     void entityToResponseShouldMapValidEntity() {
-        CertificateResponseDto certificateResponseDto = mapper.entityToResponse(GIFT_CERTIFICATE);
+        List<TagResponseDto> responses = Arrays.asList(
+                new TagResponseDto(1, "name"),
+                new TagResponseDto(2, "name")
+        );
+        GiftCertificate certificate = GiftCertificate.builder()
+                .name("test").description("description").price(new BigDecimal(1)).duration(10).build();
+
+        CertificateResponseDto RESPONSE_DTO = CertificateResponseDto.builder()
+                .name("test").description("description").price(new BigDecimal(1))
+                .duration(10).tags(Collections.EMPTY_LIST).build();
+
+        int secondId = 2;
+        when(service.getTagsByCertificateId(secondId)).thenReturn(responses);
+        mapper.service = service;
+        CertificateResponseDto certificateResponseDto = mapper.entityToResponse(certificate);
         Assertions.assertEquals(RESPONSE_DTO, certificateResponseDto);
     }
 
@@ -80,12 +74,32 @@ class GiftCertificateMapperTest {
 
     @Test
     void entitiesToRequestsShouldMapValidEntities() {
-        List<CertificateResponseDto> responses = mapper.entitiesToResponses(Arrays.asList(GIFT_CERTIFICATE, SECOND_CERTIFICATE));
-        Assertions.assertEquals(Arrays.asList(RESPONSE_DTO, SECOND_RESPONSE), responses);
+        List<TagResponseDto> responses = Arrays.asList(
+                new TagResponseDto(1, "name"),
+                new TagResponseDto(2, "name")
+        );
+        GiftCertificate certificate = GiftCertificate.builder()
+                .name("test").description("description").price(new BigDecimal(1)).duration(10).build();
+
+        CertificateResponseDto responseDto = CertificateResponseDto.builder()
+                .name("test").description("description").price(new BigDecimal(1))
+                .duration(10).tags(Collections.emptyList()).build();
+        int secondId = 2;
+        GiftCertificate secondCertificate = GiftCertificate.builder()
+                .id(secondId).name("new").build();
+        CertificateResponseDto secondResponse = CertificateResponseDto.builder()
+                .id(secondId).name("new").tags(responses).build();
+
+        when(service.getTagsByCertificateId(secondId)).thenReturn(responses);
+        mapper.service = service;
+        List<CertificateResponseDto> results = mapper.entitiesToResponses(Arrays.asList(certificate, secondCertificate));
+        Assertions.assertEquals(Arrays.asList(responseDto, secondResponse), results);
+        verify(service).getTagsByCertificateId(secondId);
     }
 
     @Test
     void requestToEntityShouldReturnNullWhenEntitiesIsNull() {
+        when(service.getTagsByCertificateId(anyLong())).thenReturn(Collections.emptyList());
         List<CertificateResponseDto> giftCertificate = mapper.entitiesToResponses(null);
         Assertions.assertNull(giftCertificate);
     }
