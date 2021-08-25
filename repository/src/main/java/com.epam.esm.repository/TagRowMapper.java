@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Component
-public class TagRowMapper implements RowMapper<GiftTag> {
+class TagRowMapper implements RowMapper<GiftTag> {
     @Override
     public GiftTag mapRow(ResultSet resultSet, int i) throws SQLException {
         long id = resultSet.getLong("id");

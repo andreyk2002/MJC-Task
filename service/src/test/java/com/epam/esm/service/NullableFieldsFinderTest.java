@@ -1,4 +1,4 @@
-package com.epam.esm;
+package com.epam.esm.service;
 
 import com.epam.esm.entity.GiftTag;
 import org.junit.jupiter.api.Assertions;

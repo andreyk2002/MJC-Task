@@ -10,8 +10,10 @@ import com.epam.esm.service.excepiton.TagNotFoundException;
 import com.epam.esm.validation.TagRequestDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,20 +23,20 @@ import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 
-
+@ExtendWith(MockitoExtension.class)
 class GiftTagServiceTest {
 
     @InjectMocks
     private GiftTagService service;
 
     @Mock
-    private final TagMapper mapper = mock(TagMapper.class);
+    private TagMapper mapper;
 
     @Mock
-    private final TagRepository tagRepository = mock(TagRepository.class);
+    private TagRepository tagRepository;
 
     @Mock
-    private final CertificateTagRepository certificateTagRepository = mock(CertificateTagRepository.class);
+    private CertificateTagRepository certificateTagRepository;
 
 
     @Test
@@ -48,7 +50,7 @@ class GiftTagServiceTest {
         when(tagRepository.getAll()).thenReturn(Arrays.asList(firstGiftTag, secondGiftTag));
         when(mapper.entitiesToRequests(anyList())).thenReturn(Arrays.asList(firstResponse, secondResponse));
 
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
+
         List<TagResponseDto> all = Arrays.asList(firstResponse, secondResponse);
         List<TagResponseDto> allTags = service.getAllTags();
         Assertions.assertEquals(allTags, all);
@@ -62,7 +64,7 @@ class GiftTagServiceTest {
         GiftTag firstGiftTag = new GiftTag(id, "first");
         when(tagRepository.getById(anyLong())).thenReturn(Optional.of(firstGiftTag));
         when(mapper.entityToResponse(any())).thenReturn(tag);
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
+
         TagResponseDto tagResponseDto = service.deleteById(id);
         Assertions.assertEquals(tag, tagResponseDto);
         verify(tagRepository).getById(id);
@@ -73,7 +75,7 @@ class GiftTagServiceTest {
     void deleteByIdShouldThrowIfNotFound() {
         long invalidId = 666;
         when(tagRepository.getById(anyLong())).thenReturn(Optional.empty());
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
+
         Assertions.assertThrows(TagNotFoundException.class, () -> service.deleteById(invalidId));
         verify(tagRepository).getById(invalidId);
     }
@@ -85,7 +87,7 @@ class GiftTagServiceTest {
         GiftTag giftTag = new GiftTag(id, "some tag");
         when(tagRepository.getById(anyLong())).thenReturn(Optional.of(giftTag));
         when(mapper.entityToResponse(any())).thenReturn(response);
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
+
 
         TagResponseDto result = service.getById(id);
         Assertions.assertEquals(response, result);
@@ -97,7 +99,7 @@ class GiftTagServiceTest {
     void getByIdShouldReturnThrowIfTagNotExists() {
         long notExitingId = 65;
         when(tagRepository.getById(anyLong())).thenReturn(Optional.empty());
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
+
         Assertions.assertThrows(TagNotFoundException.class, () -> service.getById(notExitingId));
         verify(tagRepository).getById(notExitingId);
     }
@@ -108,7 +110,7 @@ class GiftTagServiceTest {
         GiftTag tag = new GiftTag(id, "fsdaf");
         TagRequestDto requestDto = new TagRequestDto(id, "fsdaf");
         when(tagRepository.getById(anyLong())).thenReturn(Optional.of(tag));
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
+
         Assertions.assertThrows(TagAlreadyExistException.class, () -> service.addTag(requestDto));
         verify(tagRepository).getById(id);
     }
@@ -123,7 +125,7 @@ class GiftTagServiceTest {
         when(tagRepository.addTag(any())).thenReturn(id);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(mapper.requestToEntity(any())).thenReturn(tag);
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
+
 
         TagResponseDto result = service.addTag(requestDto);
         Assertions.assertEquals(responseDto, result);
@@ -143,7 +145,6 @@ class GiftTagServiceTest {
         when(tagRepository.getById(anyLong())).thenReturn(Optional.of(tag));
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(mapper.requestToEntity(any())).thenReturn(tag);
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
 
 
         TagResponseDto result = service.updateTag(requestDto);
@@ -164,7 +165,7 @@ class GiftTagServiceTest {
         when(tagRepository.getById(anyLong())).thenReturn(Optional.empty()).thenReturn(Optional.of(tag));
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(mapper.requestToEntity(any())).thenReturn(tag);
-        service = new GiftTagService(tagRepository, certificateTagRepository, mapper);
+
 
         TagResponseDto result = service.updateTag(requestDto);
         Assertions.assertEquals(responseDto, result);

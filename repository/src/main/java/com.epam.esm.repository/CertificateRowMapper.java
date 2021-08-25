@@ -9,8 +9,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+
 @Component
-public class CertificateRowMapper implements RowMapper<GiftCertificate> {
+class CertificateRowMapper implements RowMapper<GiftCertificate> {
     @Override
     public GiftCertificate mapRow(ResultSet resultSet, int i) throws SQLException {
         String name = resultSet.getString("name");

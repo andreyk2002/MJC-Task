@@ -39,7 +39,7 @@ public class CertificateRepository {
 
 
     /**
-     * Adds an instance of GitftCertificte into the storage
+     * Adds an instance of {@link GiftCertificate} into the storage
      *
      * @param giftCertificate instance of certificate, needed to be added
      * @return ID of inserted certificate
@@ -50,8 +50,9 @@ public class CertificateRepository {
                 (connection) -> {
                     PreparedStatement statement =
                             connection.prepareStatement(ADD_QUERY, new String[]{
-                                    "name", "description", "price", "duration", "creation_date", "last_update_date"
+                                    "name", "description", "price", "duration", "create_date", "last_update_date"
                             });
+
                     statement.setString(1, giftCertificate.getName());
                     statement.setString(2, giftCertificate.getDescription());
                     statement.setBigDecimal(3, giftCertificate.getPrice());
@@ -67,7 +68,7 @@ public class CertificateRepository {
 
 
     /**
-     * Removes a certificate with specified id from storage if presents
+     * Removes a certificate with specified id from storage if present
      *
      * @param id - ID of certificate to be removed
      */
@@ -76,7 +77,7 @@ public class CertificateRepository {
     }
 
     /**
-     * Updates an instance of GiftCertificate in the storage
+     * Updates an instance of {@link GiftCertificate} in the storage
      *
      * @param giftCertificate instance of certificate, needed to be updated
      */
@@ -94,7 +95,7 @@ public class CertificateRepository {
     }
 
     /**
-     * Returns list of all certificates, which are present in the storage
+     * Get list of all certificates, which are present in the storage
      *
      * @return List of all present certificates
      */
@@ -103,10 +104,11 @@ public class CertificateRepository {
     }
 
     /**
-     * Searches for certificate with specified if in the storage
+     * Searches for certificate with specified id in the storage
      *
      * @param id - ID of certificate
-     * @return certificate  wrapped into j
+     * @return instance of GiftCertificate  wrapped with {@link Optional} if present,
+     * else returns {@link Optional#empty()}
      */
     public Optional<GiftCertificate> getById(long id) {
         try {

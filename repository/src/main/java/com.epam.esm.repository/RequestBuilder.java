@@ -3,7 +3,7 @@ package com.epam.esm.repository;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RequestBuilder {
+class RequestBuilder {
     private static final String FIND_SORTED = "SELECT * FROM gift_certificate";
     private static final String FIND_BY_KEYWORD = "SELECT * FROM gift_certificate WHERE name LIKE " +
             "concat('%', ?, '%') OR description LIKE concat('%', ?, '%')";
@@ -16,7 +16,7 @@ public class RequestBuilder {
             "concat('%', ?, '%') OR gc.description LIKE concat('%', ?, '%'))";
     public static final String ORDER = " ORDER BY ";
 
-    public RequestResult buildSortRequest(String keyword, String tagName, String sortOrder, String field) {
+    RequestResult buildSortRequest(String keyword, String tagName, String sortOrder, String field) {
         RequestResult requestResult = new RequestResult();
         StringBuilder query;
         if (keyword == null && tagName == null) {

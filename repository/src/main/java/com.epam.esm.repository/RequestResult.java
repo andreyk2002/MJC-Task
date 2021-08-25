@@ -3,7 +3,7 @@ package com.epam.esm.repository;
 import lombok.Getter;
 import lombok.Setter;
 
-public class RequestResult {
+class RequestResult {
     @Getter
     private String[] params;
 
@@ -11,7 +11,7 @@ public class RequestResult {
     @Setter
     private String query;
 
-    public void setParams(String... params) {
+    void setParams(String... params) {
         this.params = params;
     }
 

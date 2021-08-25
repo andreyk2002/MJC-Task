@@ -1,6 +1,5 @@
 package com.epam.esm.service;
 
-import com.epam.esm.NullableFieldsFinder;
 import com.epam.esm.dto.CertificateResponseDto;
 import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftCertificate;
@@ -12,54 +11,41 @@ import com.epam.esm.validation.CertificateRequestDto;
 import com.epam.esm.validation.TagRequestDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 
+@ExtendWith(MockitoExtension.class)
 class CertificateServiceTest {
 
-    private static final int NOT_EXISTED_ID = 666;
-    private static final int FIRST_ID = 1;
-    private static final GiftCertificate FIRST_CERTIFICATE = GiftCertificate.builder()
-            .id(FIRST_ID).name("first").build();
-    private static final CertificateResponseDto FIRST_RESPONSE = CertificateResponseDto.builder()
-            .id(FIRST_ID).name("first").build();
-    private static final int SECOND_ID = 2;
-    private static final int TAG_ID = 1;
-    private static final Long ADDED_ID = 3L;
-    private static final CertificateResponseDto SECOND_RESPONSE = CertificateResponseDto.builder().id(SECOND_ID).name("first").build();
-    private static final GiftCertificate SECOND_CERTIFICATE = GiftCertificate.builder().id(SECOND_ID).name("first").build();
-    private static final List<GiftCertificate> CERTIFICATES = Arrays.asList(FIRST_CERTIFICATE, SECOND_CERTIFICATE);
-    private static final List<CertificateResponseDto> CERTIFICATE_RESPONSES = Arrays.asList(FIRST_RESPONSE, SECOND_RESPONSE);
-    private static final List<TagRequestDto> TAG_REQUESTS = Collections.singletonList(new TagRequestDto(TAG_ID, "tag"));
-    private static final TagResponseDto TAG_RESPONSE = new TagResponseDto(TAG_ID, "tag");
-    private static final List<TagResponseDto> TAG_RESPONSES = Collections.singletonList(TAG_RESPONSE);
-
 
     @Mock
-    private final CertificateRepository certificateRepo = Mockito.mock(CertificateRepository.class);
+    private CertificateRepository certificateRepo;
 
     @Mock
-    private final GiftTagService tagService = Mockito.mock(GiftTagService.class);
+    private GiftTagService tagService;
 
     @Mock
-    private final CertificateMapper mapper = Mockito.mock(CertificateMapper.class);
+    private CertificateMapper mapper;
 
     @Mock
-    private final CertificateTagRepository certificateTagRepository = Mockito.mock(CertificateTagRepository.class);
+    private CertificateTagRepository certificateTagRepository;
 
     @Mock
-    private final NullableFieldsFinder nullableFieldsFinder = Mockito.mock(NullableFieldsFinder.class);
+    private NullableFieldsFinder nullableFieldsFinder;
 
     @InjectMocks
     private CertificateService service;
@@ -75,7 +61,7 @@ class CertificateServiceTest {
         when(certificateRepo.addCertificate(any())).thenReturn(id);
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(addedCertificate));
         when(tagService.updateTag(any())).thenReturn(new TagResponseDto(1, "tag"));
-        service = new CertificateService(certificateRepo, tagService, mapper, certificateTagRepository, nullableFieldsFinder);
+
 
         CertificateResponseDto result = service.addCertificate(requestDto);
         Assertions.assertEquals(responseDto, result);
@@ -90,7 +76,7 @@ class CertificateServiceTest {
     void deleteByIdShouldThrowWhenCertificateNotExist() {
         long id = 10;
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.empty());
-        service = new CertificateService(certificateRepo, tagService, mapper, certificateTagRepository, nullableFieldsFinder);
+
         Assertions.assertThrows(CertificateNotFoundException.class, () -> service.deleteById(id));
         verify(certificateRepo).getById(id);
     }
@@ -102,7 +88,7 @@ class CertificateServiceTest {
         GiftCertificate addedCertificate = buildCertificate(id);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(addedCertificate));
-        service = new CertificateService(certificateRepo, tagService, mapper, certificateTagRepository, nullableFieldsFinder);
+
 
         CertificateResponseDto certificateResponseDto = service.deleteById(id);
         Assertions.assertEquals(responseDto, certificateResponseDto);
@@ -121,7 +107,7 @@ class CertificateServiceTest {
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(addedCertificate));
         when(tagService.addTag(any())).thenReturn(new TagResponseDto(1, "tag"));
-        service = new CertificateService(certificateRepo, tagService, mapper, certificateTagRepository, nullableFieldsFinder);
+
 
         CertificateResponseDto updated = service.updateCertificate(id, requestDto);
         Assertions.assertEquals(responseDto, updated);
@@ -134,7 +120,7 @@ class CertificateServiceTest {
     void getByIdShouldThrowWhenNotFound() {
         long id = 1;
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.empty());
-        service = new CertificateService(certificateRepo, tagService, mapper, certificateTagRepository, nullableFieldsFinder);
+
 
         Assertions.assertThrows(CertificateNotFoundException.class, () -> service.getById(id));
         verify(certificateRepo).getById(id);
@@ -147,7 +133,7 @@ class CertificateServiceTest {
         GiftCertificate giftCertificate = buildCertificate(id);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(giftCertificate));
-        service = new CertificateService(certificateRepo, tagService, mapper, certificateTagRepository, nullableFieldsFinder);
+
 
         CertificateResponseDto result = service.getById(id);
         Assertions.assertEquals(responseDto, result);
@@ -157,17 +143,30 @@ class CertificateServiceTest {
 
     @Test
     void getCertificatesShouldReturnAllFittingCertificates() {
-        when(mapper.entitiesToResponses(any())).thenReturn(CERTIFICATE_RESPONSES);
-        when(certificateRepo.getAllSorted(anyString(), anyString(), anyString(), anyString())).thenReturn(CERTIFICATES);
-        service = new CertificateService(certificateRepo, tagService, mapper, certificateTagRepository, nullableFieldsFinder);
+        long firstId = 1;
+        long secondId = 2;
+        GiftCertificate firstCertificate = GiftCertificate.builder()
+                .id(firstId).name("first").build();
+        GiftCertificate secondCertificate = GiftCertificate.builder()
+                .id(secondId).name("fad").build();
+        CertificateResponseDto firstResponse = CertificateResponseDto.builder()
+                .id(firstId).name("first").build();
+        CertificateResponseDto secondResponse = CertificateResponseDto.builder()
+                .id(secondId).name("fad").build();
+        List<CertificateResponseDto> responses = Arrays.asList(firstResponse, secondResponse);
+        List<GiftCertificate> certificates = Arrays.asList(firstCertificate, secondCertificate);
+
+        when(mapper.entitiesToResponses(any())).thenReturn(responses);
+        when(certificateRepo.getAllSorted(anyString(), anyString(), anyString(), anyString())).thenReturn(certificates);
+
 
         String testTagName = "";
         String testKeyword = "";
         String testSortString = "a,b";
-        List<CertificateResponseDto> certificates = service.getCertificates(testTagName, testKeyword, testSortString);
-        Assertions.assertEquals(CERTIFICATE_RESPONSES, certificates);
+        List<CertificateResponseDto> results = service.getCertificates(testTagName, testKeyword, testSortString);
+        Assertions.assertEquals(responses, results);
 
-        verify(mapper).entitiesToResponses(CERTIFICATES);
+        verify(mapper).entitiesToResponses(certificates);
         String field = "b";
         String order = "a";
         verify(certificateRepo).getAllSorted(testKeyword, testTagName, field, order);
@@ -180,12 +179,16 @@ class CertificateServiceTest {
     }
 
     private CertificateResponseDto buildCertificateResponse(long id) {
+        List<TagResponseDto> responses = Arrays.asList(new TagResponseDto(1, "fda"),
+                new TagResponseDto(2, "fff"));
         return CertificateResponseDto.builder()
                 .id(id).name("newName").description("newDescription").price(new BigDecimal(1)).duration(10)
-                .tags(TAG_RESPONSES).build();
+                .tags(responses).build();
     }
 
     private CertificateRequestDto buildCertificateRequest() {
-        return new CertificateRequestDto("newName", "newDescription", new BigDecimal(1), 10, TAG_REQUESTS);
+        List<TagRequestDto> requests = Arrays.asList(new TagRequestDto(1, "fda"), new TagRequestDto(2, "fff"));
+        return new CertificateRequestDto("newName", "newDescription", new BigDecimal(1),
+                10, requests);
     }
 }
