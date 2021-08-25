@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 public class GiftCertificate {
 
+
     private long id;
 
     private String name;

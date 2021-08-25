@@ -1,58 +1,68 @@
 package com.epam.esm.repository;
 
+import com.epam.esm.config.DbConfig;
 import com.epam.esm.entity.GiftCertificate;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {DbConfig.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class CertificateRepositoryTest {
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private final RequestBuilder builder = new RequestBuilder();
+    private final RowMapper<GiftCertificate> certificateRowMapper = new CertificateRowMapper();
     private CertificateRepository repository;
 
-    //TODO:Remove hikari
     @BeforeEach
     void setUp() {
-        HikariConfig config = new HikariConfig("src/test/resources/testDb.properties");
-        DataSource dataSource = new HikariDataSource(config);
-        JdbcTemplate template = new JdbcTemplate(dataSource);
-        RequestBuilder builder = new RequestBuilder();
-        RowMapper<GiftCertificate> giftCertificateRowMapper = new CertificateRowMapper();
-        repository = new CertificateRepository(template, giftCertificateRowMapper, builder);
+        repository = new CertificateRepository(jdbcTemplate, certificateRowMapper, builder);
     }
 
     @Test
     public void testGetByIdShouldReturnCertificateWhenItExisting() {
-        long EXISTING_ID = 2;
-        Optional<GiftCertificate> optionalCertificate = repository.getById(EXISTING_ID);
-        GiftCertificate giftCertificate = buildCertificate(EXISTING_ID);
-        Assertions.assertEquals(Optional.of(giftCertificate), optionalCertificate);
+        GiftCertificate certificate = buildCertificate();
+        long insertedId = repository.addCertificate(certificate);
+        Optional<GiftCertificate> optionalCertificate = repository.getById(insertedId);
+        Assertions.assertTrue(optionalCertificate.isPresent());
+        Assertions.assertTrue(equalsIgnoreIdAndDate(optionalCertificate.get(), certificate));
     }
 
     @Test
     public void testGetByIdShouldReturnEmptyWhenCertificateNotExisting() {
-        long NOT_EXISTING_ID = 666;
-        Optional<GiftCertificate> certificateOptional = repository.getById(NOT_EXISTING_ID);
+        long notExistingId = 666;
+        Optional<GiftCertificate> certificateOptional = repository.getById(notExistingId);
         Assertions.assertFalse(certificateOptional.isPresent());
     }
 
     @Test
     public void testGetAllShouldReturnAllCertificates() {
+        repository.deleteAll();
+        GiftCertificate first = buildCertificate();
+        GiftCertificate second = buildCertificate();
+        repository.addCertificate(first);
+        repository.addCertificate(second);
         List<GiftCertificate> all = repository.getAll();
-        GiftCertificate giftCertificate = buildCertificate();
-        List<GiftCertificate> expectedResult = Collections.singletonList(giftCertificate);
-        Assertions.assertEquals(expectedResult, all);
+        List<GiftCertificate> expectedResult = Arrays.asList(first, second);
+        Assertions.assertEquals(expectedResult.size(), all.size());
+        Assertions.assertTrue(equalsIgnoreIdAndDate(expectedResult.get(0), all.get(0)));
+        Assertions.assertTrue(equalsIgnoreIdAndDate(expectedResult.get(1), all.get(1)));
     }
 
     @Test
@@ -62,11 +72,8 @@ class CertificateRepositoryTest {
         Optional<GiftCertificate> insertedCertificate = repository.getById(insertedId);
         giftCertificate.setId(insertedId);
         Assertions.assertTrue(insertedCertificate.isPresent());
-        //We should ignore createDate and updateDate because they decided in repo.addCertificate()
         GiftCertificate inserted = insertedCertificate.get();
-        giftCertificate.setLastUpdateDate(inserted.getLastUpdateDate());
-        giftCertificate.setCreateDate(inserted.getCreateDate());
-        Assertions.assertEquals(inserted, giftCertificate);
+        Assertions.assertTrue(equalsIgnoreIdAndDate(inserted, giftCertificate));
 
     }
 
@@ -92,6 +99,22 @@ class CertificateRepositoryTest {
         GiftCertificate updatedCertificate = updated.get();
         giftCertificate.setLastUpdateDate(updatedCertificate.getLastUpdateDate());
         Assertions.assertEquals(updatedCertificate, giftCertificate);
+    }
+
+    @Test
+    public void testDeleteAllShouldDeleteAllCertificates() {
+        repository.deleteAll();
+        List<GiftCertificate> allCertificates = repository.getAll();
+        Assertions.assertEquals(Collections.emptyList(), allCertificates);
+    }
+
+    //We should ignore createDate and updateDate because they decided in repo.addCertificate()
+    private boolean equalsIgnoreIdAndDate(GiftCertificate first, GiftCertificate second) {
+        return Objects.equals(first.getName(), second.getName())
+                && Objects.equals(first.getDescription(), second.getDescription())
+                && Objects.equals(first.getPrice(), second.getPrice())
+                && Objects.equals(first.getDuration(), second.getDuration());
+
     }
 
     public GiftCertificate buildCertificate(long id) {

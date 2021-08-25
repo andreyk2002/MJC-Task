@@ -4,6 +4,7 @@ import com.epam.esm.entity.GiftTag;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,7 @@ public class TagRepository {
 
 
     private final JdbcTemplate jdbcTemplate;
-    private final TagRowMapper tagRowMapper;
+    private final RowMapper<GiftTag> tagRowMapper;
 
     /**
      * Adds an instance of {@link GiftTag} into the storage
