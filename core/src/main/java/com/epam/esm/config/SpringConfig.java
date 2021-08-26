@@ -33,7 +33,7 @@ public class SpringConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/swagger-ui/")
-                .setViewName("forward:" + "/swagger-ui/index.html");
+                .setViewName("redirect:" + "/swagger-ui/index.html");
     }
 
     @Bean

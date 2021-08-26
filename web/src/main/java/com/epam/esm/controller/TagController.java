@@ -34,7 +34,8 @@ public class TagController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<TagResponseDto> deleteById(@PathVariable long id) {
+    public ResponseEntity<TagResponseDto> deleteById(@ApiParam(value = "id of the specified tag", required = true)
+                                                     @PathVariable long id) {
         TagResponseDto deleteTag = tagService.deleteById(id);
         return new ResponseEntity<>(deleteTag, HttpStatus.OK);
     }
@@ -47,7 +48,8 @@ public class TagController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<TagResponseDto> getById(@PathVariable long id) {
+    public ResponseEntity<TagResponseDto> getById(@ApiParam(value = "id of the specified tag", required = true)
+                                                  @PathVariable long id) {
         TagResponseDto tag = tagService.getById(id);
         return new ResponseEntity<>(tag, HttpStatus.OK);
     }
@@ -74,7 +76,7 @@ public class TagController {
     }
     )
     public ResponseEntity<TagResponseDto> addTag(
-            @ApiParam(value = "createRequest", required = true)
+            @ApiParam(value = "tag for adding", required = true)
             @RequestBody @Valid TagRequestDto tagRequestDto) {
         TagResponseDto tagResponseDto = tagService.addTag(tagRequestDto);
         return new ResponseEntity<>(tagResponseDto, HttpStatus.CREATED);

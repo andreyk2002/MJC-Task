@@ -5,6 +5,7 @@ import com.epam.esm.dto.CertificateResponseDto;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.validation.CertificateRequestDto;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
@@ -33,7 +34,8 @@ public class CertificateController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<CertificateResponseDto> deleteCertificate(@PathVariable long id) {
+    public ResponseEntity<CertificateResponseDto> deleteCertificate(@ApiParam(value = "id of the specified certificate",
+            required = true) @PathVariable long id) {
         CertificateResponseDto certificate = certificateService.deleteById(id);
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
@@ -46,7 +48,8 @@ public class CertificateController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<CertificateResponseDto> getById(@PathVariable long id) {
+    public ResponseEntity<CertificateResponseDto> getById(@ApiParam(value = "id of the specified certificate",
+            required = true) @PathVariable long id) {
         CertificateResponseDto certificate = certificateService.getById(id);
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
@@ -62,12 +65,16 @@ public class CertificateController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<List<CertificateResponseDto>> getCertificates(@RequestParam(required = false) String tagName,
-                                                                        @RequestParam(required = false) String keyword,
-                                                                        @RequestParam(defaultValue = "name,asc")
-                                                                        @Pattern(message = "40016",
-                                                                                regexp = "(name|createDate),(asc|desc)")
-                                                                                String sort) {
+    public ResponseEntity<List<CertificateResponseDto>> getCertificates(
+            @ApiParam(value = "name of the tag which all certificates should contain")
+            @RequestParam(required = false) String tagName,
+            @ApiParam(value = "part of the name or / and description which all certificates should contain")
+            @RequestParam(required = false) String keyword,
+            @ApiParam(value = "Specifies how certificates will be sorted")
+            @RequestParam(defaultValue = "name,asc")
+            @Pattern(message = "40016",
+                    regexp = "(name|createDate),(asc|desc)")
+                    String sort) {
         List<CertificateResponseDto> certificates = certificateService.getCertificates(tagName, keyword, sort);
         return new ResponseEntity<>(certificates, HttpStatus.OK);
     }
@@ -90,6 +97,7 @@ public class CertificateController {
     }
     )
     public ResponseEntity<CertificateResponseDto> addCertificate(
+            @ApiParam(value = "Certificate for adding")
             @RequestBody @Valid CertificateRequestDto certificateRequestDto) {
         CertificateResponseDto certificateResponseDto = certificateService.addCertificate(certificateRequestDto);
         return new ResponseEntity<>(certificateResponseDto, HttpStatus.CREATED);
@@ -102,7 +110,9 @@ public class CertificateController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<CertificateResponseDto> updateCertificate(@PathVariable long id, @RequestBody CertificateRequestDto certificateRequestDto) {
+    public ResponseEntity<CertificateResponseDto> updateCertificate(
+            @ApiParam(value = "Id of certificate, which will be updated") @PathVariable long id,
+            @ApiParam(value = "New state of certificate") @RequestBody CertificateRequestDto certificateRequestDto) {
         CertificateResponseDto updated = certificateService.updateCertificate(id, certificateRequestDto);
         return new ResponseEntity<>(updated, HttpStatus.CREATED);
     }
