@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CertificateTagRepository {
 
-    private static final String FIND_BY_CERTIFICATE = "SELECT * FROM certificate_tag ct " +
+    private static final String FIND_BY_CERTIFICATE = "SELECT t.id AS id, t.name AS name FROM certificate_tag ct " +
             "JOIN tag t ON ct.tag_id = t.id WHERE ct.certificate_id = ?";
     private static final String DELETE_BY_CERTIFICATE_ID = "DELETE FROM certificate_tag WHERE certificate_id = ?";
     private static final String DELETE_BY_TAG_ID = "DELETE FROM certificate_tag WHERE tag_id = ?";
@@ -34,7 +34,7 @@ public class CertificateTagRepository {
      * @param id - id of specified certificate
      * @return List of all tags for specified certificate
      */
-    public List<GiftTag> getTagByCertificateId(long id) {
+    public List<GiftTag> getTagsByCertificateId(long id) {
         return jdbcTemplate.query(FIND_BY_CERTIFICATE, tagRowMapper, id);
     }
 

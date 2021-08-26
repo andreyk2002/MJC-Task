@@ -13,8 +13,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -26,6 +24,7 @@ class CertificateRepositoryTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private final CertificateBuilder certificateBuilder = new CertificateBuilder();
     private final RequestBuilder builder = new RequestBuilder();
     private final RowMapper<GiftCertificate> certificateRowMapper = new CertificateRowMapper();
     private CertificateRepository repository;
@@ -37,7 +36,7 @@ class CertificateRepositoryTest {
 
     @Test
     public void testGetByIdShouldReturnCertificateWhenItExisting() {
-        GiftCertificate certificate = buildCertificate();
+        GiftCertificate certificate = certificateBuilder.buildCertificate();
         long insertedId = repository.addCertificate(certificate);
         Optional<GiftCertificate> optionalCertificate = repository.getById(insertedId);
         Assertions.assertTrue(optionalCertificate.isPresent());
@@ -54,8 +53,8 @@ class CertificateRepositoryTest {
     @Test
     public void testGetAllShouldReturnAllCertificates() {
         repository.deleteAll();
-        GiftCertificate first = buildCertificate();
-        GiftCertificate second = buildCertificate();
+        GiftCertificate first = certificateBuilder.buildCertificate();
+        GiftCertificate second = certificateBuilder.buildCertificate();
         repository.addCertificate(first);
         repository.addCertificate(second);
         List<GiftCertificate> all = repository.getAll();
@@ -67,7 +66,7 @@ class CertificateRepositoryTest {
 
     @Test
     public void testAddCertificateShouldAddCertificate() {
-        GiftCertificate giftCertificate = buildCertificate();
+        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
         long insertedId = repository.addCertificate(giftCertificate);
         Optional<GiftCertificate> insertedCertificate = repository.getById(insertedId);
         giftCertificate.setId(insertedId);
@@ -79,7 +78,7 @@ class CertificateRepositoryTest {
 
     @Test
     public void testDeleteShouldDeleteCertificate() {
-        GiftCertificate giftCertificate = buildCertificate();
+        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
         long insertedId = repository.addCertificate(giftCertificate);
         repository.deleteById(insertedId);
         Optional<GiftCertificate> deleted = repository.getById(insertedId);
@@ -88,7 +87,7 @@ class CertificateRepositoryTest {
 
     @Test
     public void testUpdateShouldUpdateCertificate() {
-        GiftCertificate giftCertificate = buildCertificate();
+        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
         long insertedId = repository.addCertificate(giftCertificate);
         giftCertificate.setDescription("changed");
         giftCertificate.setName("changed");
@@ -117,18 +116,5 @@ class CertificateRepositoryTest {
 
     }
 
-    public GiftCertificate buildCertificate(long id) {
-        return GiftCertificate.builder()
-                .id(id)
-                .price(new BigDecimal("19"))
-                .duration(0)
-                .createDate(LocalDateTime.of(2002, 8, 12, 3, 11))
-                .lastUpdateDate(LocalDateTime.of(2005, 8, 12, 3, 11))
-                .build();
-    }
-
-    public GiftCertificate buildCertificate() {
-        return buildCertificate(0);
-    }
 
 }
