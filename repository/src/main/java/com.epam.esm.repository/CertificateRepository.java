@@ -29,7 +29,6 @@ public class CertificateRepository {
     private static final String FIND_ALL = "SELECT * FROM gift_certificate";
     private static final String UPDATE = "UPDATE gift_certificate SET name = ?," +
             "description = ?, price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
-    public static final String DELETE_ALL = "DELETE FROM gift_certificate";
 
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<GiftCertificate> certificateMapper;
@@ -139,7 +138,4 @@ public class CertificateRepository {
         return jdbcTemplate.query(query, certificateMapper, (Object[]) params);
     }
 
-    void deleteAll() {
-        jdbcTemplate.update(DELETE_ALL);
-    }
 }

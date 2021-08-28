@@ -1,7 +1,6 @@
 package com.epam.esm.repository;
 
 import com.epam.esm.config.DbConfig;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftTag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,8 +11,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @ExtendWith(SpringExtension.class)
@@ -25,70 +27,38 @@ class CertificateTagRepositoryTest {
     private JdbcTemplate jdbcTemplate;
 
     private final RowMapper<GiftTag> tagRowMapper = new TagRowMapper();
-    private final RequestBuilder builder = new RequestBuilder();
-    private final RowMapper<GiftCertificate> certificateRowMapper = new CertificateRowMapper();
 
     private final CertificateBuilder certificateBuilder = new CertificateBuilder();
     private CertificateTagRepository repository;
-    private TagRepository tagRepository;
-    private CertificateRepository certificateRepository;
+    public static final GiftTag FIRST_TAG = new GiftTag(19, "first tag");
+    public static final GiftTag SECOND_TAG = new GiftTag(22, "second tag");
+    public static final long INSERTED_CERTIFICATE_ID = 77;
 
     @BeforeEach
     void setUp() {
         repository = new CertificateTagRepository(jdbcTemplate, tagRowMapper);
-        tagRepository = new TagRepository(jdbcTemplate, tagRowMapper);
-        certificateRepository = new CertificateRepository(jdbcTemplate, certificateRowMapper, builder);
     }
 
 
     @Test
+    @Sql({"/insertCertificateTags.sql"})
     void testGetTagByCertificateIdShouldReturnAllTagsWithSpecifiedId() {
-        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
-        GiftTag firstTag = new GiftTag(1, "firstName");
-        GiftTag secondTag = new GiftTag(2, "secondName");
-        long firstId = tagRepository.addTag(firstTag);
-        long secondId = tagRepository.addTag(secondTag);
-        long certificateId = certificateRepository.addCertificate(giftCertificate);
-        repository.addCertificateTag(firstId, certificateId);
-        repository.addCertificateTag(secondId, certificateId);
-        List<GiftTag> certificateTags = repository.getTagsByCertificateId(certificateId);
-        Assertions.assertEquals(certificateTags.size(), 2);
-
-        Assertions.assertEquals(firstId, certificateTags.get(0).getId());
-        Assertions.assertEquals(secondId, certificateTags.get(1).getId());
-        Assertions.assertEquals(firstTag.getName(), certificateTags.get(0).getName());
-        Assertions.assertEquals(secondTag.getName(), certificateTags.get(1).getName());
+        List<GiftTag> certificateTags = repository.getTagsByCertificateId(INSERTED_CERTIFICATE_ID);
+        Assertions.assertEquals(Arrays.asList(FIRST_TAG, SECOND_TAG), certificateTags);
     }
 
     @Test
-    void deleteByTagId() {
-        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
-        GiftTag firstTag = new GiftTag(1, "sdfas");
-        GiftTag secondTag = new GiftTag(2, "dfasdfa");
-        long certificateId = certificateRepository.addCertificate(giftCertificate);
-        long firstId = tagRepository.addTag(firstTag);
-        long secondId = tagRepository.addTag(secondTag);
-        repository.addCertificateTag(firstId, certificateId);
-        repository.addCertificateTag(secondId, certificateId);
-        repository.deleteByTagId(firstId);
-        List<GiftTag> certificateTags = repository.getTagsByCertificateId(certificateId);
-        Assertions.assertEquals(certificateTags.size(), 1);
-        Assertions.assertEquals(certificateTags.get(0).getName(), secondTag.getName());
-        Assertions.assertEquals(certificateTags.get(0).getId(), secondId);
+    @Sql({"/insertCertificateTags.sql"})
+    void testDeleteByTagId() {
+        repository.deleteByTagId(FIRST_TAG.getId());
+        List<GiftTag> certificateTags = repository.getTagsByCertificateId(INSERTED_CERTIFICATE_ID);
+        Assertions.assertEquals(Collections.singletonList(SECOND_TAG), certificateTags);
     }
 
     @Test
-    void deleteByCertificateId() {
-        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
-        GiftTag firstTag = new GiftTag(1, "sojdef");
-        GiftTag secondTag = new GiftTag(2, "ddd");
-        long firstId = tagRepository.addTag(firstTag);
-        long secondId = tagRepository.addTag(secondTag);
-        long certificateId = certificateRepository.addCertificate(giftCertificate);
-        repository.addCertificateTag(firstId, certificateId);
-        repository.addCertificateTag(secondId, certificateId);
-        repository.deleteByCertificateId(certificateId);
-        List<GiftTag> empty = repository.getTagsByCertificateId(certificateId);
+    void testDeleteByCertificateId() {
+        repository.deleteByCertificateId(INSERTED_CERTIFICATE_ID);
+        List<GiftTag> empty = repository.getTagsByCertificateId(INSERTED_CERTIFICATE_ID);
         Assertions.assertTrue(empty.isEmpty());
     }
 

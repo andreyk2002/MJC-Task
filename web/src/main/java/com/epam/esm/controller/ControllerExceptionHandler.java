@@ -26,7 +26,6 @@ import static java.util.stream.Collectors.toList;
 public class ControllerExceptionHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(ControllerExceptionHandler.class);
-    public static final String PATH_VARIABLES = "org.springframework.web.servlet.View.pathVariables";
 
     private final Localizer localizer;
 

@@ -21,10 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 
@@ -51,7 +47,7 @@ class CertificateServiceTest {
     private CertificateService service;
 
     @Test
-    void addCertificateShouldAddCertificate() {
+    void testAddCertificateShouldAddCertificate() {
         long id = 1;
         CertificateResponseDto responseDto = buildCertificateResponse(id);
         GiftCertificate addedCertificate = buildCertificate(id);
@@ -73,7 +69,7 @@ class CertificateServiceTest {
     }
 
     @Test
-    void deleteByIdShouldThrowWhenCertificateNotExist() {
+    void testDeleteByIdShouldThrowWhenCertificateNotExist() {
         long id = 10;
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.empty());
 
@@ -82,7 +78,7 @@ class CertificateServiceTest {
     }
 
     @Test
-    void deleteByIdShouldDeleteWhenCertificatePresent() {
+    void testDeleteByIdShouldDeleteWhenCertificatePresent() {
         long id = 1;
         CertificateResponseDto responseDto = buildCertificateResponse(id);
         GiftCertificate addedCertificate = buildCertificate(id);
@@ -99,7 +95,7 @@ class CertificateServiceTest {
 
 
     @Test
-    void updateCertificateShouldUpdateCertificateIfExisted() {
+    void testUpdateCertificateShouldUpdateCertificateIfExisted() {
         long id = 421;
         CertificateResponseDto responseDto = buildCertificateResponse(id);
         GiftCertificate addedCertificate = buildCertificate(id);
@@ -117,7 +113,7 @@ class CertificateServiceTest {
     }
 
     @Test
-    void getByIdShouldThrowWhenNotFound() {
+    void testGetByIdShouldThrowWhenNotFound() {
         long id = 1;
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.empty());
 
@@ -127,7 +123,7 @@ class CertificateServiceTest {
     }
 
     @Test
-    void getByIdShouldReturnCertificateWhenExists() {
+    void testGetByIdShouldReturnCertificateWhenExists() {
         long id = 1;
         CertificateResponseDto responseDto = buildCertificateResponse(id);
         GiftCertificate giftCertificate = buildCertificate(id);
@@ -142,7 +138,7 @@ class CertificateServiceTest {
     }
 
     @Test
-    void getCertificatesShouldReturnAllFittingCertificates() {
+    void testGetCertificatesShouldReturnAllFittingCertificates() {
         long firstId = 1;
         long secondId = 2;
         GiftCertificate firstCertificate = GiftCertificate.builder()

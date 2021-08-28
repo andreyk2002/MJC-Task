@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
@@ -41,38 +42,38 @@ class TagRepositoryTest {
     }
 
     @Test
-    void updateTagShouldUpdateTag() {
-        GiftTag tag = new GiftTag(0, "tag");
-        long addingId = repository.addTag(tag);
+    @Sql({"/deleteAllTags.sql", "addTagWithId42.sql"})
+    void testUpdateTagShouldUpdateTag() {
+        long id = 42;
+        GiftTag tag = new GiftTag(id, "tagName");
         tag.setName("updated name");
-        tag.setId(addingId);
         repository.updateTag(tag);
-        Optional<GiftTag> updated = repository.getById(addingId);
+        Optional<GiftTag> updated = repository.getById(id);
         Assertions.assertEquals(updated, Optional.of(tag));
     }
 
     @Test
-    void deleteByIdShouldDeleteTag() {
-        GiftTag tag = new GiftTag(0, "tag");
-        long addingId = repository.addTag(tag);
-        repository.deleteById(addingId);
-        Optional<GiftTag> deleted = repository.getById(addingId);
+    @Sql({"/deleteAllTags.sql", "addTagWithId42.sql"})
+    void testDeleteByIdShouldDeleteTag() {
+        long id = 42;
+        repository.deleteById(id);
+        Optional<GiftTag> deleted = repository.getById(id);
         Assertions.assertTrue(deleted.isEmpty());
     }
 
     @Test
-    void getByIdShouldReturnTagIfPresent() {
-        GiftTag tag = new GiftTag(0, "tag");
-        long addingId = repository.addTag(tag);
+    @Sql({"/deleteAllTags.sql", "addTagWithId421.sql"})
+    void testGetByIdShouldReturnTagIfPresent() {
+        GiftTag expected = new GiftTag(421, "new tag");
+        long addingId = 421;
         Optional<GiftTag> tagById = repository.getById(addingId);
-        tag.setId(addingId);
-        Assertions.assertEquals(Optional.of(tag), tagById);
+        Assertions.assertEquals(Optional.of(expected), tagById);
     }
 
     @Test
-    void getByIdShouldReturnEmptyIfNotFound() {
+    @Sql({"/deleteAllTags.sql"})
+    void testGetByIdShouldReturnEmptyIfNotFound() {
         long testId = 56565656;
-        repository.deleteById(testId);
         Optional<GiftTag> empty = repository.getById(testId);
         Assertions.assertTrue(empty.isEmpty());
     }

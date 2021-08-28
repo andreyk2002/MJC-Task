@@ -32,8 +32,6 @@ public class DbConfig {
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url);
-        //in debug driverClassName - org.h2.Driver (it's right)
-        //in run driverClassName - com.mysql.cj.jdbc.Driver (it's old value )
         config.setDriverClassName(driverClassName);
         config.setUsername(user);
         config.setPassword(password);

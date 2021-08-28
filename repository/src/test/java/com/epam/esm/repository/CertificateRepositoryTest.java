@@ -11,9 +11,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @ExtendWith(SpringExtension.class)
@@ -35,15 +39,17 @@ class CertificateRepositoryTest {
     }
 
     @Test
+    @Sql({"/deleteAllCertificates.sql", "/insertCertificateWithId420.sql"})
     public void testGetByIdShouldReturnCertificateWhenItExisting() {
-        GiftCertificate certificate = certificateBuilder.buildCertificate();
-        long insertedId = repository.addCertificate(certificate);
-        Optional<GiftCertificate> optionalCertificate = repository.getById(insertedId);
+        GiftCertificate certificate = certificateBuilder.buildCertificate("certificate name");
+        long existingId = 420;
+        Optional<GiftCertificate> optionalCertificate = repository.getById(existingId);
         Assertions.assertTrue(optionalCertificate.isPresent());
         Assertions.assertTrue(equalsIgnoreIdAndDate(optionalCertificate.get(), certificate));
     }
 
     @Test
+    @Sql({"/deleteAllCertificates.sql"})
     public void testGetByIdShouldReturnEmptyWhenCertificateNotExisting() {
         long notExistingId = 666;
         Optional<GiftCertificate> certificateOptional = repository.getById(notExistingId);
@@ -51,12 +57,10 @@ class CertificateRepositoryTest {
     }
 
     @Test
+    @Sql({"/deleteAllCertificates.sql", "/insertCertificates.sql"})
     public void testGetAllShouldReturnAllCertificates() {
-        repository.deleteAll();
-        GiftCertificate first = certificateBuilder.buildCertificate();
-        GiftCertificate second = certificateBuilder.buildCertificate();
-        repository.addCertificate(first);
-        repository.addCertificate(second);
+        GiftCertificate first = certificateBuilder.buildCertificate("first");
+        GiftCertificate second = certificateBuilder.buildCertificate("second");
         List<GiftCertificate> all = repository.getAll();
         List<GiftCertificate> expectedResult = Arrays.asList(first, second);
         Assertions.assertEquals(expectedResult.size(), all.size());
@@ -66,7 +70,7 @@ class CertificateRepositoryTest {
 
     @Test
     public void testAddCertificateShouldAddCertificate() {
-        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
+        GiftCertificate giftCertificate = certificateBuilder.buildCertificate("certificate123");
         long insertedId = repository.addCertificate(giftCertificate);
         Optional<GiftCertificate> insertedCertificate = repository.getById(insertedId);
         giftCertificate.setId(insertedId);
@@ -77,18 +81,19 @@ class CertificateRepositoryTest {
     }
 
     @Test
+    @Sql({"/deleteAllCertificates.sql", "/insertCertificateWithId420.sql"})
     public void testDeleteShouldDeleteCertificate() {
-        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
-        long insertedId = repository.addCertificate(giftCertificate);
-        repository.deleteById(insertedId);
-        Optional<GiftCertificate> deleted = repository.getById(insertedId);
+        long existingId = 420;
+        repository.deleteById(existingId);
+        Optional<GiftCertificate> deleted = repository.getById(existingId);
         Assertions.assertTrue(deleted.isEmpty());
     }
 
     @Test
+    @Sql({"/deleteAllCertificates.sql", "/insertCertificateWithId420.sql"})
     public void testUpdateShouldUpdateCertificate() {
-        GiftCertificate giftCertificate = certificateBuilder.buildCertificate();
-        long insertedId = repository.addCertificate(giftCertificate);
+        GiftCertificate giftCertificate = certificateBuilder.buildCertificate("certificate name");
+        long insertedId = 420;
         giftCertificate.setDescription("changed");
         giftCertificate.setName("changed");
         giftCertificate.setId(insertedId);
@@ -100,12 +105,6 @@ class CertificateRepositoryTest {
         Assertions.assertEquals(updatedCertificate, giftCertificate);
     }
 
-    @Test
-    public void testDeleteAllShouldDeleteAllCertificates() {
-        repository.deleteAll();
-        List<GiftCertificate> allCertificates = repository.getAll();
-        Assertions.assertEquals(Collections.emptyList(), allCertificates);
-    }
 
     //We should ignore createDate and updateDate because they decided in repo.addCertificate()
     private boolean equalsIgnoreIdAndDate(GiftCertificate first, GiftCertificate second) {

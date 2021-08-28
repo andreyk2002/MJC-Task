@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class CertificateTagServiceTest {
@@ -28,7 +27,7 @@ class CertificateTagServiceTest {
     private final CertificateTagRepository certificateTagRepository = mock(CertificateTagRepository.class);
 
     @Test
-    void getTagsByCertificateId() {
+    void testGetTagsByCertificateId() {
         int certificateId = 1;
         TagResponseDto first = new TagResponseDto(1, "first");
         TagResponseDto second = new TagResponseDto(2, "second");

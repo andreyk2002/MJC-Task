@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +38,7 @@ class GiftTagServiceTest {
 
 
     @Test
-    void getAllTagsShouldReturnAllTags() {
+    void testGetAllTagsShouldReturnAllTags() {
         long firstId = 1;
         long secondId = 2;
         GiftTag firstGiftTag = new GiftTag(firstId, "first");
@@ -58,7 +56,7 @@ class GiftTagServiceTest {
     }
 
     @Test
-    void deleteByIdShouldReturnDeletedEntityIfExists() {
+    void testDeleteByIdShouldReturnDeletedEntityIfExists() {
         long id = 100;
         TagResponseDto tag = new TagResponseDto(id, "first");
         GiftTag firstGiftTag = new GiftTag(id, "first");
@@ -72,7 +70,7 @@ class GiftTagServiceTest {
     }
 
     @Test
-    void deleteByIdShouldThrowIfNotFound() {
+    void testDeleteByIdShouldThrowIfNotFound() {
         long invalidId = 666;
         when(tagRepository.getById(anyLong())).thenReturn(Optional.empty());
 
@@ -81,7 +79,7 @@ class GiftTagServiceTest {
     }
 
     @Test
-    void getByIdShouldReturnValidTagIfExists() {
+    void testGetByIdShouldReturnValidTagIfExists() {
         long id = 65;
         TagResponseDto response = new TagResponseDto(id, "some tag");
         GiftTag giftTag = new GiftTag(id, "some tag");
@@ -96,7 +94,7 @@ class GiftTagServiceTest {
     }
 
     @Test
-    void getByIdShouldReturnThrowIfTagNotExists() {
+    void testGetByIdShouldReturnThrowIfTagNotExists() {
         long notExitingId = 65;
         when(tagRepository.getById(anyLong())).thenReturn(Optional.empty());
 
@@ -105,7 +103,7 @@ class GiftTagServiceTest {
     }
 
     @Test
-    void addTagShouldThrowIfAlreadyExists() {
+    void testAddTagShouldThrowIfAlreadyExists() {
         long id = 15;
         GiftTag tag = new GiftTag(id, "fsdaf");
         TagRequestDto requestDto = new TagRequestDto(id, "fsdaf");
@@ -116,7 +114,7 @@ class GiftTagServiceTest {
     }
 
     @Test
-    void addTagShouldAddIfNotPresent() {
+    void testAddTagShouldAddIfNotPresent() {
         long id = 15;
         GiftTag tag = new GiftTag(id, "fsdaf");
         TagRequestDto requestDto = new TagRequestDto(id, "fsdaf");
@@ -137,7 +135,7 @@ class GiftTagServiceTest {
     }
 
     @Test
-    void updateTagShouldUpdateIfExists() {
+    void testUpdateTagShouldUpdateIfExists() {
         long id = 555;
         GiftTag tag = new GiftTag(id, "fdasfasdf");
         TagRequestDto requestDto = new TagRequestDto(id, "fdasfasdf");
@@ -157,7 +155,7 @@ class GiftTagServiceTest {
     }
 
     @Test
-    void updateTagShouldAddIfNotPresent() {
+    void testUpdateTagShouldAddIfNotPresent() {
         long id = 424242;
         GiftTag tag = new GiftTag(id, "123");
         TagRequestDto requestDto = new TagRequestDto(id, "123");

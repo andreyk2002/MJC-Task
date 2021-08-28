@@ -6,8 +6,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 class CertificateBuilder {
-    public GiftCertificate buildCertificate(long id) {
+    public GiftCertificate buildCertificate(long id, String name) {
+
         return GiftCertificate.builder()
+                .name(name)
                 .id(id)
                 .price(new BigDecimal("19"))
                 .duration(0)
@@ -16,7 +18,7 @@ class CertificateBuilder {
                 .build();
     }
 
-    public GiftCertificate buildCertificate() {
-        return buildCertificate(0);
+    public GiftCertificate buildCertificate(String name) {
+        return buildCertificate(0, name);
     }
 }
