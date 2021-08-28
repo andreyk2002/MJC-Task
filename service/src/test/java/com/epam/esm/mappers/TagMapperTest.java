@@ -45,7 +45,6 @@ class TagMapperTest {
 
     @Test
     void requestToEntityShouldMapValidRequest() {
-        GiftTag FIRST_TAG = new GiftTag(1, "name");
         GiftTag firstTag = new GiftTag(1, "name");
         GiftTag tag = mapper.requestToEntity(new TagRequestDto(1, "name"));
         Assertions.assertEquals(firstTag, tag);

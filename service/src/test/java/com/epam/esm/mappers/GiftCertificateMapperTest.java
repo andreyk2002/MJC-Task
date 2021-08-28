@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class GiftCertificateMapperTest {
@@ -57,7 +56,7 @@ class GiftCertificateMapperTest {
 
         CertificateResponseDto RESPONSE_DTO = CertificateResponseDto.builder()
                 .name("test").description("description").price(new BigDecimal(1))
-                .duration(10).tags(Collections.EMPTY_LIST).build();
+                .duration(10).tags(Collections.emptyList()).build();
 
         int secondId = 2;
         when(service.getTagsByCertificateId(secondId)).thenReturn(responses);

@@ -51,7 +51,7 @@ public abstract class CertificateMapper {
     /**
      * Transforms instance of {@link CertificateRequestDto} type to instance of {@link GiftCertificate}
      *
-     * @param giftTag - instance of {@link CertificateRequestDto}, needed to be transformed
+     * @param certificate - instance of {@link CertificateRequestDto}, needed to be transformed
      * @return instance of {@link GiftCertificate}, which has the same state that has passed instance
      */
     @Mappings({
@@ -60,5 +60,5 @@ public abstract class CertificateMapper {
             @Mapping(target = "price", source = "price"),
             @Mapping(target = "duration", source = "duration"),
     })
-    public abstract GiftCertificate requestToEntity(CertificateRequestDto model);
+    public abstract GiftCertificate requestToEntity(CertificateRequestDto certificate);
 }

@@ -28,7 +28,6 @@ class CertificateTagRepositoryTest {
 
     private final RowMapper<GiftTag> tagRowMapper = new TagRowMapper();
 
-    private final CertificateBuilder certificateBuilder = new CertificateBuilder();
     private CertificateTagRepository repository;
     public static final GiftTag FIRST_TAG = new GiftTag(19, "first tag");
     public static final GiftTag SECOND_TAG = new GiftTag(22, "second tag");
