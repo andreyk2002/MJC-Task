@@ -1,2 +1,2 @@
 INSERT INTO Tag (id, name)
-VALUES (42, 'tagName')
+VALUES (42, 'tagName');

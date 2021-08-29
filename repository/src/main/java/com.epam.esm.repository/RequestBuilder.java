@@ -14,28 +14,28 @@ class RequestBuilder {
             "description, create_date, last_update_date FROM gift_certificate gc JOIN certificate_tag ct ON " +
             "gc.id = ct.certificate_id JOIN tag t ON t.id = ct.tag_id WHERE t.name = ? AND (gc.name LIKE " +
             "concat('%', ?, '%') OR gc.description LIKE concat('%', ?, '%'))";
-    public static final String ORDER = " ORDER BY ";
+    private static final String ORDER = " ORDER BY ";
 
-    RequestResult buildSortRequest(String keyword, String tagName, String sortOrder, String field) {
-        RequestResult requestResult = new RequestResult();
+    RequestBuilderResult buildSortRequest(String keyword, String tagName, String sortOrder, String field) {
+        RequestBuilderResult requestBuilderResult = new RequestBuilderResult();
         StringBuilder query;
         if (keyword == null && tagName == null) {
             query = new StringBuilder(FIND_SORTED);
         } else if (keyword == null) {
-            requestResult.setParams(tagName);
+            requestBuilderResult.setParams(tagName);
             query = new StringBuilder(FIND_BY_TAG_NAME);
         } else if (tagName == null) {
-            requestResult.setParams(keyword, keyword);
+            requestBuilderResult.setParams(keyword, keyword);
             query = new StringBuilder(FIND_BY_KEYWORD);
         } else {
             query = new StringBuilder(FIND_BY_TAG_NAME_KEYWORD);
-            requestResult.setParams(tagName, keyword, keyword);
+            requestBuilderResult.setParams(tagName, keyword, keyword);
         }
         query.append(ORDER);
         query.append(field);
         query.append(" ");
         query.append(sortOrder);
-        requestResult.setQuery(query.toString());
-        return requestResult;
+        requestBuilderResult.setQuery(query.toString());
+        return requestBuilderResult;
     }
 }

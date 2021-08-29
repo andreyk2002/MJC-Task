@@ -29,9 +29,7 @@ class CertificateTagRepositoryTest {
     private final RowMapper<GiftTag> tagRowMapper = new TagRowMapper();
 
     private CertificateTagRepository repository;
-    public static final GiftTag FIRST_TAG = new GiftTag(19, "first tag");
-    public static final GiftTag SECOND_TAG = new GiftTag(22, "second tag");
-    public static final long INSERTED_CERTIFICATE_ID = 77;
+
 
     @BeforeEach
     void setUp() {
@@ -42,22 +40,29 @@ class CertificateTagRepositoryTest {
     @Test
     @Sql({"/insertCertificateTags.sql"})
     void testGetTagByCertificateIdShouldReturnAllTagsWithSpecifiedId() {
-        List<GiftTag> certificateTags = repository.getTagsByCertificateId(INSERTED_CERTIFICATE_ID);
-        Assertions.assertEquals(Arrays.asList(FIRST_TAG, SECOND_TAG), certificateTags);
+        GiftTag firstTag = new GiftTag(19, "first tag");
+        GiftTag secondTag = new GiftTag(22, "second tag");
+        long insertedCertificateId = 77;
+        List<GiftTag> certificateTags = repository.getTagsByCertificateId(insertedCertificateId);
+        Assertions.assertEquals(Arrays.asList(firstTag, secondTag), certificateTags);
     }
 
     @Test
     @Sql({"/insertCertificateTags.sql"})
     void testDeleteByTagId() {
-        repository.deleteByTagId(FIRST_TAG.getId());
-        List<GiftTag> certificateTags = repository.getTagsByCertificateId(INSERTED_CERTIFICATE_ID);
-        Assertions.assertEquals(Collections.singletonList(SECOND_TAG), certificateTags);
+        GiftTag firstTag = new GiftTag(19, "first tag");
+        GiftTag secondTag = new GiftTag(22, "second tag");
+        long insertedCertificateId = 77;
+        repository.deleteByTagId(firstTag.getId());
+        List<GiftTag> certificateTags = repository.getTagsByCertificateId(insertedCertificateId);
+        Assertions.assertEquals(Collections.singletonList(secondTag), certificateTags);
     }
 
     @Test
     void testDeleteByCertificateId() {
-        repository.deleteByCertificateId(INSERTED_CERTIFICATE_ID);
-        List<GiftTag> empty = repository.getTagsByCertificateId(INSERTED_CERTIFICATE_ID);
+        long insertedCertificateId = 77;
+        repository.deleteByCertificateId(insertedCertificateId);
+        List<GiftTag> empty = repository.getTagsByCertificateId(insertedCertificateId);
         Assertions.assertTrue(empty.isEmpty());
     }
 

@@ -24,7 +24,7 @@ class GiftCertificateMapperTest {
 
 
     @Test
-    void requestToEntityShouldMapValidRequest() {
+    void testRequestToEntityShouldMapValidRequest() {
         List<TagRequestDto> tags = Arrays.asList(
                 new TagRequestDto(1, "name"),
                 new TagRequestDto(2, "name")
@@ -40,13 +40,13 @@ class GiftCertificateMapperTest {
     }
 
     @Test
-    void requestToEntityShouldReturnNullWhenRequestIsNull() {
+    void testRequestToEntityShouldReturnNullWhenRequestIsNull() {
         GiftCertificate giftCertificate = mapper.requestToEntity(null);
         Assertions.assertNull(giftCertificate);
     }
 
     @Test
-    void entityToResponseShouldMapValidEntity() {
+    void testEntityToResponseShouldMapValidEntity() {
         List<TagResponseDto> responses = Arrays.asList(
                 new TagResponseDto(1, "name"),
                 new TagResponseDto(2, "name")
@@ -66,13 +66,13 @@ class GiftCertificateMapperTest {
     }
 
     @Test
-    void requestToEntityShouldReturnNullWhenEntityIsNull() {
+    void testRequestToEntityShouldReturnNullWhenEntityIsNull() {
         CertificateResponseDto giftCertificate = mapper.entityToResponse(null);
         Assertions.assertNull(giftCertificate);
     }
 
     @Test
-    void entitiesToRequestsShouldMapValidEntities() {
+    void testEntitiesToRequestsShouldMapValidEntities() {
         List<TagResponseDto> responses = Arrays.asList(
                 new TagResponseDto(1, "name"),
                 new TagResponseDto(2, "name")
@@ -97,7 +97,7 @@ class GiftCertificateMapperTest {
     }
 
     @Test
-    void requestToEntityShouldReturnNullWhenEntitiesIsNull() {
+    void testRequestToEntityShouldReturnNullWhenEntitiesIsNull() {
         when(service.getTagsByCertificateId(anyLong())).thenReturn(Collections.emptyList());
         List<CertificateResponseDto> giftCertificate = mapper.entitiesToResponses(null);
         Assertions.assertNull(giftCertificate);

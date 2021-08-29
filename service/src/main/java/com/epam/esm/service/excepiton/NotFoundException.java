@@ -6,18 +6,18 @@ import lombok.Getter;
 @Getter
 public abstract class NotFoundException extends RuntimeException {
 
-    private final Object[] params;
+    private final Object[] messageParams;
 
     private final int errorCode;
 
     public NotFoundException(int errorCode, Object... params) {
         this.errorCode = errorCode;
-        this.params = params;
+        this.messageParams = params;
     }
 
     public NotFoundException(String message, int errorCode, Object... params) {
         super(message);
-        this.params = params;
+        this.messageParams = params;
         this.errorCode = errorCode;
     }
 }

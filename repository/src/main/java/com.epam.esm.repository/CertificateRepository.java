@@ -24,18 +24,17 @@ import java.util.Optional;
 @Repository
 @AllArgsConstructor
 public class CertificateRepository {
-    private static final String DELETE_QUERY = "DELETE FROM gift_certificate WHERE id = ?";
+    private static final String DELETE_BY_ID = "DELETE FROM gift_certificate WHERE id = ?";
     private static final String FIND_BY_ID = "SELECT * FROM gift_certificate WHERE id = ?";
     private static final String FIND_ALL = "SELECT * FROM gift_certificate";
-    private static final String UPDATE = "UPDATE gift_certificate SET name = ?," +
+    private static final String UPDATE_QUERY = "UPDATE gift_certificate SET name = ?," +
             "description = ?, price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
+    private static final String ADD_QUERY = "INSERT INTO gift_certificate (name, description, price, duration," +
+            " create_date, last_update_date) VALUES(?,?,?,?,?,?)";
 
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<GiftCertificate> certificateMapper;
     private final RequestBuilder requestBuilder;
-
-    private static final String ADD_QUERY = "INSERT INTO gift_certificate (name, description, price, duration," +
-            " create_date, last_update_date) VALUES(?,?,?,?,?,?)";
 
 
     /**
@@ -73,7 +72,7 @@ public class CertificateRepository {
      * @param id - ID of certificate to be removed
      */
     public void deleteById(long id) {
-        jdbcTemplate.update(DELETE_QUERY, id);
+        jdbcTemplate.update(DELETE_BY_ID, id);
     }
 
     /**
@@ -83,7 +82,7 @@ public class CertificateRepository {
      */
     public void updateCertificate(GiftCertificate giftCertificate) {
         jdbcTemplate.update(
-                UPDATE,
+                UPDATE_QUERY,
                 giftCertificate.getName(),
                 giftCertificate.getDescription(),
                 giftCertificate.getPrice(),
@@ -128,13 +127,14 @@ public class CertificateRepository {
      * @param tagName   name of the tag which certificate should contain. In case if keyword is null
      *                  all certificates are specified to this criteria
      * @param sortOrder type of sort order (ascending, descending)
-     * @param field     name of the field by which certificates should be ordered
+     * @param sortField name of the field by which certificates should be ordered
      * @return List of certificates which applied to the mentioned criterias
      */
-    public List<GiftCertificate> getAllSorted(String keyword, String tagName, String sortOrder, String field) {
-        RequestResult requestResult = requestBuilder.buildSortRequest(keyword, tagName, sortOrder, field);
-        String query = requestResult.getQuery();
-        String[] params = requestResult.getParams();
+    public List<GiftCertificate> getAllSorted(String keyword, String tagName, String sortOrder, String sortField) {
+        RequestBuilderResult requestBuilderResult =
+                requestBuilder.buildSortRequest(keyword, tagName, sortOrder, sortField);
+        String query = requestBuilderResult.getQuery();
+        String[] params = requestBuilderResult.getParams();
         return jdbcTemplate.query(query, certificateMapper, (Object[]) params);
     }
 

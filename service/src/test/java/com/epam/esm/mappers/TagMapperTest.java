@@ -14,7 +14,7 @@ class TagMapperTest {
     private final TagMapper mapper = new TagMapperImpl();
 
     @Test
-    void entityToResponseShouldMapValidEntity() {
+    void testEntityToResponseShouldMapValidEntity() {
         GiftTag tag = new GiftTag(1, "name");
         TagResponseDto response = new TagResponseDto(1, "name");
         TagResponseDto tagResponseDto = mapper.entityToResponse(tag);
@@ -22,13 +22,13 @@ class TagMapperTest {
     }
 
     @Test
-    void entityToResponseShouldReturnNullWhenEntityIsNull() {
+    void testEntityToResponseShouldReturnNullWhenEntityIsNull() {
         TagResponseDto tagResponseDto = mapper.entityToResponse(null);
         Assertions.assertNull(tagResponseDto);
     }
 
     @Test
-    void entitiesToResponsesShouldMapValidEntities() {
+    void testEntitiesToResponsesShouldMapValidEntities() {
         GiftTag firstTag = new GiftTag(1, "name");
         TagResponseDto firstTagResponse = new TagResponseDto(1, "name");
         GiftTag secondTag = new GiftTag(2, "second");
@@ -38,20 +38,20 @@ class TagMapperTest {
     }
 
     @Test
-    void entityToResponseShouldReturnNullWhenEntitiesIsNull() {
+    void testEntityToResponseShouldReturnNullWhenEntitiesIsNull() {
         List<TagResponseDto> tags = mapper.entitiesToRequests(null);
         Assertions.assertNull(tags);
     }
 
     @Test
-    void requestToEntityShouldMapValidRequest() {
+    void testRequestToEntityShouldMapValidRequest() {
         GiftTag firstTag = new GiftTag(1, "name");
         GiftTag tag = mapper.requestToEntity(new TagRequestDto(1, "name"));
         Assertions.assertEquals(firstTag, tag);
     }
 
     @Test
-    void entityToResponseShouldReturnNullWhenRequestIsNull() {
+    void testEntityToResponseShouldReturnNullWhenRequestIsNull() {
         GiftTag tags = mapper.requestToEntity(null);
         Assertions.assertNull(tags);
     }

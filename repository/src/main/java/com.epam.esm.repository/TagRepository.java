@@ -24,7 +24,7 @@ public class TagRepository {
     private static final String SAVE_QUERY = "INSERT INTO tag (name) VALUES (?);";
     private static final String FIND_BY_ID = "SELECT * FROM tag WHERE id = ?";
     private static final String FIND_ALL = "SELECT * FROM tag";
-    public static final String UPDATE_QUERY = "UPDATE tag SET name = ? WHERE id = ?";
+    private static final String UPDATE_QUERY = "UPDATE tag SET name = ? WHERE id = ?";
 
 
     private final JdbcTemplate jdbcTemplate;

@@ -67,7 +67,7 @@ public class ControllerExceptionHandler {
     })
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public ErrorMessage certificateNotFoundException(NotFoundException e, WebRequest request) {
-        Object[] params = e.getParams();
+        Object[] params = e.getMessageParams();
         LOGGER.error(e.getMessage(), e);
         int errorCode = e.getErrorCode();
         String localizedMessage = localizer.getLocalizedMessage(errorCode, params);
