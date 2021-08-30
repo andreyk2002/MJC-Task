@@ -73,7 +73,7 @@ public class CertificateController {
             @ApiParam(value = "Specifies how certificates will be sorted")
             @RequestParam(defaultValue = "name,asc")
             @Pattern(message = "40016",
-                    regexp = "(name|createDate),(asc|desc)")
+                    regexp = "(name|create_date),(asc|desc)")
                     String sort) {
         List<CertificateResponseDto> certificates = certificateService.getCertificates(tagName, keyword, sort);
         return new ResponseEntity<>(certificates, HttpStatus.OK);
