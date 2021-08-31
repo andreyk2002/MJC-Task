@@ -18,7 +18,7 @@ import java.util.List;
 
 @Repository
 @AllArgsConstructor
-public class CertificateTagRepository {
+public class CertificateTagJdbcRepository {
 
     private static final String FIND_BY_CERTIFICATE = "SELECT t.id AS id, t.name AS name FROM certificate_tag ct " +
             "JOIN tag t ON ct.tag_id = t.id WHERE ct.certificate_id = ?";

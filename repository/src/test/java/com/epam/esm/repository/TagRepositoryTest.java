@@ -2,6 +2,7 @@ package com.epam.esm.repository;
 
 import com.epam.esm.config.DbConfig;
 import com.epam.esm.entity.GiftTag;
+import com.epam.esm.repository.impl.TagJdbcRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ class TagRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new TagRepository(jdbcTemplate, certificateRowMapper);
+        repository = new TagJdbcRepository(jdbcTemplate, certificateRowMapper);
     }
 
 

@@ -28,12 +28,12 @@ class CertificateTagRepositoryTest {
 
     private final RowMapper<GiftTag> tagRowMapper = new TagRowMapper();
 
-    private CertificateTagRepository repository;
+    private CertificateTagJdbcRepository repository;
 
 
     @BeforeEach
     void setUp() {
-        repository = new CertificateTagRepository(jdbcTemplate, tagRowMapper);
+        repository = new CertificateTagJdbcRepository(jdbcTemplate, tagRowMapper);
     }
 
 

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.PositiveOrZero;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -57,7 +59,7 @@ public class CertificateController {
 
     @GetMapping("")
     @ApiOperation(value = "Searches list of all certificates depends on keyword (part of name or description)" +
-            " or/and tag name in specified order", response = List.class)
+            " or/and tag name in specified order", response = ResponseEntity.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Certificates were successfully archived"),
             @ApiResponse(code = 40016, message = "Parameters were not in correct format: order string " +
@@ -114,6 +116,22 @@ public class CertificateController {
             @ApiParam(value = "Id of certificate, which will be updated") @PathVariable long id,
             @ApiParam(value = "New state of certificate") @RequestBody CertificateRequestDto certificateRequestDto) {
         CertificateResponseDto updated = certificateService.updateCertificate(id, certificateRequestDto);
+        return new ResponseEntity<>(updated, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}/price")
+    @ApiOperation(value = "Updates price for certificate with specified id", response = ResponseEntity.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Certificates were successfully archived"),
+            @ApiResponse(code = 40013, message = "Certificate price was negative"),
+            @ApiResponse(code = 500, message = "Application failed to process the request")
+    })
+    public ResponseEntity<CertificateResponseDto> updateCertificatePrice(
+            @ApiParam(value = "Id of certificate, which price will be updated") @PathVariable long id,
+            @ApiParam(value = "New duration of certificate") @RequestBody @PositiveOrZero(message = "40013")
+            @Valid BigDecimal price) {
+        CertificateRequestDto newCertificate = CertificateRequestDto.builder().price(price).build();
+        CertificateResponseDto updated = certificateService.updateCertificate(id, newCertificate);
         return new ResponseEntity<>(updated, HttpStatus.CREATED);
     }
 }

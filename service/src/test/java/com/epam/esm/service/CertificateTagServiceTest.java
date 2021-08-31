@@ -3,7 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
-import com.epam.esm.repository.CertificateTagRepository;
+import com.epam.esm.repository.CertificateTagJdbcRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -24,7 +24,7 @@ class CertificateTagServiceTest {
     private final TagMapper mapper = mock(TagMapper.class);
 
     @Mock
-    private final CertificateTagRepository certificateTagRepository = mock(CertificateTagRepository.class);
+    private final CertificateTagJdbcRepository certificateTagRepository = mock(CertificateTagJdbcRepository.class);
 
     @Test
     void testGetTagsByCertificateId() {

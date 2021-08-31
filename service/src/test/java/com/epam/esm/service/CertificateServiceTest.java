@@ -4,8 +4,8 @@ import com.epam.esm.dto.CertificateResponseDto;
 import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mappers.CertificateMapper;
-import com.epam.esm.repository.CertificateRepository;
-import com.epam.esm.repository.CertificateTagRepository;
+import com.epam.esm.repository.CertificateJdbcRepository;
+import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.service.excepiton.CertificateNotFoundException;
 import com.epam.esm.validation.CertificateRequestDto;
 import com.epam.esm.validation.TagRequestDto;
@@ -29,7 +29,7 @@ class CertificateServiceTest {
 
 
     @Mock
-    private CertificateRepository certificateRepo;
+    private CertificateJdbcRepository certificateRepo;
 
     @Mock
     private GiftTagService tagService;
@@ -38,7 +38,7 @@ class CertificateServiceTest {
     private CertificateMapper mapper;
 
     @Mock
-    private CertificateTagRepository certificateTagRepository;
+    private CertificateTagJdbcRepository certificateTagRepository;
 
     @Mock
     private NullableFieldsFinder nullableFieldsFinder;

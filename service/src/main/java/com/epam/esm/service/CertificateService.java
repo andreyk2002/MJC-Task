@@ -4,8 +4,8 @@ import com.epam.esm.dto.CertificateResponseDto;
 import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mappers.CertificateMapper;
-import com.epam.esm.repository.CertificateRepository;
-import com.epam.esm.repository.CertificateTagRepository;
+import com.epam.esm.repository.CertificateJdbcRepository;
+import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.service.excepiton.CertificateNotFoundException;
 import com.epam.esm.validation.CertificateRequestDto;
 import com.epam.esm.validation.TagRequestDto;
@@ -25,10 +25,10 @@ import java.util.Optional;
 @AllArgsConstructor
 public class CertificateService {
 
-    private final CertificateRepository certificateRepo;
+    private final CertificateJdbcRepository certificateRepo;
     private final GiftTagService tagService;
     private final CertificateMapper mapper;
-    private final CertificateTagRepository certificateTagRepository;
+    private final CertificateTagJdbcRepository certificateTagRepository;
     private final NullableFieldsFinder nullableFieldsFinder;
 
 

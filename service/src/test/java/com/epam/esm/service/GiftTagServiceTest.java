@@ -3,7 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
-import com.epam.esm.repository.CertificateTagRepository;
+import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.excepiton.TagAlreadyExistException;
 import com.epam.esm.service.excepiton.TagNotFoundException;
@@ -34,7 +34,7 @@ class GiftTagServiceTest {
     private TagRepository tagRepository;
 
     @Mock
-    private CertificateTagRepository certificateTagRepository;
+    private CertificateTagJdbcRepository certificateTagRepository;
 
 
     @Test

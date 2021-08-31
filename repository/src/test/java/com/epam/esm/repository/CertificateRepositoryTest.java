@@ -31,11 +31,11 @@ class CertificateRepositoryTest {
     private final CertificateBuilder certificateBuilder = new CertificateBuilder();
     private final RequestBuilder builder = new RequestBuilder();
     private final RowMapper<GiftCertificate> certificateRowMapper = new CertificateRowMapper();
-    private CertificateRepository repository;
+    private CertificateJdbcRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new CertificateRepository(jdbcTemplate, certificateRowMapper, builder);
+        repository = new CertificateJdbcRepository(jdbcTemplate, certificateRowMapper, builder);
     }
 
     @Test

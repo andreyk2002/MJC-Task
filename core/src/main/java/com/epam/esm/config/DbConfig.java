@@ -15,16 +15,16 @@ import javax.sql.DataSource;
 @Configuration
 @PropertySource("classpath:application.properties")
 public class DbConfig {
-    @Value("${db.url}")
+    @Value("${spring.datasource.url}")
     private String url;
 
-    @Value("${db.user}")
+    @Value("${spring.datasource.username}")
     private String user;
 
-    @Value("${db.password}")
+    @Value("${spring.datasource.password}")
     private String password;
 
-    @Value("${db.driver}")
+    @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
 
 
