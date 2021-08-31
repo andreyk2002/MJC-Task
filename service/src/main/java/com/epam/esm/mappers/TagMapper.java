@@ -1,8 +1,8 @@
 package com.epam.esm.mappers;
 
-import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftTag;
-import com.epam.esm.validation.TagRequestDto;
+import com.epam.esm.request.TagRequestDto;
+import com.epam.esm.response.TagResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

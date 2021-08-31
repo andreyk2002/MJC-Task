@@ -1,6 +1,6 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.dto.UserResponseDto;
+import com.epam.esm.response.UserResponseDto;
 import com.epam.esm.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

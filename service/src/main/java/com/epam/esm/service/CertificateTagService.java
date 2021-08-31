@@ -1,10 +1,10 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
+import com.epam.esm.response.TagResponseDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

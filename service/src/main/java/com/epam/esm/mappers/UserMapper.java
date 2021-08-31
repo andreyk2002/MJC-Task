@@ -1,7 +1,7 @@
 package com.epam.esm.mappers;
 
-import com.epam.esm.dto.UserResponseDto;
 import com.epam.esm.entity.User;
+import com.epam.esm.response.UserResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

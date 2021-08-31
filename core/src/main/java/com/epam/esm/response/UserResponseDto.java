@@ -1,4 +1,4 @@
-package com.epam.esm.dto;
+package com.epam.esm.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

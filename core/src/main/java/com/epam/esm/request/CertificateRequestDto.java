@@ -1,4 +1,4 @@
-package com.epam.esm.validation;
+package com.epam.esm.request;
 
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.epam.esm.dto;
+package com.epam.esm.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;

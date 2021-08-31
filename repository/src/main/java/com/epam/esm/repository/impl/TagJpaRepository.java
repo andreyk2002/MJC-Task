@@ -15,7 +15,7 @@ import java.util.Optional;
 @Primary
 public class TagJpaRepository implements TagRepository {
 
-    public static final String FIND_ALL = "SELECT t FROM GiftTag t";
+    private static final String FIND_ALL = "SELECT t FROM GiftTag t";
     @PersistenceContext
     private EntityManager entityManager;
 

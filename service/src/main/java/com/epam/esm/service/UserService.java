@@ -1,9 +1,9 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.UserResponseDto;
 import com.epam.esm.entity.User;
 import com.epam.esm.mappers.UserMapper;
 import com.epam.esm.repository.UserRepository;
+import com.epam.esm.response.UserResponseDto;
 import com.epam.esm.service.excepiton.UserNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;

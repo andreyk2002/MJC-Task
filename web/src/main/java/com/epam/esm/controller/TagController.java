@@ -1,9 +1,9 @@
 package com.epam.esm.controller;
 
 
-import com.epam.esm.dto.TagResponseDto;
+import com.epam.esm.request.TagRequestDto;
+import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.GiftTagService;
-import com.epam.esm.validation.TagRequestDto;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;

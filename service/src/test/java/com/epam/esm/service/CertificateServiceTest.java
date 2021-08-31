@@ -1,14 +1,14 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.CertificateResponseDto;
-import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mappers.CertificateMapper;
 import com.epam.esm.repository.CertificateJdbcRepository;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
+import com.epam.esm.request.CertificateRequestDto;
+import com.epam.esm.request.TagRequestDto;
+import com.epam.esm.response.CertificateResponseDto;
+import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.CertificateNotFoundException;
-import com.epam.esm.validation.CertificateRequestDto;
-import com.epam.esm.validation.TagRequestDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,9 +1,9 @@
 package com.epam.esm.controller;
 
 
-import com.epam.esm.dto.CertificateResponseDto;
+import com.epam.esm.request.CertificateRequestDto;
+import com.epam.esm.response.CertificateResponseDto;
 import com.epam.esm.service.CertificateService;
-import com.epam.esm.validation.CertificateRequestDto;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;

@@ -1,10 +1,10 @@
 package com.epam.esm.mappers;
 
 
-import com.epam.esm.dto.CertificateResponseDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.request.CertificateRequestDto;
+import com.epam.esm.response.CertificateResponseDto;
 import com.epam.esm.service.CertificateTagService;
-import com.epam.esm.validation.CertificateRequestDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

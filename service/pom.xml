@@ -64,6 +64,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.1</version>
                 <configuration>
+                    <skipTests>true</skipTests>
                     <useSystemClassLoader>true</useSystemClassLoader>
                     <forkMode>once</forkMode>
                     <argLine>${jacocoArgLine}</argLine>

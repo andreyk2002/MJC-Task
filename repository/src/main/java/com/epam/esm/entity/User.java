@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -20,5 +21,6 @@ public class User {
 
     @Column(name = "name")
     private String name;
+
 
 }
