@@ -31,11 +31,11 @@ class CertificateRepositoryTest {
     private final CertificateBuilder certificateBuilder = new CertificateBuilder();
     private final RequestBuilder builder = new RequestBuilder();
     private final RowMapper<GiftCertificate> certificateRowMapper = new CertificateRowMapper();
-    private CertificateJdbcRepository repository;
+    private CertificateRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new CertificateJdbcRepository(jdbcTemplate, certificateRowMapper, builder);
+        repository = null;
     }
 
     @Test
@@ -71,13 +71,8 @@ class CertificateRepositoryTest {
     @Test
     public void testAddCertificateShouldAddCertificate() {
         GiftCertificate giftCertificate = certificateBuilder.buildCertificate("certificate123");
-        long insertedId = repository.addCertificate(giftCertificate);
-        Optional<GiftCertificate> insertedCertificate = repository.getById(insertedId);
-        giftCertificate.setId(insertedId);
-        Assertions.assertTrue(insertedCertificate.isPresent());
-        GiftCertificate inserted = insertedCertificate.get();
-        Assertions.assertTrue(equalsIgnoreIdAndDate(inserted, giftCertificate));
-
+        GiftCertificate certificate = repository.addCertificate(giftCertificate);
+        Assertions.assertEquals(giftCertificate, certificate);
     }
 
     @Test

@@ -33,13 +33,13 @@ class TagMapperTest {
         TagResponseDto firstTagResponse = new TagResponseDto(1, "name");
         GiftTag secondTag = new GiftTag(2, "second");
         TagResponseDto secondResponse = new TagResponseDto(2, "second");
-        List<TagResponseDto> tags = mapper.entitiesToRequests(Arrays.asList(firstTag, secondTag));
+        List<TagResponseDto> tags = mapper.entitiesToResponses(Arrays.asList(firstTag, secondTag));
         Assertions.assertEquals(Arrays.asList(firstTagResponse, secondResponse), tags);
     }
 
     @Test
     void testEntityToResponseShouldReturnNullWhenEntitiesIsNull() {
-        List<TagResponseDto> tags = mapper.entitiesToRequests(null);
+        List<TagResponseDto> tags = mapper.entitiesToResponses(null);
         Assertions.assertNull(tags);
     }
 

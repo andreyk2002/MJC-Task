@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +20,9 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/certificates")
@@ -36,9 +40,13 @@ public class CertificateController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<CertificateResponseDto> deleteCertificate(@ApiParam(value = "id of the specified certificate",
+    public ResponseEntity<CertificateResponseDto> deleteById(@ApiParam(value = "id of the specified certificate",
             required = true) @PathVariable long id) {
         CertificateResponseDto certificate = certificateService.deleteById(id);
+        certificate.add(
+                linkTo(methodOn(CertificateController.class).getById(id)).withRel("getById"),
+                linkTo(methodOn(CertificateController.class).deleteById(id)).withSelfRel()
+        );
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
@@ -53,6 +61,10 @@ public class CertificateController {
     public ResponseEntity<CertificateResponseDto> getById(@ApiParam(value = "id of the specified certificate",
             required = true) @PathVariable long id) {
         CertificateResponseDto certificate = certificateService.getById(id);
+        certificate.add(
+                linkTo(methodOn(CertificateController.class).getById(id)).withSelfRel(),
+                linkTo(methodOn(CertificateController.class).deleteById(id)).withRel("deleteById")
+        );
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
@@ -67,7 +79,7 @@ public class CertificateController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<List<CertificateResponseDto>> getCertificates(
+    public ResponseEntity<CollectionModel<CertificateResponseDto>> getCertificates(
             @ApiParam(value = "name of the tag which all certificates should contain")
             @RequestParam(required = false) String tagName,
             @ApiParam(value = "part of the name or / and description which all certificates should contain")
@@ -78,7 +90,11 @@ public class CertificateController {
                     regexp = "(name|create_date),(asc|desc)")
                     String sort) {
         List<CertificateResponseDto> certificates = certificateService.getCertificates(tagName, keyword, sort);
-        return new ResponseEntity<>(certificates, HttpStatus.OK);
+        certificates.forEach(cert ->
+                cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
+
+        CollectionModel<CertificateResponseDto> model = CollectionModel.of(certificates);
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
 
@@ -101,8 +117,13 @@ public class CertificateController {
     public ResponseEntity<CertificateResponseDto> addCertificate(
             @ApiParam(value = "Certificate for adding")
             @RequestBody @Valid CertificateRequestDto certificateRequestDto) {
-        CertificateResponseDto certificateResponseDto = certificateService.addCertificate(certificateRequestDto);
-        return new ResponseEntity<>(certificateResponseDto, HttpStatus.CREATED);
+        CertificateResponseDto certificate = certificateService.addCertificate(certificateRequestDto);
+        certificate.add(
+                linkTo(methodOn(CertificateController.class).getById(certificate.getId())).withRel("getById"),
+                linkTo(methodOn(CertificateController.class).deleteById(certificate.getId())).withRel("deleteById"),
+                linkTo(methodOn(CertificateController.class).addCertificate(certificateRequestDto)).withSelfRel()
+        );
+        return new ResponseEntity<>(certificate, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -116,6 +137,11 @@ public class CertificateController {
             @ApiParam(value = "Id of certificate, which will be updated") @PathVariable long id,
             @ApiParam(value = "New state of certificate") @RequestBody CertificateRequestDto certificateRequestDto) {
         CertificateResponseDto updated = certificateService.updateCertificate(id, certificateRequestDto);
+        updated.add(
+                linkTo(methodOn(CertificateController.class).getById(id)).withRel("getById"),
+                linkTo(methodOn(CertificateController.class).deleteById(id)).withRel("deleteById"),
+                linkTo(methodOn(CertificateController.class).updateCertificate(id, certificateRequestDto)).withSelfRel()
+        );
         return new ResponseEntity<>(updated, HttpStatus.CREATED);
     }
 
@@ -132,6 +158,11 @@ public class CertificateController {
             @Valid BigDecimal price) {
         CertificateRequestDto newCertificate = CertificateRequestDto.builder().price(price).build();
         CertificateResponseDto updated = certificateService.updateCertificate(id, newCertificate);
+        updated.add(
+                linkTo(methodOn(CertificateController.class).getById(id)).withRel("getById"),
+                linkTo(methodOn(CertificateController.class).deleteById(id)).withRel("deleteById"),
+                linkTo(methodOn(CertificateController.class).updateCertificatePrice(id, price)).withSelfRel()
+        );
         return new ResponseEntity<>(updated, HttpStatus.CREATED);
     }
 }

@@ -2,7 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mappers.CertificateMapper;
-import com.epam.esm.repository.CertificateJdbcRepository;
+import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.request.TagRequestDto;
@@ -29,7 +29,7 @@ class CertificateServiceTest {
 
 
     @Mock
-    private CertificateJdbcRepository certificateRepo;
+    private CertificateRepository certificateRepo;
 
     @Mock
     private GiftTagService tagService;
@@ -54,7 +54,7 @@ class CertificateServiceTest {
         CertificateRequestDto requestDto = buildCertificateRequest();
         when(mapper.requestToEntity(any())).thenReturn(addedCertificate);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
-        when(certificateRepo.addCertificate(any())).thenReturn(id);
+        when(certificateRepo.addCertificate(any())).thenReturn(GiftCertificate.builder().build());
         when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(addedCertificate));
         when(tagService.updateTag(any())).thenReturn(new TagResponseDto(1, "tag"));
 
@@ -184,7 +184,7 @@ class CertificateServiceTest {
 
     private CertificateRequestDto buildCertificateRequest() {
         List<TagRequestDto> requests = Arrays.asList(new TagRequestDto(1, "fda"), new TagRequestDto(2, "fff"));
-        return new CertificateRequestDto("newName", "newDescription", new BigDecimal(1),
+        return new CertificateRequestDto(0, "newName", "newDescription", new BigDecimal(1),
                 10, requests);
     }
 }

@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -29,6 +30,15 @@ public class GiftCertificate {
     @Column(name = "price")
     private BigDecimal price;
 
+    @ManyToMany
+    @JoinTable(
+            name = "certificate_tag",
+            joinColumns = @JoinColumn(name = "certificate_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id")
+    )
+    private List<GiftTag> tags;
+
+
     @Column(name = "duration")
     private Integer duration;
 
@@ -37,6 +47,17 @@ public class GiftCertificate {
 
     @Column(name = "last_update_date")
     private LocalDateTime lastUpdateDate;
+
+    @PrePersist
+    public void prePersist() {
+        createDate = LocalDateTime.now();
+        lastUpdateDate = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        lastUpdateDate = LocalDateTime.now();
+    }
 
 
 }

@@ -3,6 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
+import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.request.TagRequestDto;
 import com.epam.esm.response.TagResponseDto;
@@ -24,11 +25,14 @@ import java.util.Optional;
 @AllArgsConstructor
 public class GiftTagService {
 
+    public static final int MAX_ALLOWED_PAGE_SIZE = 100;
     private final TagRepository tagRepo;
 
     private final CertificateTagJdbcRepository certificateTagRepo;
 
     private final TagMapper mapper;
+
+    private final OrderRepository orderRepository;
 
     /**
      * Gets all available tags
@@ -37,7 +41,7 @@ public class GiftTagService {
      */
     public List<TagResponseDto> getAllTags() {
         List<GiftTag> tags = tagRepo.getAll();
-        return mapper.entitiesToRequests(tags);
+        return mapper.entitiesToResponses(tags);
     }
 
 
@@ -80,7 +84,7 @@ public class GiftTagService {
         return optional.map(tag -> {
             tagRepo.updateTag(giftTag);
             return getById(id);
-        }).orElseGet(() -> getById(tagRepo.addTag(giftTag)));
+        }).orElseGet(() -> mapper.entityToResponse(tagRepo.addTag(giftTag)));
     }
 
     /**
@@ -96,7 +100,20 @@ public class GiftTagService {
             throw new TagAlreadyExistException();
         });
         GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
-        long insertId = tagRepo.addTag(giftTag);
-        return getById(insertId);
+        GiftTag addedTag = tagRepo.addTag(giftTag);
+        return mapper.entityToResponse(addedTag);
+    }
+
+    public TagResponseDto getTopUserTopTag() {
+        GiftTag topUserTopTag = tagRepo.getTopUserTopTag();
+        return mapper.entityToResponse(topUserTopTag);
+    }
+
+    public List<TagResponseDto> getPage(int offset, int size) {
+        if (size > MAX_ALLOWED_PAGE_SIZE) {
+            size = MAX_ALLOWED_PAGE_SIZE;
+        }
+        List<GiftTag> page = tagRepo.getPage(offset, size);
+        return mapper.entitiesToResponses(page);
     }
 }

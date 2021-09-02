@@ -15,6 +15,8 @@ import java.util.List;
 @Builder
 public class CertificateRequestDto {
 
+    @PositiveOrZero
+    private long id;
 
     @NotEmpty(message = "40011")
     private String name;

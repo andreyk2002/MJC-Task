@@ -36,13 +36,13 @@ class CertificateTagServiceTest {
                 new GiftTag(1, "first"), new GiftTag(2, "second")
         );
 
-        when(mapper.entitiesToRequests(anyList())).thenReturn(responseDtoList);
+        when(mapper.entitiesToResponses(anyList())).thenReturn(responseDtoList);
         when(certificateTagRepository.getTagsByCertificateId(anyLong())).thenReturn(giftTags);
         service = new CertificateTagService(certificateTagRepository, mapper);
 
         List<TagResponseDto> tags = service.getTagsByCertificateId(certificateId);
         Assertions.assertEquals(tags, responseDtoList);
-        verify(mapper).entitiesToRequests(giftTags);
+        verify(mapper).entitiesToResponses(giftTags);
         verify(certificateTagRepository).getTagsByCertificateId(certificateId);
     }
 }

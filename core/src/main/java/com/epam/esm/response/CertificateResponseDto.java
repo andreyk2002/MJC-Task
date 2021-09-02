@@ -2,6 +2,7 @@ package com.epam.esm.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class CertificateResponseDto {
+public class CertificateResponseDto extends RepresentationModel<CertificateResponseDto> {
 
     private long id;
 

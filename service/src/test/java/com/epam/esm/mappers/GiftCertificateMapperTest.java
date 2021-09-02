@@ -29,7 +29,7 @@ class GiftCertificateMapperTest {
                 new TagRequestDto(1, "name"),
                 new TagRequestDto(2, "name")
         );
-        CertificateRequestDto requestDto = new CertificateRequestDto(
+        CertificateRequestDto requestDto = new CertificateRequestDto(0,
                 "test", "description", new BigDecimal(1), 10, tags
         );
         GiftCertificate certificate = GiftCertificate.builder()
@@ -60,7 +60,6 @@ class GiftCertificateMapperTest {
 
         int secondId = 2;
         when(service.getTagsByCertificateId(secondId)).thenReturn(responses);
-        mapper.service = service;
         CertificateResponseDto certificateResponseDto = mapper.entityToResponse(certificate);
         Assertions.assertEquals(RESPONSE_DTO, certificateResponseDto);
     }
@@ -90,7 +89,6 @@ class GiftCertificateMapperTest {
                 .id(secondId).name("new").tags(responses).build();
 
         when(service.getTagsByCertificateId(secondId)).thenReturn(responses);
-        mapper.service = service;
         List<CertificateResponseDto> results = mapper.entitiesToResponses(Arrays.asList(certificate, secondCertificate));
         Assertions.assertEquals(Arrays.asList(responseDto, secondResponse), results);
         verify(service).getTagsByCertificateId(secondId);

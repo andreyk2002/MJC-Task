@@ -28,6 +28,6 @@ public class CertificateTagService {
      */
     public List<TagResponseDto> getTagsByCertificateId(long certificateId) {
         List<GiftTag> tags = repository.getTagsByCertificateId(certificateId);
-        return mapper.entitiesToRequests(tags);
+        return mapper.entitiesToResponses(tags);
     }
 }

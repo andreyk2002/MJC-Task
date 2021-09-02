@@ -28,4 +28,9 @@ public class UserService {
         return optionalUser.map(user -> mapper.entityToResponse(user))
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+
+    public List<UserResponseDto> getPage(int size, int offset) {
+        List<User> page = userRepository.getPage(size, offset);
+        return mapper.entitiesToResponses(page);
+    }
 }

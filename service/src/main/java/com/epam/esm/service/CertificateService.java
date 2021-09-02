@@ -2,12 +2,10 @@ package com.epam.esm.service;
 
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mappers.CertificateMapper;
-import com.epam.esm.repository.CertificateJdbcRepository;
+import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.request.CertificateRequestDto;
-import com.epam.esm.request.TagRequestDto;
 import com.epam.esm.response.CertificateResponseDto;
-import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.CertificateNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -25,7 +23,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class CertificateService {
 
-    private final CertificateJdbcRepository certificateRepo;
+    private final CertificateRepository certificateRepo;
     private final GiftTagService tagService;
     private final CertificateMapper mapper;
     private final CertificateTagJdbcRepository certificateTagRepository;
@@ -38,17 +36,10 @@ public class CertificateService {
      * @param certificateDto - instance needed to be added
      * @return instance of {@link CertificateResponseDto} which is already added to repository
      */
-    @Transactional
     public CertificateResponseDto addCertificate(CertificateRequestDto certificateDto) {
         GiftCertificate giftCertificate = mapper.requestToEntity(certificateDto);
-        long insertId = certificateRepo.addCertificate(giftCertificate);
-        List<TagRequestDto> tags = certificateDto.getTags();
-        for (TagRequestDto tagRequestDto : tags) {
-            TagResponseDto tagResponseDto = tagService.updateTag(tagRequestDto);
-            long tagId = tagResponseDto.getId();
-            certificateTagRepository.addCertificateTag(tagId, insertId);
-        }
-        return getById(insertId);
+        GiftCertificate certificate = certificateRepo.addCertificate(giftCertificate);
+        return mapper.entityToResponse(certificate);
     }
 
     /**
@@ -78,17 +69,9 @@ public class CertificateService {
         return optionalUpdated.map(updated -> {
             String[] nullPropertyNames = nullableFieldsFinder.getNullPropertyNames(giftCertificate);
             BeanUtils.copyProperties(giftCertificate, updated, nullPropertyNames);
-            List<TagRequestDto> tags = giftCertificate.getTags();
-            if (tags != null) {
-                certificateTagRepository.deleteByCertificateId(certificateId);
-                for (TagRequestDto tagResponseDto : tags) {
-                    TagResponseDto inserted = tagService.addTag(tagResponseDto);
-                    long tagId = inserted.getId();
-                    certificateTagRepository.addCertificateTag(tagId, certificateId);
-                }
-            }
-            certificateRepo.updateCertificate(updated);
-            return getById(certificateId);
+            updated.setId(certificateId);
+            GiftCertificate certificate = certificateRepo.updateCertificate(updated);
+            return mapper.entityToResponse(certificate);
         }).orElseGet(() -> addCertificate(giftCertificate));
     }
 

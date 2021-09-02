@@ -46,13 +46,13 @@ class GiftTagServiceTest {
         TagResponseDto firstResponse = new TagResponseDto(firstId, "first");
         TagResponseDto secondResponse = new TagResponseDto(secondId, "second");
         when(tagRepository.getAll()).thenReturn(Arrays.asList(firstGiftTag, secondGiftTag));
-        when(mapper.entitiesToRequests(anyList())).thenReturn(Arrays.asList(firstResponse, secondResponse));
+        when(mapper.entitiesToResponses(anyList())).thenReturn(Arrays.asList(firstResponse, secondResponse));
 
 
         List<TagResponseDto> all = Arrays.asList(firstResponse, secondResponse);
         List<TagResponseDto> allTags = service.getAllTags();
         Assertions.assertEquals(allTags, all);
-        verify(mapper).entitiesToRequests(Arrays.asList(firstGiftTag, secondGiftTag));
+        verify(mapper).entitiesToResponses(Arrays.asList(firstGiftTag, secondGiftTag));
     }
 
     @Test
@@ -120,7 +120,7 @@ class GiftTagServiceTest {
         TagRequestDto requestDto = new TagRequestDto(id, "fsdaf");
         TagResponseDto responseDto = new TagResponseDto(id, "fsdaf");
         when(tagRepository.getById(anyLong())).thenReturn(Optional.empty()).thenReturn(Optional.of(tag));
-        when(tagRepository.addTag(any())).thenReturn(id);
+        when(tagRepository.addTag(any())).thenReturn(tag);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(mapper.requestToEntity(any())).thenReturn(tag);
 

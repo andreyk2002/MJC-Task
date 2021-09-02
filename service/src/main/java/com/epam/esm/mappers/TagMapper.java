@@ -46,6 +46,6 @@ public interface TagMapper {
      * @param tags - list of {@link GiftTag} instances, needed to be transformed
      * @return list of {@link TagResponseDto} instances, which have the same state that have passed instances
      */
-    List<TagResponseDto> entitiesToRequests(List<GiftTag> tags);
+    List<TagResponseDto> entitiesToResponses(List<GiftTag> tags);
 
 }
