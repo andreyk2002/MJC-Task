@@ -1,7 +1,6 @@
 package com.epam.esm.controller;
 
 
-import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.response.OrderResponseDto;
 import com.epam.esm.service.CartService;
 import lombok.AllArgsConstructor;
@@ -30,7 +29,7 @@ public class CartController {
     @PostMapping("/{userId}")
     public ResponseEntity<OrderResponseDto> createOrder(@PathVariable long userId,
                                                         @RequestBody @Valid @NotEmpty
-                                                                List<CertificateRequestDto> certificates) {
+                                                                List<Integer> certificates) {
         OrderResponseDto order = cartService.createOrder(userId, certificates);
         order.add(
                 linkTo(methodOn(CartController.class).createOrder(userId, certificates)).withSelfRel()

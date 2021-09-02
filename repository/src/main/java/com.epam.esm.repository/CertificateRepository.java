@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,4 +102,13 @@ public class CertificateRepository {
         return entityManager.createQuery(FIND_ALL, GiftCertificate.class).getResultList();
     }
 
+    public List<GiftCertificate> findInRange(List<Integer> certificatesIds) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> query = criteriaBuilder.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> certificateRoot = query.from(GiftCertificate.class);
+        query.select(certificateRoot).where(certificateRoot.in(certificatesIds));
+        return entityManager
+                .createQuery(query)
+                .getResultList();
+    }
 }

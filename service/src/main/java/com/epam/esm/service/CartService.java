@@ -8,7 +8,6 @@ import com.epam.esm.mappers.OrderMapper;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.UserRepository;
-import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.response.OrderResponseDto;
 import com.epam.esm.service.excepiton.UserNotFoundException;
 import lombok.AllArgsConstructor;
@@ -17,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @AllArgsConstructor
@@ -29,11 +30,12 @@ public class CartService {
     private final CertificateRepository certificateRepository;
 
 
-    public OrderResponseDto createOrder(long userId, List<CertificateRequestDto> certificates) {
+    public OrderResponseDto createOrder(long userId, List<Integer> certificates) {
         Optional<User> optionalUser = userRepository.getById(userId);
-        List<GiftCertificate> giftCertificates = certificateMapper.requestsToEntities(certificates);
-        BigDecimal totalPrice = certificates.stream()
-                .map(CertificateRequestDto::getPrice)
+        List<Integer> certificateRange = certificates.stream().sorted().distinct().collect(toList());
+        List<GiftCertificate> giftCertificates = certificateRepository.findInRange(certificateRange);
+        BigDecimal totalPrice = giftCertificates.stream()
+                .map(GiftCertificate::getPrice)
                 .reduce(new BigDecimal("0"), BigDecimal::add);
         return optionalUser.map(user -> {
             Order order = Order.builder()
