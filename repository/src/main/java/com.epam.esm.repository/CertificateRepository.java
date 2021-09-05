@@ -2,14 +2,13 @@ package com.epam.esm.repository;
 
 
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.GiftTag;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -134,23 +133,13 @@ public class CertificateRepository {
     }
 
 
-    public List<GiftCertificate> findByTags(List<Integer> tagIds) {
-//        select * from gift_certificate gc JOIN
-//        certificate_tag ct ON
-//        gc.id = ct.certificate_id
-//        WHERE ct.tag_id IN (tagsIds)
-//        group by ct.certificate_id having count(ct.tag_id) = tagsIds.count
-
-
-        Query query = entityManager.createNativeQuery(
-                "select * from gift_certificate gc JOIN\n" +
-                        "        certificate_tag ct ON\n" +
-                        "        gc.id = ct.certificate_id\n" +
-                        "        WHERE ct.tag_id IN (?)\n" +
-                        "        group by ct.certificate_id having count(ct.tag_id) = ?", GiftTag.class);
-
+    public List<GiftCertificate> findByTags(List<Long> tagIds) {
+        TypedQuery<GiftCertificate> query = entityManager.createQuery(
+                "select gc from GiftCertificate gc JOIN gc.tags t" +
+                        " WHERE t.id IN ?1" +
+                        " group by gc.id having count(t.id) = ?2", GiftCertificate.class);
         query.setParameter(1, tagIds);
-        query.setParameter(2, tagIds.size());
+        query.setParameter(2, (long) tagIds.size());
         return query.getResultList();
     }
 }

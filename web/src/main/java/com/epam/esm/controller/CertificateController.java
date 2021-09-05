@@ -193,13 +193,11 @@ public class CertificateController {
 
     @GetMapping("/tags")
     public ResponseEntity<CollectionModel<CertificateResponseDto>> findByTags(
-            @RequestParam @Pattern(regexp = "\\d+(\\sAND\\s\\d+)*")
-                    String tagsString) {
-
-        List<CertificateResponseDto> certificates = certificateService.findByTags(tagsString);
+            @RequestParam @Pattern(regexp = "\\d+(\\sAND\\s\\d+)*", message = "40031")
+                    String tags) {
+        List<CertificateResponseDto> certificates = certificateService.findByTags(tags);
         certificates.forEach(cert ->
                 cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
-
         return new ResponseEntity<>(CollectionModel.of(certificates), HttpStatus.OK);
     }
 }

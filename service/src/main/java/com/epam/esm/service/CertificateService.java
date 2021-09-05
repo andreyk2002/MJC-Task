@@ -140,7 +140,7 @@ public class CertificateService {
 
     public List<CertificateResponseDto> findByTags(String namesString) {
         String[] tags = namesString.split(" AND ");
-        List<Integer> ids = Arrays.stream(tags).map(Integer::parseInt).collect(Collectors.toList());
+        List<Long> ids = Arrays.stream(tags).map(Long::parseLong).collect(Collectors.toList());
         List<GiftCertificate> certificates = certificateRepo.findByTags(ids);
         return mapper.entitiesToResponses(certificates);
     }

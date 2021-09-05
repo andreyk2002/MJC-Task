@@ -41,6 +41,14 @@ public class GiftCertificate {
     )
     private List<GiftTag> tags;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "order_certificate",
+            inverseJoinColumns = @JoinColumn(name = "order_id", referencedColumnName = "id"),
+            joinColumns = @JoinColumn(name = "certificate_id", referencedColumnName = "id")
+    )
+    private List<Order> orders;
+
 
     @Column(name = "duration")
     private Integer duration;
