@@ -3,7 +3,6 @@ package com.epam.esm.service;
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
-import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.request.TagRequestDto;
 import com.epam.esm.response.TagResponseDto;
@@ -25,14 +24,13 @@ import java.util.Optional;
 @AllArgsConstructor
 public class GiftTagService {
 
-    public static final int MAX_ALLOWED_PAGE_SIZE = 100;
     private final TagRepository tagRepo;
 
     private final CertificateTagJdbcRepository certificateTagRepo;
 
     private final TagMapper mapper;
 
-    private final OrderRepository orderRepository;
+    private final PageLimiter pageLimiter;
 
     /**
      * Gets all available tags
@@ -110,10 +108,8 @@ public class GiftTagService {
     }
 
     public List<TagResponseDto> getPage(int offset, int size) {
-        if (size > MAX_ALLOWED_PAGE_SIZE) {
-            size = MAX_ALLOWED_PAGE_SIZE;
-        }
-        List<GiftTag> page = tagRepo.getPage(offset, size);
+        int limitedSize = pageLimiter.limitSize(size);
+        List<GiftTag> page = tagRepo.getPage(offset, limitedSize);
         return mapper.entitiesToResponses(page);
     }
 }

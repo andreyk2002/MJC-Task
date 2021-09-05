@@ -46,7 +46,7 @@ public class TagController {
                                                      @PathVariable long id) {
         TagResponseDto deleteTag = tagService.deleteById(id);
         deleteTag.add(
-                linkTo(methodOn(TagController.class).getById(id)).withRel("findById"),
+                linkTo(methodOn(TagController.class).getById(id)).withRel("getById"),
                 linkTo(methodOn(TagController.class).deleteById(id)).withSelfRel(),
                 linkTo(methodOn(TagController.class).findTopUserTopTag()).withRel("topUserTopTag")
         );

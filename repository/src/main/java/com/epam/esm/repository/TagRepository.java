@@ -17,26 +17,26 @@ public class TagRepository {
     private EntityManager entityManager;
 
     public GiftTag getTopUserTopTag() {
-        return (GiftTag) entityManager.createQuery(" SELECT t.name AS name, t.id AS id, count(t.id) AS count" +
-                " from tag t" +
-                " JOIN  certificate_tag ct" +
-                " on t.id = ct.tag_id" +
-                " where ct.certificate_id IN (SELECT certificate_id FROM user_order" +
-                " WHERE user_id = (SELECT user_id FROM user_order " +
-                " group by user_id" +
-                " order by sum(order_price) desc" +
-                " limit 1)" +
-                ")" +
-                " group by t.id" +
-                " ORDER By count(t.id) desc" +
-                " limit 1").getSingleResult();
+        return (GiftTag) entityManager.createNativeQuery(
+                "select t.name AS name, ct.tag_id AS id, oc.certificate_id, oc.order_id, count(tag_id) \n" +
+                        "FROM tag t\n" +
+                        " JOIN certificate_tag ct\n" +
+                        " ON t.id = ct.id\n" +
+                        " JOIN order_certificate oc\n" +
+                        " ON ct.certificate_id = oc.certificate_id\n" +
+                        " JOIN user_order uo \n" +
+                        "ON uo.id = oc.order_id\n" +
+                        "where uo.user_id = (\n" +
+                        "select uo.user_id from user_order uo\n" +
+                        "group by uo.user_id order by sum(uo.order_price) desc limit 1\n" +
+                        ") group by tag_id order by count(tag_id) desc limit 1", GiftTag.class).getSingleResult();
     }
 
 
     @Transactional
     public GiftTag addTag(GiftTag tag) {
         entityManager.persist(tag);
-//        entityManager.flush();
+        entityManager.flush();
         return tag;
     }
 

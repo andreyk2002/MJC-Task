@@ -61,7 +61,7 @@ class CertificateRepositoryTest {
     public void testGetAllShouldReturnAllCertificates() {
         GiftCertificate first = certificateBuilder.buildCertificate("first");
         GiftCertificate second = certificateBuilder.buildCertificate("second");
-        List<GiftCertificate> all = repository.getAll();
+        List<GiftCertificate> all = repository.getPage(0, 100);
         List<GiftCertificate> expectedResult = Arrays.asList(first, second);
         Assertions.assertEquals(expectedResult.size(), all.size());
         Assertions.assertTrue(equalsIgnoreIdAndDate(expectedResult.get(0), all.get(0)));

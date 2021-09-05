@@ -5,8 +5,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.transaction.TransactionManager;
 
@@ -42,6 +44,12 @@ public class DbConfig {
     public JdbcTemplate jdbcTemplate() {
         DataSource dataSource = dataSource();
         return new JdbcTemplate(dataSource);
+    }
+
+    @Bean
+    @Primary
+    public DataSourceTransactionManager dataSourceTransactionManager() {
+        return new DataSourceTransactionManager(dataSource());
     }
 
     @Bean

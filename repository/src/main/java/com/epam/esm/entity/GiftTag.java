@@ -10,7 +10,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 @Entity
-@Table(name = "tag")
+@Table(name = "tag", indexes = @Index(name = "tagNameIndex", columnList = "name"))
 public class GiftTag {
 
     @Id

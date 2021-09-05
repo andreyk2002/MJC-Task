@@ -27,6 +27,9 @@ public interface TagMapper {
     })
     GiftTag requestToEntity(TagRequestDto tagRequestDto);
 
+
+    List<GiftTag> requestsToEntities(List<TagRequestDto> tags);
+
     /**
      * Transforms instance of {@link GiftTag} type to instance of {@link TagResponseDto}
      *

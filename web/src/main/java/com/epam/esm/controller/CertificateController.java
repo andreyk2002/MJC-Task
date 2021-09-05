@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,8 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -68,8 +71,26 @@ public class CertificateController {
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
-
     @GetMapping("")
+    public ResponseEntity<CollectionModel<CertificateResponseDto>> getPage(
+            @ApiParam(value = "Size of certificate page")
+            @Positive int size,
+            @ApiParam(value = "Offset of certificate page")
+            @PositiveOrZero int offset
+    ) {
+        List<CertificateResponseDto> page = certificateService.getPage(offset, size);
+        page.forEach(cert ->
+                cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
+        List<Link> links = Arrays.asList(
+                linkTo(methodOn(CertificateController.class)
+                        .getPage(size, offset + size)).withRel("next"),
+                linkTo(methodOn(CertificateController.class)
+                        .getPage(size, offset - size)).withRel("prev"));
+        CollectionModel<CertificateResponseDto> model = CollectionModel.of(page, links);
+        return new ResponseEntity<>(model, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
     @ApiOperation(value = "Searches list of all certificates depends on keyword (part of name or description)" +
             " or/and tag name in specified order", response = ResponseEntity.class)
     @ApiResponses(value = {
@@ -86,13 +107,17 @@ public class CertificateController {
             @RequestParam(required = false) String keyword,
             @ApiParam(value = "Specifies how certificates will be sorted")
             @RequestParam(defaultValue = "name,asc")
-            @Pattern(message = "40016",
-                    regexp = "(name|create_date),(asc|desc)")
-                    String sort) {
-        List<CertificateResponseDto> certificates = certificateService.getCertificates(tagName, keyword, sort);
+            @Pattern(message = "40016", regexp = "(name|create_date),(asc|desc)") String sort,
+            @ApiParam(value = "Size of certificate page")
+            @RequestParam @Positive int size,
+            @ApiParam(value = "Offset of certificate page")
+            @RequestParam @PositiveOrZero int offset
+    ) {
+
+        List<CertificateResponseDto> certificates = certificateService
+                .getCertificates(tagName, keyword, sort, size, offset);
         certificates.forEach(cert ->
                 cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
-
         CollectionModel<CertificateResponseDto> model = CollectionModel.of(certificates);
         return new ResponseEntity<>(model, HttpStatus.OK);
     }
@@ -160,9 +185,21 @@ public class CertificateController {
         CertificateResponseDto updated = certificateService.updateCertificate(id, newCertificate);
         updated.add(
                 linkTo(methodOn(CertificateController.class).getById(id)).withRel("getById"),
-                linkTo(methodOn(CertificateController.class).deleteById(id)).withRel("deleteById"),
-                linkTo(methodOn(CertificateController.class).updateCertificatePrice(id, price)).withSelfRel()
+                linkTo(methodOn(CertificateController.class).deleteById(id)).withRel("deleteById")
+//                linkTo(methodOn(CertificateController.class).updateCertificatePrice(id, price)).withSelfRel()
         );
-        return new ResponseEntity<>(updated, HttpStatus.CREATED);
+        return new ResponseEntity<>(updated, HttpStatus.OK);
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<CollectionModel<CertificateResponseDto>> findByTags(
+            @RequestParam @Pattern(regexp = "\\d+(\\sAND\\s\\d+)*")
+                    String tagsString) {
+
+        List<CertificateResponseDto> certificates = certificateService.findByTags(tagsString);
+        certificates.forEach(cert ->
+                cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
+
+        return new ResponseEntity<>(CollectionModel.of(certificates), HttpStatus.OK);
     }
 }

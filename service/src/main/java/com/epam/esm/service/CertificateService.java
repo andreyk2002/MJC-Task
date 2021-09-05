@@ -2,9 +2,11 @@ package com.epam.esm.service;
 
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.mappers.CertificateMapper;
+import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.request.CertificateRequestDto;
+import com.epam.esm.request.TagRequestDto;
 import com.epam.esm.response.CertificateResponseDto;
 import com.epam.esm.service.excepiton.CertificateNotFoundException;
 import lombok.AllArgsConstructor;
@@ -12,8 +14,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Provides set of operations with {@link GiftCertificate} entities
@@ -28,6 +32,7 @@ public class CertificateService {
     private final CertificateMapper mapper;
     private final CertificateTagJdbcRepository certificateTagRepository;
     private final NullableFieldsFinder nullableFieldsFinder;
+    private final PageLimiter pageLimiter;
 
 
     /**
@@ -37,6 +42,8 @@ public class CertificateService {
      * @return instance of {@link CertificateResponseDto} which is already added to repository
      */
     public CertificateResponseDto addCertificate(CertificateRequestDto certificateDto) {
+        List<TagRequestDto> tags = certificateDto.getTags();
+        tags.forEach(tagService::updateTag);
         GiftCertificate giftCertificate = mapper.requestToEntity(certificateDto);
         GiftCertificate certificate = certificateRepo.addCertificate(giftCertificate);
         return mapper.entityToResponse(certificate);
@@ -56,23 +63,33 @@ public class CertificateService {
         return certificate;
     }
 
+    public List<CertificateResponseDto> getPage(int offset, int size) {
+        List<GiftCertificate> all = certificateRepo.getPage(offset, size);
+        return mapper.entitiesToResponses(all);
+    }
+
     /**
      * Updates instance of specified certificate (Only non-nullable fields will be updated)
      *
-     * @param certificateId   ID of certificate, which should be updated
-     * @param giftCertificate Contains new state of field, which will be updated
+     * @param certificateId      ID of certificate, which should be updated
+     * @param certificateRequest Contains new state of field, which will be updated
      * @return instance of {@link CertificateResponseDto} which is already update in repository
      */
-    @Transactional
-    public CertificateResponseDto updateCertificate(long certificateId, CertificateRequestDto giftCertificate) {
+    public CertificateResponseDto updateCertificate(long certificateId, CertificateRequestDto certificateRequest) {
         Optional<GiftCertificate> optionalUpdated = certificateRepo.getById(certificateId);
         return optionalUpdated.map(updated -> {
-            String[] nullPropertyNames = nullableFieldsFinder.getNullPropertyNames(giftCertificate);
-            BeanUtils.copyProperties(giftCertificate, updated, nullPropertyNames);
+            GiftCertificate newCertificate = mapper.requestToEntity(certificateRequest);
+            String[] nullPropertyNames = nullableFieldsFinder.getNullPropertyNames(newCertificate);
+            BeanUtils.copyProperties(newCertificate, updated, nullPropertyNames);
             updated.setId(certificateId);
+            certificateTagRepository.deleteByCertificateId(certificateId);
+            List<TagRequestDto> tags = certificateRequest.getTags();
+            if (tags != null) {
+                tags.forEach(tagService::updateTag);
+            }
             GiftCertificate certificate = certificateRepo.updateCertificate(updated);
             return mapper.entityToResponse(certificate);
-        }).orElseGet(() -> addCertificate(giftCertificate));
+        }).orElseGet(() -> addCertificate(certificateRequest));
     }
 
     /**
@@ -99,14 +116,32 @@ public class CertificateService {
      * @param sortString - specifies the way, how list of certificates should be sorted. Should apply to regex (.*), (.*),
      *                   where first part contain information about field, by which sorting will performed, and second part
      *                   specifies the sort order (acs/desc)
+     * @param size
+     * @param offset
      * @return List of all certificates which applied to all limits, sorted in specified order
      */
-    public List<CertificateResponseDto> getCertificates(String tagName, String keyword, String sortString) {
+    public List<CertificateResponseDto> getCertificates(String tagName, String keyword, String sortString, int size, int offset) {
         String[] sort = sortString.split(",");
         String sortOrder = sort[1];
         String field = sort[0];
+        int limitedSize = pageLimiter.limitSize(size);
+        CertificateFilter filter = CertificateFilter.builder()
+                .sortOrder(sortOrder)
+                .sortString(field)
+                .tagName(tagName)
+                .keyword(keyword)
+                .pageSize(limitedSize)
+                .offset(offset)
+                .build();
         List<GiftCertificate> certificates;
-        certificates = certificateRepo.getAllSorted(keyword, tagName, sortOrder, field);
+        certificates = certificateRepo.getAllSorted(filter);
+        return mapper.entitiesToResponses(certificates);
+    }
+
+    public List<CertificateResponseDto> findByTags(String namesString) {
+        String[] tags = namesString.split(" AND ");
+        List<Integer> ids = Arrays.stream(tags).map(Integer::parseInt).collect(Collectors.toList());
+        List<GiftCertificate> certificates = certificateRepo.findByTags(ids);
         return mapper.entitiesToResponses(certificates);
     }
 }

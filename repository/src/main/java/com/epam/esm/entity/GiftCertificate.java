@@ -14,7 +14,10 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 @Entity
-@Table(name = "gift_certificate")
+@Table(name = "gift_certificate", indexes = {
+        @Index(name = "certificateNameIndex", columnList = "name"),
+        @Index(name = "certificateDescriptionIndex", columnList = "description")
+})
 public class GiftCertificate {
 
     @Id
@@ -24,13 +27,13 @@ public class GiftCertificate {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 511)
     private String description;
 
     @Column(name = "price")
     private BigDecimal price;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
     @JoinTable(
             name = "certificate_tag",
             joinColumns = @JoinColumn(name = "certificate_id", referencedColumnName = "id"),

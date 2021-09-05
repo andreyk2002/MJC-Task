@@ -2,12 +2,14 @@ package com.epam.esm.repository;
 
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.GiftTag;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -39,6 +41,7 @@ public class CertificateRepository {
     @Transactional
     public GiftCertificate addCertificate(GiftCertificate giftCertificate) {
         entityManager.persist(giftCertificate);
+        entityManager.flush();
         return giftCertificate;
     }
 
@@ -59,8 +62,11 @@ public class CertificateRepository {
      * @param giftCertificate instance of certificate, needed to be updated
      * @return entity of updated certificate
      */
+    @Transactional
     public GiftCertificate updateCertificate(GiftCertificate giftCertificate) {
-        return entityManager.merge(giftCertificate);
+        GiftCertificate updated = entityManager.merge(giftCertificate);
+        entityManager.flush();
+        return updated;
     }
 
     /**
@@ -68,8 +74,11 @@ public class CertificateRepository {
      *
      * @return List of all present certificates
      */
-    public List<GiftCertificate> getAll() {
-        return entityManager.createQuery(FIND_ALL, GiftCertificate.class).getResultList();
+    public List<GiftCertificate> getPage(int offset, int size) {
+        return entityManager.createQuery(FIND_ALL, GiftCertificate.class)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     /**
@@ -97,9 +106,21 @@ public class CertificateRepository {
      * @return List of certificates which applied to the mentioned criterias
      */
 
-    //TODO: return filtering
-    public List<GiftCertificate> getAllSorted(String keyword, String tagName, String sortOrder, String sortField) {
-        return entityManager.createQuery(FIND_ALL, GiftCertificate.class).getResultList();
+    public List<GiftCertificate> getAllSorted(CertificateFilter filter) {
+        StringBuilder query = new StringBuilder("SELECT DISTINCT gc FROM GiftCertificate gc JOIN gc.tags t " +
+                "WHERE (?1 is NULL  OR t.name LIKE concat('%', ?1, '%') AND " +
+                "(?2 is NULL OR gc.name LIKE concat('%', ?2, '%') OR gc.description LIKE concat('%', ?2, '%'))) " +
+                "ORDER BY ");
+        query.append("gc.");
+        query.append(filter.getSortString());
+        query.append(" ");
+        query.append(filter.getSortOrder());
+        return entityManager.createQuery(query.toString(), GiftCertificate.class)
+                .setParameter(1, filter.getTagName())
+                .setParameter(2, filter.getKeyword())
+                .setFirstResult(filter.getOffset())
+                .setMaxResults(filter.getPageSize())
+                .getResultList();
     }
 
     public List<GiftCertificate> findInRange(List<Integer> certificatesIds) {
@@ -110,5 +131,26 @@ public class CertificateRepository {
         return entityManager
                 .createQuery(query)
                 .getResultList();
+    }
+
+
+    public List<GiftCertificate> findByTags(List<Integer> tagIds) {
+//        select * from gift_certificate gc JOIN
+//        certificate_tag ct ON
+//        gc.id = ct.certificate_id
+//        WHERE ct.tag_id IN (tagsIds)
+//        group by ct.certificate_id having count(ct.tag_id) = tagsIds.count
+
+
+        Query query = entityManager.createNativeQuery(
+                "select * from gift_certificate gc JOIN\n" +
+                        "        certificate_tag ct ON\n" +
+                        "        gc.id = ct.certificate_id\n" +
+                        "        WHERE ct.tag_id IN (?)\n" +
+                        "        group by ct.certificate_id having count(ct.tag_id) = ?", GiftTag.class);
+
+        query.setParameter(1, tagIds);
+        query.setParameter(2, tagIds.size());
+        return query.getResultList();
     }
 }

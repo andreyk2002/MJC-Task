@@ -15,6 +15,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserService {
 
+    private final PageLimiter pageLimiter;
     private final UserRepository userRepository;
     private final UserMapper mapper;
 
@@ -25,12 +26,13 @@ public class UserService {
 
     public UserResponseDto getById(long id) {
         Optional<User> optionalUser = userRepository.getById(id);
-        return optionalUser.map(user -> mapper.entityToResponse(user))
+        return optionalUser.map(mapper::entityToResponse)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public List<UserResponseDto> getPage(int size, int offset) {
-        List<User> page = userRepository.getPage(size, offset);
+        int limitedSize = pageLimiter.limitSize(size);
+        List<User> page = userRepository.getPage(limitedSize, offset);
         return mapper.entitiesToResponses(page);
     }
 }

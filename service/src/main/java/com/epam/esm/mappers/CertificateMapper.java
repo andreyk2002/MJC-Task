@@ -59,6 +59,7 @@ public abstract class CertificateMapper {
             @Mapping(target = "description", source = "description"),
             @Mapping(target = "price", source = "price"),
             @Mapping(target = "duration", source = "duration"),
+            @Mapping(target = "tags", expression = "java(tagMapper.requestsToEntities(certificate.getTags()))"),
     })
     public abstract GiftCertificate requestToEntity(CertificateRequestDto certificate);
 

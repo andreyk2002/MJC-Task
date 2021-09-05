@@ -2,11 +2,8 @@ package com.epam.esm.service;
 
 
 import com.epam.esm.entity.Order;
-import com.epam.esm.mappers.CertificateMapper;
 import com.epam.esm.mappers.OrderMapper;
-import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.OrderRepository;
-import com.epam.esm.repository.UserRepository;
 import com.epam.esm.response.OrderResponseDto;
 import com.epam.esm.service.excepiton.OrderNotFoundException;
 import lombok.AllArgsConstructor;
@@ -21,9 +18,7 @@ public class OrderService {
 
     private final OrderMapper mapper;
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
-    private final CertificateMapper certificateMapper;
-    private final CertificateRepository certificateRepository;
+    private final PageLimiter pageLimiter;
 
     public List<OrderResponseDto> getAll() {
         List<Order> all = orderRepository.getAll();
@@ -32,13 +27,14 @@ public class OrderService {
 
     public OrderResponseDto getById(long id) {
         Optional<Order> optionalOrder = orderRepository.getById(id);
-        return optionalOrder.map(order -> mapper.entityToResponse(order))
+        return optionalOrder.map(mapper::entityToResponse)
                 .orElseThrow(() -> new OrderNotFoundException(id));
     }
 
 
     public List<OrderResponseDto> getPage(int size, int offset) {
-        List<Order> page = orderRepository.getPage(size, offset);
+        int limitedSize = pageLimiter.limitSize(size);
+        List<Order> page = orderRepository.getPage(limitedSize, offset);
         return mapper.entitiesToResponse(page);
     }
 }

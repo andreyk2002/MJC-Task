@@ -25,7 +25,7 @@ public class Order {
     @JoinColumn(name = "user_id", referencedColumnName = "id", updatable = false, nullable = false)
     private User user;
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.ALL})
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinTable(
             name = "order_certificate",
             joinColumns = @JoinColumn(name = "order_id", referencedColumnName = "id"),
