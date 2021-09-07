@@ -96,15 +96,16 @@ public class CertificateRepository {
      * Searches list of all certificates depends on keyword (part of name or description) or/and tag name
      * in specified order
      *
-     * @param keyword   part of name or description which certificates should contain. In case if keyword is null
-     *                  all certificates are specified to this criteria
-     * @param tagName   name of the tag which certificate should contain. In case if keyword is null
-     *                  all certificates are specified to this criteria
-     * @param sortOrder type of sort order (ascending, descending)
-     * @param sortField name of the field by which certificates should be ordered
+     * @param filter stores information about which criterias of selecting certificates.
+     *               May include tagName -  name of the tag which certificate should contain,
+     *               keyword - part of the name or description which certificate should have
+     *               sortOrder -  type of sort order (ascending, descending),
+     *               sortField - name of the field by which certificates should be ordered
      * @return List of certificates which applied to the mentioned criterias
      */
 
+
+    //TODO : criteria api last time
     public List<GiftCertificate> getAllSorted(CertificateFilter filter) {
         StringBuilder query = new StringBuilder("SELECT DISTINCT gc FROM GiftCertificate gc JOIN gc.tags t " +
                 "WHERE (?1 is NULL  OR t.name LIKE concat('%', ?1, '%') AND " +

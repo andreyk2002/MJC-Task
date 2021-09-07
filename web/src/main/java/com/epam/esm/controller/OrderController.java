@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Arrays;
@@ -27,9 +28,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class OrderController {
 
     private final OrderService orderService;
+    private final static int MAX_PAGE = 100;
 
     @GetMapping("")
-    public ResponseEntity<CollectionModel<OrderResponseDto>> getPage(@RequestParam @Positive(message = "40021") int size,
+    public ResponseEntity<CollectionModel<OrderResponseDto>> getPage(@RequestParam @Max(MAX_PAGE)
+                                                                     @Positive(message = "40021") int size,
                                                                      @RequestParam @PositiveOrZero(message = "40022") int offset) {
         List<OrderResponseDto> page = orderService.getPage(size, offset);
         page.forEach(order -> order.add(linkTo(methodOn(OrderController.class).getById(order.getId())).withRel("getById")));

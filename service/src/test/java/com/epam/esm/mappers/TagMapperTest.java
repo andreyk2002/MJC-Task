@@ -6,6 +6,7 @@ import com.epam.esm.response.TagResponseDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,7 +40,7 @@ class TagMapperTest {
 
     @Test
     void testEntityToResponseShouldReturnNullWhenEntitiesIsNull() {
-        List<TagResponseDto> tags = mapper.entitiesToResponses(null);
+        List<TagResponseDto> tags = mapper.entitiesToResponses(new ArrayList<>());
         Assertions.assertNull(tags);
     }
 

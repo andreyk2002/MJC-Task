@@ -2,6 +2,7 @@ package com.epam.esm.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
@@ -12,7 +13,7 @@ import static springfox.documentation.builders.PathSelectors.regex;
 
 @Configuration
 @EnableSwagger2
-public class SwaggerDocConfig {
+public class SwaggerDocConfig implements WebMvcConfigurer {
 
     private static final String ALL_CHILD = ".*";
 
@@ -27,8 +28,5 @@ public class SwaggerDocConfig {
                 .paths(regex("/" + ALL_CHILD)).build();
 
     }
-
-
-
 
 }

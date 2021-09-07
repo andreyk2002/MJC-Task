@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Validated
 public class TagController {
 
+    private static final int MAX_PAGE = 100;
     private final GiftTagService tagService;
 
 
@@ -84,7 +86,7 @@ public class TagController {
     )
     public ResponseEntity<CollectionModel<TagResponseDto>> getPage(
             @RequestParam @PositiveOrZero(message = "40021") int offset,
-            @RequestParam @Positive(message = "40022") int size) {
+            @RequestParam @Positive(message = "40022") @Max(MAX_PAGE) int size) {
         List<TagResponseDto> page = tagService.getPage(offset, size);
         page.forEach(tag -> tag.add(linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("findTag")));
         List<Link> links = Arrays.asList(

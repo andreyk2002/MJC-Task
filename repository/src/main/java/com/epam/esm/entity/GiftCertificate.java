@@ -5,7 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @Getter
@@ -14,10 +14,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 @Entity
-@Table(name = "gift_certificate", indexes = {
-        @Index(name = "certificateNameIndex", columnList = "name"),
-        @Index(name = "certificateDescriptionIndex", columnList = "description")
-})
+@Table(name = "gift_certificate")
 public class GiftCertificate {
 
     @Id
@@ -33,13 +30,16 @@ public class GiftCertificate {
     @Column(name = "price")
     private BigDecimal price;
 
+
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @JoinTable(
             name = "certificate_tag",
             joinColumns = @JoinColumn(name = "certificate_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id")
     )
-    private List<GiftTag> tags;
+    private Set<GiftTag> tags;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -47,7 +47,7 @@ public class GiftCertificate {
             inverseJoinColumns = @JoinColumn(name = "order_id", referencedColumnName = "id"),
             joinColumns = @JoinColumn(name = "certificate_id", referencedColumnName = "id")
     )
-    private List<Order> orders;
+    private Set<Order> orders;
 
 
     @Column(name = "duration")

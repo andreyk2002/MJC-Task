@@ -21,6 +21,7 @@ import java.util.List;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {DbConfig.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+//TODO: DbRider
 class CertificateTagRepositoryTest {
 
     @Autowired

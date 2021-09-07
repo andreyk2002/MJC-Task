@@ -15,7 +15,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserService {
 
-    private final PageLimiter pageLimiter;
     private final UserRepository userRepository;
     private final UserMapper mapper;
 
@@ -31,8 +30,7 @@ public class UserService {
     }
 
     public List<UserResponseDto> getPage(int size, int offset) {
-        int limitedSize = pageLimiter.limitSize(size);
-        List<User> page = userRepository.getPage(limitedSize, offset);
+        List<User> page = userRepository.getPage(size, offset);
         return mapper.entitiesToResponses(page);
     }
 }

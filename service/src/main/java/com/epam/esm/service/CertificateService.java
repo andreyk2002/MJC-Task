@@ -32,7 +32,6 @@ public class CertificateService {
     private final CertificateMapper mapper;
     private final CertificateTagJdbcRepository certificateTagRepository;
     private final NullableFieldsFinder nullableFieldsFinder;
-    private final PageLimiter pageLimiter;
 
 
     /**
@@ -41,9 +40,9 @@ public class CertificateService {
      * @param certificateDto - instance needed to be added
      * @return instance of {@link CertificateResponseDto} which is already added to repository
      */
+    @Transactional
     public CertificateResponseDto addCertificate(CertificateRequestDto certificateDto) {
         List<TagRequestDto> tags = certificateDto.getTags();
-        tags.forEach(tagService::updateTag);
         GiftCertificate giftCertificate = mapper.requestToEntity(certificateDto);
         GiftCertificate certificate = certificateRepo.addCertificate(giftCertificate);
         return mapper.entityToResponse(certificate);
@@ -106,8 +105,8 @@ public class CertificateService {
     }
 
     /**
-     * Searches list of all certificates depends on keyword (part of name or description) or/and tag name
-     * in specified order
+     * Searches list of certificates specified size from specified position depends
+     * on keyword (part of name or description) or/and tag name in specified order
      *
      * @param tagName    - name of the tag which required certificates should contain. If null value passed, all certificates
      *                   applied to that criteria
@@ -116,21 +115,20 @@ public class CertificateService {
      * @param sortString - specifies the way, how list of certificates should be sorted. Should apply to regex (.*), (.*),
      *                   where first part contain information about field, by which sorting will performed, and second part
      *                   specifies the sort order (acs/desc)
-     * @param size
-     * @param offset
-     * @return List of all certificates which applied to all limits, sorted in specified order
+     * @param size       - size of result list
+     * @param offset     - start position of result list
+     * @return List of certificates which applied to all limits, sorted in specified order
      */
     public List<CertificateResponseDto> getCertificates(String tagName, String keyword, String sortString, int size, int offset) {
         String[] sort = sortString.split(",");
         String sortOrder = sort[1];
         String field = sort[0];
-        int limitedSize = pageLimiter.limitSize(size);
         CertificateFilter filter = CertificateFilter.builder()
                 .sortOrder(sortOrder)
                 .sortString(field)
                 .tagName(tagName)
                 .keyword(keyword)
-                .pageSize(limitedSize)
+                .pageSize(size)
                 .offset(offset)
                 .build();
         List<GiftCertificate> certificates;
@@ -139,7 +137,7 @@ public class CertificateService {
     }
 
     public List<CertificateResponseDto> findByTags(String namesString) {
-        String[] tags = namesString.split(" AND ");
+        String[] tags = namesString.split(",");
         List<Long> ids = Arrays.stream(tags).map(Long::parseLong).collect(Collectors.toList());
         List<GiftCertificate> certificates = certificateRepo.findByTags(ids);
         return mapper.entitiesToResponses(certificates);

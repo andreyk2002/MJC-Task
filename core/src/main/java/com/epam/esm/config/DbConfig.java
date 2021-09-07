@@ -16,6 +16,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource("classpath:application.properties")
+//TODO: move to application.properties
 public class DbConfig {
     @Value("${spring.datasource.url}")
     private String url;

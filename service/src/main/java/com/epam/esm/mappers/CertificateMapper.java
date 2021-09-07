@@ -34,7 +34,8 @@ public abstract class CertificateMapper {
             @Mapping(target = "duration", source = "duration"),
             @Mapping(target = "createDate", source = "createDate"),
             @Mapping(target = "lastUpdateDate", source = "lastUpdateDate"),
-            @Mapping(target = "tags", expression = "java(tagMapper.entitiesToResponses(giftCertificate.getTags()))")
+            @Mapping(target = "tags",
+                    expression = "java(tagMapper.entitiesToResponses(giftCertificate.getTags()))")
     })
     public abstract CertificateResponseDto entityToResponse(GiftCertificate giftCertificate);
 
@@ -59,7 +60,8 @@ public abstract class CertificateMapper {
             @Mapping(target = "description", source = "description"),
             @Mapping(target = "price", source = "price"),
             @Mapping(target = "duration", source = "duration"),
-            @Mapping(target = "tags", expression = "java(tagMapper.requestsToEntities(certificate.getTags()))"),
+            @Mapping(target = "tags", expression =
+                    "java((tagMapper.requestsToEntities(certificate.getTags())))"),
     })
     public abstract GiftCertificate requestToEntity(CertificateRequestDto certificate);
 

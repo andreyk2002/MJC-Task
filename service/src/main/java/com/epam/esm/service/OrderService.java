@@ -18,7 +18,6 @@ public class OrderService {
 
     private final OrderMapper mapper;
     private final OrderRepository orderRepository;
-    private final PageLimiter pageLimiter;
 
     public List<OrderResponseDto> getAll() {
         List<Order> all = orderRepository.getAll();
@@ -33,8 +32,7 @@ public class OrderService {
 
 
     public List<OrderResponseDto> getPage(int size, int offset) {
-        int limitedSize = pageLimiter.limitSize(size);
-        List<Order> page = orderRepository.getPage(limitedSize, offset);
+        List<Order> page = orderRepository.getPage(size, offset);
         return mapper.entitiesToResponse(page);
     }
 }

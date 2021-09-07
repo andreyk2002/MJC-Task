@@ -30,7 +30,7 @@ public class GiftTagService {
 
     private final TagMapper mapper;
 
-    private final PageLimiter pageLimiter;
+
 
     /**
      * Gets all available tags
@@ -108,8 +108,7 @@ public class GiftTagService {
     }
 
     public List<TagResponseDto> getPage(int offset, int size) {
-        int limitedSize = pageLimiter.limitSize(size);
-        List<GiftTag> page = tagRepo.getPage(offset, limitedSize);
+        List<GiftTag> page = tagRepo.getPage(offset, size);
         return mapper.entitiesToResponses(page);
     }
 }

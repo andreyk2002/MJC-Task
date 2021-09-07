@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides functionality for transforming tag entities from/to request and response dtos
@@ -28,7 +29,9 @@ public interface TagMapper {
     GiftTag requestToEntity(TagRequestDto tagRequestDto);
 
 
-    List<GiftTag> requestsToEntities(List<TagRequestDto> tags);
+    Set<GiftTag> requestsToEntities(List<TagRequestDto> tags);
+
+    Set<GiftTag> requestsToEntities(Set<TagRequestDto> tags);
 
     /**
      * Transforms instance of {@link GiftTag} type to instance of {@link TagResponseDto}
@@ -50,5 +53,7 @@ public interface TagMapper {
      * @return list of {@link TagResponseDto} instances, which have the same state that have passed instances
      */
     List<TagResponseDto> entitiesToResponses(List<GiftTag> tags);
+
+    List<TagResponseDto> entitiesToResponses(Set<GiftTag> tags);
 
 }

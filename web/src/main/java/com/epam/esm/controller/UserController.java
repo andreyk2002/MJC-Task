@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Arrays;
 import java.util.List;
@@ -26,12 +26,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @AllArgsConstructor
 public class UserController {
 
-
+    private static final int MAX_PAGE = 100;
     private final UserService userService;
 
     @GetMapping("")
-    public ResponseEntity<CollectionModel<UserResponseDto>> getPage(@RequestParam @Positive(message = "40021") int size,
-                                                                    @RequestParam @PositiveOrZero(message = "40021") int offset) {
+    public ResponseEntity<CollectionModel<UserResponseDto>> getPage(@RequestParam @PositiveOrZero(message = "40021")
+                                                                    @Max(MAX_PAGE) int size,
+                                                                    @RequestParam @PositiveOrZero(message = "40021")
+                                                                            int offset) {
         List<UserResponseDto> page = userService.getPage(size, offset);
         page.forEach(user -> user.add(linkTo(methodOn(UserController.class).getById(user.getId())).withRel("getByID")));
         List<Link> links = Arrays.asList(

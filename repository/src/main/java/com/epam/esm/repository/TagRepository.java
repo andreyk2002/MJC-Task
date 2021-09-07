@@ -16,16 +16,20 @@ public class TagRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public GiftTag getTopUserTopTag() {
-        Long userId = entityManager.createQuery("SELECT ord.user.id FROM Order ord" +
-                " GROUP BY ord.user.id order by sum (orderPrice) desc", Long.class)
-                .setMaxResults(1)
-                .getSingleResult();
 
-        return entityManager.createQuery("SELECT t FROM  GiftTag t JOIN t.certificates c " +
-                "JOIN c.orders o WHERE o.user.id = ?1 GROUP BY t.id ORDER BY COUNT(t.id) DESC ", GiftTag.class)
-                .setParameter(1, userId)
-                .setMaxResults(1)
+    public GiftTag getTopUserTopTag() {
+        return (GiftTag) entityManager.createNativeQuery("select t.name AS name, ct.tag_id AS id, oc.certificate_id, oc.order_id, count(tag_id) \n" +
+                "FROM tag t\n" +
+                " JOIN certificate_tag ct\n" +
+                " ON t.id = ct.id\n" +
+                " JOIN order_certificate oc\n" +
+                " ON ct.certificate_id = oc.certificate_id\n" +
+                " JOIN user_order uo \n" +
+                "ON uo.id = oc.order_id\n" +
+                "where uo.user_id = (\n" +
+                "select uo.user_id from user_order uo\n" +
+                "group by uo.user_id order by sum(uo.order_price) desc limit 1\n" +
+                ") group by tag_id order by count(tag_id) desc limit 1", GiftTag.class)
                 .getSingleResult();
     }
 

@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -33,6 +34,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Validated
 public class CertificateController {
 
+
+    private static final int MAX_PAGE = 100;
     private final CertificateService certificateService;
 
     @DeleteMapping("/{id}")
@@ -71,12 +74,14 @@ public class CertificateController {
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
+    //previous links on last
+    //TODO: move links to interceptor (catch all get requests and adds next and prev) @PostHandle #last priority
     @GetMapping("")
     public ResponseEntity<CollectionModel<CertificateResponseDto>> getPage(
             @ApiParam(value = "Size of certificate page")
-            @Positive int size,
+            @RequestParam(defaultValue = "10") @Positive @Max(MAX_PAGE) int size,
             @ApiParam(value = "Offset of certificate page")
-            @PositiveOrZero int offset
+            @RequestParam(defaultValue = "0") @PositiveOrZero int offset
     ) {
         List<CertificateResponseDto> page = certificateService.getPage(offset, size);
         page.forEach(cert ->
@@ -109,9 +114,9 @@ public class CertificateController {
             @RequestParam(defaultValue = "name,asc")
             @Pattern(message = "40016", regexp = "(name|create_date),(asc|desc)") String sort,
             @ApiParam(value = "Size of certificate page")
-            @RequestParam @Positive int size,
+            @RequestParam(defaultValue = "10") @Positive @Max(MAX_PAGE) int size,
             @ApiParam(value = "Offset of certificate page")
-            @RequestParam @PositiveOrZero int offset
+            @RequestParam(defaultValue = "0") @PositiveOrZero int offset
     ) {
 
         List<CertificateResponseDto> certificates = certificateService
@@ -186,14 +191,13 @@ public class CertificateController {
         updated.add(
                 linkTo(methodOn(CertificateController.class).getById(id)).withRel("getById"),
                 linkTo(methodOn(CertificateController.class).deleteById(id)).withRel("deleteById")
-//                linkTo(methodOn(CertificateController.class).updateCertificatePrice(id, price)).withSelfRel()
         );
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
 
     @GetMapping("/tags")
     public ResponseEntity<CollectionModel<CertificateResponseDto>> findByTags(
-            @RequestParam @Pattern(regexp = "\\d+(\\sAND\\s\\d+)*", message = "40031")
+            @RequestParam @Pattern(regexp = "\\d+(,\\d+)*", message = "40031")
                     String tags) {
         List<CertificateResponseDto> certificates = certificateService.findByTags(tags);
         certificates.forEach(cert ->
