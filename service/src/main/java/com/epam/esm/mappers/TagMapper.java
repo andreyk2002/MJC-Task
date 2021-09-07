@@ -45,6 +45,11 @@ public interface TagMapper {
     })
     TagResponseDto entityToResponse(GiftTag giftTag);
 
+    @Mappings({
+            @Mapping(target = "id", source = "id"),
+            @Mapping(target = "name", source = "name"),
+    })
+    GiftTag responseToEntity(TagResponseDto tagResponseDto);
 
     /**
      * Transforms list of {@link GiftTag} instances to list of {@link TagResponseDto} instances
@@ -56,4 +61,5 @@ public interface TagMapper {
 
     List<TagResponseDto> entitiesToResponses(Set<GiftTag> tags);
 
+    List<GiftTag> responsesToEntities(List<TagResponseDto> updatedTags);
 }

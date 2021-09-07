@@ -1,13 +1,16 @@
 package com.epam.esm.service;
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.CertificateMapper;
+import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.request.TagRequestDto;
 import com.epam.esm.response.CertificateResponseDto;
+import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.CertificateNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,7 +36,7 @@ public class CertificateService {
     private final CertificateMapper mapper;
     private final CertificateTagJdbcRepository certificateTagRepository;
     private final NullableFieldsFinder nullableFieldsFinder;
-
+    private final TagMapper tagMapper;
 
     /**
      * Adds a requested instance of certificate and its tags to repository
@@ -43,7 +47,10 @@ public class CertificateService {
     @Transactional
     public CertificateResponseDto addCertificate(CertificateRequestDto certificateDto) {
         List<TagRequestDto> tags = certificateDto.getTags();
+        List<TagResponseDto> updatedTags = tags.stream().map(tagService::updateTag).collect(Collectors.toList());
+        List<GiftTag> giftTags = tagMapper.responsesToEntities(updatedTags);
         GiftCertificate giftCertificate = mapper.requestToEntity(certificateDto);
+        giftCertificate.setTags(new HashSet<>(giftTags));
         GiftCertificate certificate = certificateRepo.addCertificate(giftCertificate);
         return mapper.entityToResponse(certificate);
     }
