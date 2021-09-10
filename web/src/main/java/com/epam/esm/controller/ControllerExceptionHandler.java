@@ -6,8 +6,8 @@ import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,7 +29,7 @@ public class ControllerExceptionHandler {
 
     private final Localizer localizer;
 
-    @ExceptionHandler(value = {ConstraintViolationException.class})
+    @ExceptionHandler(value = {ConstraintViolationException.class,})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public List<ErrorMessage> constraintViolationException(ConstraintViolationException e, WebRequest request) {
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
@@ -46,13 +46,15 @@ public class ControllerExceptionHandler {
         }).collect(toList());
     }
 
-    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+
+    @ExceptionHandler(value = {BindException.class})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public List<ErrorMessage> methodArgumentNotValidException(MethodArgumentNotValidException e, WebRequest request) {
+    public List<ErrorMessage> methodArgumentNotValidException(BindException e, WebRequest request) {
         List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
         LOGGER.error("Exception: {}", allErrors, e);
         return allErrors.stream()
                 .map(x -> {
+                            Object[] arguments = x.getArguments();
                             int code = Integer.parseInt(x.getDefaultMessage());
                             String localizedMessage = localizer.getLocalizedMessage(code);
                             return new ErrorMessage(

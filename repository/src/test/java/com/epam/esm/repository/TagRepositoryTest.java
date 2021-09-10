@@ -1,36 +1,34 @@
 package com.epam.esm.repository;
 
-import com.epam.esm.config.DbConfig;
 import com.epam.esm.entity.GiftTag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.Collections;
 import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DbConfig.class})
+@DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class TagRepositoryTest {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<GiftTag> certificateRowMapper = new TagRowMapper();
     private TagRepository repository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
-        repository = new TagRepository();
+        repository = new TagRepository(entityManager);
     }
-
 
     @Test
     void testAddTagShouldAdd() {
@@ -62,7 +60,7 @@ class TagRepositoryTest {
     @Test
     @Sql({"/deleteAllTags.sql", "addTagWithId421.sql"})
     void testGetByIdShouldReturnTagIfPresent() {
-        GiftTag expected = new GiftTag(421, "new tag");
+        GiftTag expected = new GiftTag(421, "new tag", Collections.emptySet());
         long addingId = 421;
         Optional<GiftTag> tagById = repository.getById(addingId);
         Assertions.assertEquals(Optional.of(expected), tagById);

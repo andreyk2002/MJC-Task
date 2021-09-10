@@ -29,7 +29,7 @@ public class CartController {
     @PostMapping("/{userId}")
     public ResponseEntity<OrderResponseDto> createOrder(@PathVariable long userId,
                                                         @RequestBody @Valid @NotEmpty
-                                                                List<Integer> certificates) {
+                                                                List<Long> certificates) {
         OrderResponseDto order = cartService.createOrder(userId, certificates);
         order.add(
                 linkTo(methodOn(CartController.class).createOrder(userId, certificates)).withSelfRel()

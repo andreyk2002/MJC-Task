@@ -2,6 +2,7 @@ package com.epam.esm.mappers;
 
 import com.epam.esm.entity.Order;
 import com.epam.esm.response.OrderResponseDto;
+import lombok.Setter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -11,6 +12,7 @@ import java.util.List;
 
 
 @Mapper(componentModel = "spring")
+@Setter
 public abstract class OrderMapper {
 
     @Autowired

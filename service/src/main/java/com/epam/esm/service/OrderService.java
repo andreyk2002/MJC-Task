@@ -19,10 +19,6 @@ public class OrderService {
     private final OrderMapper mapper;
     private final OrderRepository orderRepository;
 
-    public List<OrderResponseDto> getAll() {
-        List<Order> all = orderRepository.getAll();
-        return mapper.entitiesToResponse(all);
-    }
 
     public OrderResponseDto getById(long id) {
         Optional<Order> optionalOrder = orderRepository.getById(id);

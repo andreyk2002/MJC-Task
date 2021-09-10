@@ -8,7 +8,7 @@ import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.request.CertificateRequestDto;
-import com.epam.esm.request.TagRequestDto;
+import com.epam.esm.request.TagRequestDtoCertificate;
 import com.epam.esm.response.CertificateResponseDto;
 import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.CertificateNotFoundException;
@@ -46,7 +46,7 @@ public class CertificateService {
      */
     @Transactional
     public CertificateResponseDto addCertificate(CertificateRequestDto certificateDto) {
-        List<TagRequestDto> tags = certificateDto.getTags();
+        List<TagRequestDtoCertificate> tags = certificateDto.getTags();
         List<TagResponseDto> updatedTags = tags.stream().map(tagService::updateTag).collect(Collectors.toList());
         List<GiftTag> giftTags = tagMapper.responsesToEntities(updatedTags);
         GiftCertificate giftCertificate = mapper.requestToEntity(certificateDto);
@@ -69,10 +69,6 @@ public class CertificateService {
         return certificate;
     }
 
-    public List<CertificateResponseDto> getPage(int offset, int size) {
-        List<GiftCertificate> all = certificateRepo.getPage(offset, size);
-        return mapper.entitiesToResponses(all);
-    }
 
     /**
      * Updates instance of specified certificate (Only non-nullable fields will be updated)
@@ -81,6 +77,7 @@ public class CertificateService {
      * @param certificateRequest Contains new state of field, which will be updated
      * @return instance of {@link CertificateResponseDto} which is already update in repository
      */
+    @Transactional
     public CertificateResponseDto updateCertificate(long certificateId, CertificateRequestDto certificateRequest) {
         Optional<GiftCertificate> optionalUpdated = certificateRepo.getById(certificateId);
         return optionalUpdated.map(updated -> {
@@ -89,9 +86,11 @@ public class CertificateService {
             BeanUtils.copyProperties(newCertificate, updated, nullPropertyNames);
             updated.setId(certificateId);
             certificateTagRepository.deleteByCertificateId(certificateId);
-            List<TagRequestDto> tags = certificateRequest.getTags();
+            List<TagRequestDtoCertificate> tags = certificateRequest.getTags();
             if (tags != null) {
-                tags.forEach(tagService::updateTag);
+                List<TagResponseDto> updatedTags = tags.stream().map(tagService::updateTag).collect(Collectors.toList());
+                List<GiftTag> giftTags = tagMapper.responsesToEntities(updatedTags);
+                updated.setTags(new HashSet<>(giftTags));
             }
             GiftCertificate certificate = certificateRepo.updateCertificate(updated);
             return mapper.entityToResponse(certificate);
@@ -126,20 +125,8 @@ public class CertificateService {
      * @param offset     - start position of result list
      * @return List of certificates which applied to all limits, sorted in specified order
      */
-    public List<CertificateResponseDto> getCertificates(String tagName, String keyword, String sortString, int size, int offset) {
-        String[] sort = sortString.split(",");
-        String sortOrder = sort[1];
-        String field = sort[0];
-        CertificateFilter filter = CertificateFilter.builder()
-                .sortOrder(sortOrder)
-                .sortString(field)
-                .tagName(tagName)
-                .keyword(keyword)
-                .pageSize(size)
-                .offset(offset)
-                .build();
-        List<GiftCertificate> certificates;
-        certificates = certificateRepo.getAllSorted(filter);
+    public List<CertificateResponseDto> getCertificates(CertificateFilter filter) {
+        List<GiftCertificate> certificates = certificateRepo.getAllSorted(filter);
         return mapper.entitiesToResponses(certificates);
     }
 

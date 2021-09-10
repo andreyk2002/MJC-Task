@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 @Entity
 @Table(name = "user_order")
@@ -26,6 +27,8 @@ public class Order {
     private User user;
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.ALL}, fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @JoinTable(
             name = "order_certificate",
             joinColumns = @JoinColumn(name = "order_id", referencedColumnName = "id"),

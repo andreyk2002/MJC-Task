@@ -31,6 +31,6 @@ public class CertificateRequestDto {
     private Integer duration;
 
     @NotNull(message = "40015")
-    private List<TagRequestDto> tags;
+    private List<TagRequestDtoCertificate> tags;
 
 }

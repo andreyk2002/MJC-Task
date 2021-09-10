@@ -1,9 +1,6 @@
 package com.epam.esm.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.math.BigDecimal;
@@ -14,6 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class OrderResponseDto extends RepresentationModel<OrderResponseDto> {
 
     private long id;

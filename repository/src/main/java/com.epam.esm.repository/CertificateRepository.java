@@ -108,11 +108,11 @@ public class CertificateRepository {
     //TODO : criteria api last time
     public List<GiftCertificate> getAllSorted(CertificateFilter filter) {
         StringBuilder query = new StringBuilder("SELECT DISTINCT gc FROM GiftCertificate gc JOIN gc.tags t " +
-                "WHERE (?1 is NULL  OR t.name LIKE concat('%', ?1, '%') AND " +
-                "(?2 is NULL OR gc.name LIKE concat('%', ?2, '%') OR gc.description LIKE concat('%', ?2, '%'))) " +
+                "WHERE (?1 is NULL  OR t.name LIKE concat('%', ?1, '%')) AND " +
+                "(?2 is NULL OR gc.name LIKE concat('%', ?2, '%') OR gc.description LIKE concat('%', ?2, '%')) " +
                 "ORDER BY ");
         query.append("gc.");
-        query.append(filter.getSortString());
+        query.append(filter.getSortField());
         query.append(" ");
         query.append(filter.getSortOrder());
         return entityManager.createQuery(query.toString(), GiftCertificate.class)
@@ -123,7 +123,7 @@ public class CertificateRepository {
                 .getResultList();
     }
 
-    public List<GiftCertificate> findInRange(List<Integer> certificatesIds) {
+    public List<GiftCertificate> findInRange(List<Long> certificatesIds) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> query = criteriaBuilder.createQuery(GiftCertificate.class);
         Root<GiftCertificate> certificateRoot = query.from(GiftCertificate.class);

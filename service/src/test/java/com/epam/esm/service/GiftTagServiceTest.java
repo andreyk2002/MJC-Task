@@ -4,7 +4,7 @@ import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.repository.TagRepository;
-import com.epam.esm.request.TagRequestDto;
+import com.epam.esm.request.TagRequestDtoCertificate;
 import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.TagAlreadyExistException;
 import com.epam.esm.service.excepiton.TagNotFoundException;
@@ -106,7 +106,7 @@ class GiftTagServiceTest {
     void testAddTagShouldThrowIfAlreadyExists() {
         long id = 15;
         GiftTag tag = new GiftTag(id, "fsdaf");
-        TagRequestDto requestDto = new TagRequestDto(id, "fsdaf");
+        TagRequestDtoCertificate requestDto = new TagRequestDtoCertificate(id, "fsdaf");
         when(tagRepository.getById(anyLong())).thenReturn(Optional.of(tag));
 
         Assertions.assertThrows(TagAlreadyExistException.class, () -> service.addTag(requestDto));
@@ -117,32 +117,31 @@ class GiftTagServiceTest {
     void testAddTagShouldAddIfNotPresent() {
         long id = 15;
         GiftTag tag = new GiftTag(id, "fsdaf");
-        TagRequestDto requestDto = new TagRequestDto(id, "fsdaf");
+        TagRequestDtoCertificate requestDto = new TagRequestDtoCertificate(id, "fsdaf");
         TagResponseDto responseDto = new TagResponseDto(id, "fsdaf");
-        when(tagRepository.getById(anyLong())).thenReturn(Optional.empty()).thenReturn(Optional.of(tag));
+        when(tagRepository.getById(anyLong())).thenReturn(Optional.empty());
         when(tagRepository.addTag(any())).thenReturn(tag);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
-        when(mapper.requestToEntity(any())).thenReturn(tag);
+        when(mapper.certificateRequestToEntity(any())).thenReturn(tag);
 
 
         TagResponseDto result = service.addTag(requestDto);
         Assertions.assertEquals(responseDto, result);
 
-        verify(tagRepository, times(2)).getById(id);
+        verify(tagRepository).getById(id);
         verify(tagRepository).addTag(tag);
         verify(mapper).entityToResponse(tag);
-        verify(mapper).requestToEntity(requestDto);
+        verify(mapper).certificateRequestToEntity(requestDto);
     }
 
     @Test
     void testUpdateTagShouldUpdateIfExists() {
         long id = 555;
         GiftTag tag = new GiftTag(id, "fdasfasdf");
-        TagRequestDto requestDto = new TagRequestDto(id, "fdasfasdf");
+        TagRequestDtoCertificate requestDto = new TagRequestDtoCertificate(id, "fdasfasdf");
         TagResponseDto responseDto = new TagResponseDto(id, "fdasfasdf");
         when(tagRepository.getById(anyLong())).thenReturn(Optional.of(tag));
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
-        when(mapper.requestToEntity(any())).thenReturn(tag);
 
 
         TagResponseDto result = service.updateTag(requestDto);
@@ -150,7 +149,7 @@ class GiftTagServiceTest {
 
         verify(tagRepository, times(2)).getById(id);
         verify(mapper).entityToResponse(tag);
-        verify(mapper).requestToEntity(requestDto);
+        verify(mapper).certificateRequestToEntity(requestDto);
 
     }
 
@@ -158,18 +157,22 @@ class GiftTagServiceTest {
     void testUpdateTagShouldAddIfNotPresent() {
         long id = 424242;
         GiftTag tag = new GiftTag(id, "123");
-        TagRequestDto requestDto = new TagRequestDto(id, "123");
+        TagRequestDtoCertificate requestDto = new TagRequestDtoCertificate(id, "123");
         TagResponseDto responseDto = new TagResponseDto(id, "123");
         when(tagRepository.getById(anyLong())).thenReturn(Optional.empty()).thenReturn(Optional.of(tag));
+        when(tagRepository.addTag(any())).thenReturn(tag);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
-        when(mapper.requestToEntity(any())).thenReturn(tag);
+        when(mapper.certificateRequestToEntity(any())).thenReturn(tag);
 
 
         TagResponseDto result = service.updateTag(requestDto);
         Assertions.assertEquals(responseDto, result);
 
+        verify(tagRepository).addTag(tag);
         verify(tagRepository).getById(id);
         verify(mapper).entityToResponse(tag);
-        verify(mapper).requestToEntity(requestDto);
+        verify(mapper).certificateRequestToEntity(requestDto);
     }
+
+
 }

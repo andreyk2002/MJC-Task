@@ -18,11 +18,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper mapper;
 
-    public List<UserResponseDto> getAll() {
-        List<User> all = userRepository.getAll();
-        return mapper.entitiesToResponses(all);
-    }
-
     public UserResponseDto getById(long id) {
         Optional<User> optionalUser = userRepository.getById(id);
         return optionalUser.map(mapper::entityToResponse)

@@ -5,6 +5,7 @@ import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.request.TagRequestDto;
+import com.epam.esm.request.TagRequestDtoCertificate;
 import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.TagAlreadyExistException;
 import com.epam.esm.service.excepiton.TagNotFoundException;
@@ -75,8 +76,8 @@ public class GiftTagService {
      * @param tagRequestDto Contains updated state of tag instance
      * @return instance of {@link TagResponseDto} which is already updated in repository
      */
-    TagResponseDto updateTag(TagRequestDto tagRequestDto) {
-        GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
+    TagResponseDto updateTag(TagRequestDtoCertificate tagRequestDto) {
+        GiftTag giftTag = mapper.certificateRequestToEntity(tagRequestDto);
         long id = tagRequestDto.getId();
         Optional<GiftTag> optional = tagRepo.getById(id);
         return optional.map(tag -> {
@@ -91,12 +92,18 @@ public class GiftTagService {
      * @param tagRequestDto - instance needed to be added
      * @return instance of {@link TagResponseDto} which is already added to repository
      */
-    public TagResponseDto addTag(TagRequestDto tagRequestDto) {
+    public TagResponseDto addTag(TagRequestDtoCertificate tagRequestDto) {
         long id = tagRequestDto.getId();
         Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
         optionalGiftTag.ifPresent(giftTag -> {
             throw new TagAlreadyExistException();
         });
+        GiftTag giftTag = mapper.certificateRequestToEntity(tagRequestDto);
+        GiftTag addedTag = tagRepo.addTag(giftTag);
+        return mapper.entityToResponse(addedTag);
+    }
+
+    public TagResponseDto addTag(TagRequestDto tagRequestDto) {
         GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
         GiftTag addedTag = tagRepo.addTag(giftTag);
         return mapper.entityToResponse(addedTag);

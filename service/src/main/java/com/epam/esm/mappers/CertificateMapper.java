@@ -4,6 +4,7 @@ package com.epam.esm.mappers;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.response.CertificateResponseDto;
+import lombok.Setter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -16,6 +17,7 @@ import java.util.List;
  * Provides functionality for transforming certificate entities from/to request and response dtos
  */
 @Mapper(componentModel = "spring")
+@Setter
 public abstract class CertificateMapper {
 
     @Autowired

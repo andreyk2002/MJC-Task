@@ -1,6 +1,7 @@
 package com.epam.esm.controller;
 
 
+import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.response.CertificateResponseDto;
 import com.epam.esm.service.CertificateService;
@@ -10,19 +11,15 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -74,53 +71,14 @@ public class CertificateController {
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
-    //previous links on last
-    //TODO: move links to interceptor (catch all get requests and adds next and prev) @PostHandle #last priority
-    @GetMapping("")
-    public ResponseEntity<CollectionModel<CertificateResponseDto>> getPage(
-            @ApiParam(value = "Size of certificate page")
-            @RequestParam(defaultValue = "10") @Positive @Max(MAX_PAGE) int size,
-            @ApiParam(value = "Offset of certificate page")
-            @RequestParam(defaultValue = "0") @PositiveOrZero int offset
-    ) {
-        List<CertificateResponseDto> page = certificateService.getPage(offset, size);
-        page.forEach(cert ->
-                cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
-        List<Link> links = Arrays.asList(
-                linkTo(methodOn(CertificateController.class)
-                        .getPage(size, offset + size)).withRel("next"),
-                linkTo(methodOn(CertificateController.class)
-                        .getPage(size, offset - size)).withRel("prev"));
-        CollectionModel<CertificateResponseDto> model = CollectionModel.of(page, links);
-        return new ResponseEntity<>(model, HttpStatus.OK);
-    }
 
-    @GetMapping("/search")
+    @GetMapping("")
     @ApiOperation(value = "Searches list of all certificates depends on keyword (part of name or description)" +
             " or/and tag name in specified order", response = ResponseEntity.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Certificates were successfully archived"),
-            @ApiResponse(code = 40016, message = "Parameters were not in correct format: order string " +
-                    "violated regexp (name|createDate),(asc|desc)"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")
-    }
-    )
-    public ResponseEntity<CollectionModel<CertificateResponseDto>> getCertificates(
-            @ApiParam(value = "name of the tag which all certificates should contain")
-            @RequestParam(required = false) String tagName,
-            @ApiParam(value = "part of the name or / and description which all certificates should contain")
-            @RequestParam(required = false) String keyword,
-            @ApiParam(value = "Specifies how certificates will be sorted")
-            @RequestParam(defaultValue = "name,asc")
-            @Pattern(message = "40016", regexp = "(name|create_date),(asc|desc)") String sort,
-            @ApiParam(value = "Size of certificate page")
-            @RequestParam(defaultValue = "10") @Positive @Max(MAX_PAGE) int size,
-            @ApiParam(value = "Offset of certificate page")
-            @RequestParam(defaultValue = "0") @PositiveOrZero int offset
-    ) {
+    public ResponseEntity<CollectionModel<CertificateResponseDto>> getCertificates(@Validated CertificateFilter filter) {
 
         List<CertificateResponseDto> certificates = certificateService
-                .getCertificates(tagName, keyword, sort, size, offset);
+                .getCertificates(filter);
         certificates.forEach(cert ->
                 cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
         CollectionModel<CertificateResponseDto> model = CollectionModel.of(certificates);
