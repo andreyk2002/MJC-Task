@@ -6,7 +6,6 @@ import com.epam.esm.mappers.CertificateMapper;
 import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.repository.CertificateRepository;
-import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.request.TagRequestDtoCertificate;
 import com.epam.esm.response.CertificateResponseDto;
@@ -34,7 +33,6 @@ public class CertificateService {
     private final CertificateRepository certificateRepo;
     private final GiftTagService tagService;
     private final CertificateMapper mapper;
-    private final CertificateTagJdbcRepository certificateTagRepository;
     private final NullableFieldsFinder nullableFieldsFinder;
     private final TagMapper tagMapper;
 
@@ -64,7 +62,6 @@ public class CertificateService {
     @Transactional
     public CertificateResponseDto deleteById(long id) {
         CertificateResponseDto certificate = getById(id);
-        certificateTagRepository.deleteByCertificateId(id);
         certificateRepo.deleteById(id);
         return certificate;
     }
@@ -85,7 +82,6 @@ public class CertificateService {
             String[] nullPropertyNames = nullableFieldsFinder.getNullPropertyNames(newCertificate);
             BeanUtils.copyProperties(newCertificate, updated, nullPropertyNames);
             updated.setId(certificateId);
-            certificateTagRepository.deleteByCertificateId(certificateId);
             List<TagRequestDtoCertificate> tags = certificateRequest.getTags();
             if (tags != null) {
                 List<TagResponseDto> updatedTags = tags.stream().map(tagService::updateTag).collect(Collectors.toList());

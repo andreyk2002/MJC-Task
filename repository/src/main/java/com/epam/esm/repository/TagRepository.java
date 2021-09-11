@@ -51,6 +51,7 @@ public class TagRepository {
     @Transactional
     public void updateTag(GiftTag giftTag) {
         entityManager.merge(giftTag);
+        entityManager.flush();
     }
 
 

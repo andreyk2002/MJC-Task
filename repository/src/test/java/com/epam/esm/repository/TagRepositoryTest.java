@@ -1,13 +1,14 @@
 package com.epam.esm.repository;
 
 import com.epam.esm.entity.GiftTag;
+import com.github.database.rider.core.api.dataset.DataSet;
+import com.github.database.rider.core.api.dataset.ExpectedDataSet;
+import com.github.database.rider.spring.api.DBRider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.persistence.EntityManager;
@@ -15,9 +16,9 @@ import javax.persistence.PersistenceContext;
 import java.util.Collections;
 import java.util.Optional;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class})
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DBRider
 class TagRepositoryTest {
 
     private TagRepository repository;
@@ -31,43 +32,41 @@ class TagRepositoryTest {
     }
 
     @Test
+    @DataSet(value = "/datasets/allTags.yml")
+    @ExpectedDataSet(value = "/datasets/addedTag.yml")
     void testAddTagShouldAdd() {
         GiftTag tagToAdd = new GiftTag(0, "tag");
-        GiftTag addedTag = repository.addTag(tagToAdd);
-        Assertions.assertEquals(addedTag, tagToAdd);
+        repository.addTag(tagToAdd);
     }
 
     @Test
-    @Sql({"/deleteAllTags.sql", "addTagWithId42.sql"})
+    @DataSet(value = "/datasets/tag.yml")
+    @ExpectedDataSet(value = "/datasets/updatedTag.yml")
     void testUpdateTagShouldUpdateTag() {
         long id = 42;
-        GiftTag tag = new GiftTag(id, "tagName");
-        tag.setName("updated name");
+        GiftTag tag = new GiftTag(id, "updated name");
         repository.updateTag(tag);
-        Optional<GiftTag> updated = repository.getById(id);
-        Assertions.assertEquals(updated, Optional.of(tag));
     }
 
     @Test
-    @Sql({"/deleteAllTags.sql", "addTagWithId42.sql"})
+    @DataSet(value = "/datasets/tag.yml")
+    @ExpectedDataSet(value = "/datasets/emptyTags.yml")
     void testDeleteByIdShouldDeleteTag() {
         long id = 42;
         repository.deleteById(id);
-        Optional<GiftTag> deleted = repository.getById(id);
-        Assertions.assertTrue(deleted.isEmpty());
     }
 
     @Test
-    @Sql({"/deleteAllTags.sql", "addTagWithId421.sql"})
+    @DataSet(value = "/datasets/allTags.yml")
     void testGetByIdShouldReturnTagIfPresent() {
-        GiftTag expected = new GiftTag(421, "new tag", Collections.emptySet());
-        long addingId = 421;
-        Optional<GiftTag> tagById = repository.getById(addingId);
+        long id = 3;
+        GiftTag expected = new GiftTag(id, "third", Collections.emptySet());
+        Optional<GiftTag> tagById = repository.getById(id);
         Assertions.assertEquals(Optional.of(expected), tagById);
     }
 
     @Test
-    @Sql({"/deleteAllTags.sql"})
+    @DataSet(value = "/datasets/allTags.yml")
     void testGetByIdShouldReturnEmptyIfNotFound() {
         long testId = 56565656;
         Optional<GiftTag> empty = repository.getById(testId);

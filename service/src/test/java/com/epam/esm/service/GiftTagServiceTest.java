@@ -2,7 +2,6 @@ package com.epam.esm.service;
 
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
-import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.request.TagRequestDtoCertificate;
 import com.epam.esm.response.TagResponseDto;
@@ -32,9 +31,6 @@ class GiftTagServiceTest {
 
     @Mock
     private TagRepository tagRepository;
-
-    @Mock
-    private CertificateTagJdbcRepository certificateTagRepository;
 
 
     @Test

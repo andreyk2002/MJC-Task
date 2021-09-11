@@ -2,7 +2,6 @@ package com.epam.esm.service;
 
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
-import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.request.TagRequestDto;
 import com.epam.esm.request.TagRequestDtoCertificate;
@@ -26,8 +25,6 @@ import java.util.Optional;
 public class GiftTagService {
 
     private final TagRepository tagRepo;
-
-    private final CertificateTagJdbcRepository certificateTagRepo;
 
     private final TagMapper mapper;
 
@@ -53,7 +50,6 @@ public class GiftTagService {
     @Transactional
     public TagResponseDto deleteById(long id) {
         TagResponseDto tagToDelete = getById(id);
-        certificateTagRepo.deleteByTagId(id);
         tagRepo.deleteById(id);
         return tagToDelete;
     }

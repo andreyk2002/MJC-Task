@@ -30,7 +30,7 @@
             </dependency>
             <dependency>
                 <groupId>com.github.database-rider</groupId>
-                <artifactId>rider-core</artifactId>
+                <artifactId>rider-spring</artifactId>
                 <version>1.30.0</version>
                 <scope>test</scope>
                 <exclusions>
@@ -40,6 +40,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
         </dependencies>
 <build>
     <plugins>

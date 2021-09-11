@@ -6,7 +6,6 @@ import com.epam.esm.mappers.CertificateMapper;
 import com.epam.esm.mappers.TagMapper;
 import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.repository.CertificateRepository;
-import com.epam.esm.repository.CertificateTagJdbcRepository;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.request.TagRequestDtoCertificate;
 import com.epam.esm.response.CertificateResponseDto;
@@ -37,9 +36,6 @@ class CertificateServiceTest {
 
     @Mock
     private CertificateMapper mapper;
-
-    @Mock
-    private CertificateTagJdbcRepository certificateTagRepository;
 
     @Mock
     private NullableFieldsFinder nullableFieldsFinder;
