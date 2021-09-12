@@ -8,6 +8,11 @@ import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * UserRepository provides functionality for interaction with storage,
+ * which contains data about {@link User} entities
+ */
+
 @Repository
 public class UserRepository {
     private static final String FIND_ALL = "SELECT u FROM User u";
@@ -15,16 +20,26 @@ public class UserRepository {
     private EntityManager entityManager;
 
 
-    public List<User> getAll() {
-        return entityManager.createQuery(FIND_ALL, User.class).getResultList();
-    }
-
-
+    /**
+     * Searches user by specified id
+     *
+     * @param id - ID of the user to be find
+     * @return User with specified id if user with specified id exists in the storage, e
+     * else returns Optional.empty()
+     */
     public Optional<User> getById(long id) {
         User user = entityManager.find(User.class, id);
         return Optional.ofNullable(user);
     }
 
+
+    /**
+     * Return a page of users within specified range
+     *
+     * @param size   -  maximal number of users in one page
+     * @param offset - number of user from which page starts
+     * @return List of all users located within specified range
+     */
     public List<User> getPage(int size, int offset) {
         return entityManager
                 .createQuery(FIND_ALL, User.class)

@@ -18,6 +18,10 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * provides opportunities about managing {@link Order} entities
+ */
+
 @Service
 @AllArgsConstructor
 public class CartService {
@@ -28,6 +32,14 @@ public class CartService {
     private final CertificateRepository certificateRepository;
 
 
+    /**
+     * Creates order for user with specified id
+     *
+     * @param userId       - id to which order belongs to
+     * @param certificates - ids of certificates which included to order
+     * @return instance of created order
+     * @throws UserNotFoundException is user with specified id not exists
+     */
     public OrderResponseDto createOrder(long userId, List<Long> certificates) {
         Optional<User> optionalUser = userRepository.getById(userId);
         List<Long> certificateRange = certificates.stream().sorted().distinct().collect(toList());

@@ -2,6 +2,7 @@ package com.epam.esm.repository;
 
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.GiftTag;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,7 +60,7 @@ public class CertificateRepository {
      * Updates an instance of {@link GiftCertificate} in the storage
      *
      * @param giftCertificate instance of certificate, needed to be updated
-     * @return entity of updated certificate
+     * @return instance of updated certificate
      */
     @Transactional
     public GiftCertificate updateCertificate(GiftCertificate giftCertificate) {
@@ -69,9 +70,11 @@ public class CertificateRepository {
     }
 
     /**
-     * Get list of all certificates, which are present in the storage
+     * Return a page of certificates within specified range
      *
-     * @return List of all present certificates
+     * @param size   -  maximal number of certificates in one page
+     * @param offset - number of user from which page starts
+     * @return List of all certificates located within specified range
      */
     public List<GiftCertificate> getPage(int offset, int size) {
         return entityManager.createQuery(FIND_ALL, GiftCertificate.class)
@@ -105,24 +108,52 @@ public class CertificateRepository {
      */
 
 
-    //TODO : criteria api last time
     public List<GiftCertificate> getAllSorted(CertificateFilter filter) {
-        StringBuilder query = new StringBuilder("SELECT DISTINCT gc FROM GiftCertificate gc JOIN gc.tags t " +
-                "WHERE (?1 is NULL  OR t.name LIKE concat('%', ?1, '%')) AND " +
-                "(?2 is NULL OR gc.name LIKE concat('%', ?2, '%') OR gc.description LIKE concat('%', ?2, '%')) " +
-                "ORDER BY ");
-        query.append("gc.");
-        query.append(filter.getSortField());
-        query.append(" ");
-        query.append(filter.getSortOrder());
-        return entityManager.createQuery(query.toString(), GiftCertificate.class)
-                .setParameter(1, filter.getTagName())
-                .setParameter(2, filter.getKeyword())
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> certificateRoot = criteriaQuery.from(GiftCertificate.class);
+        Metamodel metamodel = entityManager.getMetamodel();
+        EntityType<GiftCertificate> certificateEntityType = metamodel.entity(GiftCertificate.class);
+        Join<GiftCertificate, GiftTag> tasks = certificateRoot.join(
+                certificateEntityType.getSet("tags", GiftTag.class), JoinType.LEFT);
+        String keyword = "%" + filter.getKeyword() + "%";
+        String sortField = filter.getSortField();
+        String sortOrder = filter.getSortOrder();
+        Order order;
+        Path<Object> sort = certificateRoot.get(sortField);
+        if (sortOrder.equalsIgnoreCase("asc")) {
+            order = criteriaBuilder.asc(sort);
+        } else {
+            order = criteriaBuilder.desc(sort);
+        }
+        String tagName = filter.getTagName();
+        Predicate findInCertificates = criteriaBuilder.or(
+                criteriaBuilder.like(certificateRoot.get("name"), keyword),
+                criteriaBuilder.like(certificateRoot.get("description"), keyword)
+        );
+        Predicate searchPredicate = findInCertificates;
+        if (tagName != null) {
+            searchPredicate = criteriaBuilder.and(
+                    findInCertificates,
+                    criteriaBuilder.equal(tasks.get("name"), tagName)
+            );
+        }
+        criteriaQuery.select(certificateRoot)
+                .distinct(true)
+                .where(searchPredicate)
+                .orderBy(order);
+        return entityManager.createQuery(criteriaQuery)
                 .setFirstResult(filter.getOffset())
                 .setMaxResults(filter.getPageSize())
                 .getResultList();
     }
 
+    /**
+     * Searches certificates which ids are present in specified list
+     *
+     * @param certificatesIds list of needed certificates ids
+     * @return all certificates, which ids are present in specified list
+     */
     public List<GiftCertificate> findInRange(List<Long> certificatesIds) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> query = criteriaBuilder.createQuery(GiftCertificate.class);
@@ -134,6 +165,12 @@ public class CertificateRepository {
     }
 
 
+    /**
+     * Searches certificates which tags ids are present in specified list
+     *
+     * @param tagIds ids all of which certificates should contain
+     * @return all certificates, which contain all needed tags
+     */
     public List<GiftCertificate> findByTags(List<Long> tagIds) {
         TypedQuery<GiftCertificate> query = entityManager.createQuery(
                 "select gc from GiftCertificate gc JOIN gc.tags t" +

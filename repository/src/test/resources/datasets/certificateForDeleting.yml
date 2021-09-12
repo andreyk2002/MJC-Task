@@ -2,9 +2,9 @@ gift_certificate:
   - id: 705
     name: "first"
 tag:
-  - id: 102
+  - id: 1
     name: "some tag"
 
 certificate_tag:
   - certificate_id: 705
-    tag_id: 102
+    tag_id: 1

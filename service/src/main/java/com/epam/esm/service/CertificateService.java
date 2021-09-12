@@ -107,27 +107,29 @@ public class CertificateService {
     }
 
     /**
-     * Searches list of certificates specified size from specified position depends
-     * on keyword (part of name or description) or/and tag name in specified order
+     * Searches list of all certificates depends on keyword (part of name or description) or/and tag name
+     * in specified order
      *
-     * @param tagName    - name of the tag which required certificates should contain. If null value passed, all certificates
-     *                   applied to that criteria
-     * @param keyword    - part of certificate name/description which required certificates should contain. If null value passed, all certificates
-     *                   *                applied to that criteria
-     * @param sortString - specifies the way, how list of certificates should be sorted. Should apply to regex (.*), (.*),
-     *                   where first part contain information about field, by which sorting will performed, and second part
-     *                   specifies the sort order (acs/desc)
-     * @param size       - size of result list
-     * @param offset     - start position of result list
-     * @return List of certificates which applied to all limits, sorted in specified order
+     * @param filter stores information about which criterias of selecting certificates.
+     *               May include tagName -  name of the tag which certificate should contain,
+     *               keyword - part of the name or description which certificate should have
+     *               sortOrder -  type of sort order (ascending, descending),
+     *               sortField - name of the field by which certificates should be ordered
+     * @return List of certificates which applied to the mentioned criterias
      */
     public List<CertificateResponseDto> getCertificates(CertificateFilter filter) {
         List<GiftCertificate> certificates = certificateRepo.getAllSorted(filter);
         return mapper.entitiesToResponses(certificates);
     }
 
-    public List<CertificateResponseDto> findByTags(String namesString) {
-        String[] tags = namesString.split(",");
+    /**
+     * Searches certificates which tags ids are present in specified list
+     *
+     * @param tagsString - String which contain tags ids in format id1,id2,id3,id4...
+     * @return all certificates, which contain all needed tags
+     */
+    public List<CertificateResponseDto> findByTags(String tagsString) {
+        String[] tags = tagsString.split(",");
         List<Long> ids = Arrays.stream(tags).map(Long::parseLong).collect(Collectors.toList());
         List<GiftCertificate> certificates = certificateRepo.findByTags(ids);
         return mapper.entitiesToResponses(certificates);

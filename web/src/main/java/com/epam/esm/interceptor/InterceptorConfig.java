@@ -1,24 +1,21 @@
 package com.epam.esm.interceptor;
 
-import com.epam.esm.controller.CartController;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Component
-public class CartInterceptor implements HandlerInterceptor {
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response,
-                           Object handler, ModelAndView modelAndView) throws Exception {
-        String method = request.getMethod();
+@AllArgsConstructor
+public class InterceptorConfig implements WebMvcConfigurer {
 
+    private TagInterceptor tagInterceptor;
+    private CertificateInterceptor certificateInterceptor;
 
+    public void addInterceptors(InterceptorRegistry registry) {
+        InterceptorRegistration tagInterceptorRegistration = registry.addInterceptor(tagInterceptor);
+        tagInterceptorRegistration.addPathPatterns("/tags/**");
     }
-
-    //    order.add(
-//    linkTo(methodOn(CartController.class).createOrder(userId, certificates)).withSelfRel()
-//        );
 }
+

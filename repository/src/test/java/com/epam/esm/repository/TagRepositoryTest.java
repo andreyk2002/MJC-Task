@@ -32,7 +32,7 @@ class TagRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/allTags.yml")
+    @DataSet(value = "/datasets/allTags.yml", disableConstraints = true)
     @ExpectedDataSet(value = "/datasets/addedTag.yml")
     void testAddTagShouldAdd() {
         GiftTag tagToAdd = new GiftTag(0, "tag");
@@ -40,7 +40,7 @@ class TagRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/tag.yml")
+    @DataSet(value = "/datasets/tag.yml", disableConstraints = true)
     @ExpectedDataSet(value = "/datasets/updatedTag.yml")
     void testUpdateTagShouldUpdateTag() {
         long id = 42;
@@ -49,7 +49,7 @@ class TagRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/tag.yml")
+    @DataSet(value = "/datasets/tag.yml", disableConstraints = true)
     @ExpectedDataSet(value = "/datasets/emptyTags.yml")
     void testDeleteByIdShouldDeleteTag() {
         long id = 42;
@@ -57,7 +57,7 @@ class TagRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/allTags.yml")
+    @DataSet(value = "/datasets/allTags.yml", disableConstraints = true)
     void testGetByIdShouldReturnTagIfPresent() {
         long id = 3;
         GiftTag expected = new GiftTag(id, "third", Collections.emptySet());
@@ -66,7 +66,7 @@ class TagRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/allTags.yml")
+    @DataSet(value = "/datasets/allTags.yml", disableConstraints = true)
     void testGetByIdShouldReturnEmptyIfNotFound() {
         long testId = 56565656;
         Optional<GiftTag> empty = repository.getById(testId);

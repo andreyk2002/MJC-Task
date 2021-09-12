@@ -75,18 +75,20 @@ public class TagController {
     }
 
     @GetMapping("")
-    @ApiOperation(value = "Returns page with specified range of all available tags with specified offset",
+    @ApiOperation(value = " Return a page of tags within specified range",
             response = ResponseEntity.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Requested tag was successfully found"),
-            @ApiResponse(code = 40021, message = "Offset can't be negative"),
-            @ApiResponse(code = 40022, message = "Page size can't be negative"),
+            @ApiResponse(code = 200, message = "Page were successfully find"),
+            @ApiResponse(code = 40021, message = "Page offset were negative"),
+            @ApiResponse(code = 400221, message = "Page size were not positive"),
+            @ApiResponse(code = 400222, message = "Page size exceeded maximal limit"),
             @ApiResponse(code = 500, message = "Application failed to process the request")
-    }
-    )
+    })
     public ResponseEntity<CollectionModel<TagResponseDto>> getPage(
-            @RequestParam @PositiveOrZero(message = "40021") int offset,
-            @RequestParam @Positive(message = "40022") @Max(MAX_PAGE) int size) {
+            @ApiParam("number of tag from which page starts") @RequestParam
+            @PositiveOrZero(message = "40021") int offset,
+            @ApiParam("maximal number of orders in one page") @RequestParam @Positive(message = "400221")
+            @Max(value = MAX_PAGE, message = "400222") int size) {
         List<TagResponseDto> page = tagService.getPage(offset, size);
         page.forEach(tag -> tag.add(linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("findTag")));
         List<Link> links = Arrays.asList(

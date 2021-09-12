@@ -29,18 +29,6 @@ public class GiftTagService {
     private final TagMapper mapper;
 
 
-
-    /**
-     * Gets all available tags
-     *
-     * @return list of all tags, available in the repository
-     */
-    public List<TagResponseDto> getAllTags() {
-        List<GiftTag> tags = tagRepo.getAll();
-        return mapper.entitiesToResponses(tags);
-    }
-
-
     /**
      * Removes tag by its id
      *
@@ -83,10 +71,11 @@ public class GiftTagService {
     }
 
     /**
-     * Adds a requested instance of tag to repository
+     * Adds a requested instance of tag (with id) to repository
      *
      * @param tagRequestDto - instance needed to be added
-     * @return instance of {@link TagResponseDto} which is already added to repository
+     * @return instance of {@link TagResponseDto} which is added to repository
+     * @throws TagAlreadyExistException if tag with specified id already  added to repository
      */
     public TagResponseDto addTag(TagRequestDtoCertificate tagRequestDto) {
         long id = tagRequestDto.getId();
@@ -99,17 +88,35 @@ public class GiftTagService {
         return mapper.entityToResponse(addedTag);
     }
 
+    /**
+     * Adds a requested instance of tag (without id) to repository
+     *
+     * @param tagRequestDto - instance needed to be added
+     * @return instance of {@link TagResponseDto} which is added to repository
+     */
     public TagResponseDto addTag(TagRequestDto tagRequestDto) {
         GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
         GiftTag addedTag = tagRepo.addTag(giftTag);
         return mapper.entityToResponse(addedTag);
     }
 
+    /**
+     * Gets the most widely used id of user with the highest total sum of orders
+     *
+     * @return most widely used id of user with the highest total sum of orders
+     */
     public TagResponseDto getTopUserTopTag() {
         GiftTag topUserTopTag = tagRepo.getTopUserTopTag();
         return mapper.entityToResponse(topUserTopTag);
     }
 
+    /**
+     * Return a page of tags within specified range
+     *
+     * @param size   -  maximal number of tags in one page
+     * @param offset - number of tags from which page starts
+     * @return List of all tags located within specified range
+     */
     public List<TagResponseDto> getPage(int offset, int size) {
         List<GiftTag> page = tagRepo.getPage(offset, size);
         return mapper.entitiesToResponses(page);

@@ -32,7 +32,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class CertificateController {
 
 
-    private static final int MAX_PAGE = 100;
     private final CertificateService certificateService;
 
     @DeleteMapping("/{id}")
@@ -154,9 +153,15 @@ public class CertificateController {
     }
 
     @GetMapping("/tags")
+    @ApiOperation(value = "Searches certificates which tags ids are present in specified list", response = ResponseEntity.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Certificates were successfully archived"),
+            @ApiResponse(code = 40031, message = "Tags string violated format id1,id2,id3..."),
+            @ApiResponse(code = 500, message = "Application failed to process the request")
+    })
     public ResponseEntity<CollectionModel<CertificateResponseDto>> findByTags(
-            @RequestParam @Pattern(regexp = "\\d+(,\\d+)*", message = "40031")
-                    String tags) {
+            @ApiParam("String which contain tags ids") @RequestParam
+            @Pattern(regexp = "\\d+(,\\d+)*", message = "40031") String tags) {
         List<CertificateResponseDto> certificates = certificateService.findByTags(tags);
         certificates.forEach(cert ->
                 cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));

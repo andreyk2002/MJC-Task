@@ -34,21 +34,24 @@ class GiftTagServiceTest {
 
 
     @Test
-    void testGetAllTagsShouldReturnAllTags() {
+    void testGetPageShouldReturnTagsPage() {
         long firstId = 1;
         long secondId = 2;
+        int offset = 0;
+        int size = 10;
         GiftTag firstGiftTag = new GiftTag(firstId, "first");
         GiftTag secondGiftTag = new GiftTag(secondId, "second");
         TagResponseDto firstResponse = new TagResponseDto(firstId, "first");
         TagResponseDto secondResponse = new TagResponseDto(secondId, "second");
-        when(tagRepository.getAll()).thenReturn(Arrays.asList(firstGiftTag, secondGiftTag));
+        when(tagRepository.getPage(anyInt(), anyInt())).thenReturn(Arrays.asList(firstGiftTag, secondGiftTag));
         when(mapper.entitiesToResponses(anyList())).thenReturn(Arrays.asList(firstResponse, secondResponse));
 
 
         List<TagResponseDto> all = Arrays.asList(firstResponse, secondResponse);
-        List<TagResponseDto> allTags = service.getAllTags();
+        List<TagResponseDto> allTags = service.getPage(offset, size);
         Assertions.assertEquals(allTags, all);
         verify(mapper).entitiesToResponses(Arrays.asList(firstGiftTag, secondGiftTag));
+        verify(tagRepository).getPage(offset, size);
     }
 
     @Test
