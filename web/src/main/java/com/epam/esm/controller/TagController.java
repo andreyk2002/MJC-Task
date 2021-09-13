@@ -34,6 +34,7 @@ public class TagController {
 
     private static final int MAX_PAGE = 100;
     private final GiftTagService tagService;
+    private final OffsetCreator offsetCreator;
 
 
     @DeleteMapping("/{id}")
@@ -92,10 +93,7 @@ public class TagController {
         List<TagResponseDto> page = tagService.getPage(offset, size);
         page.forEach(tag -> tag.add(linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("findTag")));
         int nextOffset = offset + size;
-        int prevOffset = offset - size;
-        if (prevOffset < 0) {
-            prevOffset = 0;
-        }
+        int prevOffset = offsetCreator.createPreviousOffset(offset, size);
         List<Link> links = Arrays.asList(
                 linkTo(methodOn(TagController.class).getPage(offset, size)).withSelfRel(),
                 linkTo(methodOn(TagController.class).getPage(nextOffset, size)).withRel("nextPage"),

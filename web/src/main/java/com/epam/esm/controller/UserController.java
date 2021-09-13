@@ -34,7 +34,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserController {
 
     private static final int MAX_PAGE = 100;
+
     private final UserService userService;
+    private final OffsetCreator offsetCreator;
 
     @GetMapping("")
     @ApiOperation("Return a page of users within specified range")
@@ -53,10 +55,7 @@ public class UserController {
         List<UserResponseDto> page = userService.getPage(size, offset);
         page.forEach(user -> user.add(linkTo(methodOn(UserController.class).getById(user.getId())).withRel("getByID")));
         int nextOffset = offset + size;
-        int prevOffset = offset - size;
-        if (prevOffset < 0) {
-            prevOffset += totalCount;
-        }
+        int prevOffset = offsetCreator.createPreviousOffset(offset, size);
         List<Link> links = Arrays.asList(
                 linkTo(methodOn(UserController.class).getPage(offset, size)).withSelfRel(),
                 linkTo(methodOn(UserController.class).getPage(nextOffset, size)).withRel("nextPage"),

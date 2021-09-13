@@ -35,6 +35,7 @@ public class OrderController {
 
     private final OrderService orderService;
     private final static int MAX_PAGE = 100;
+    private final OffsetCreator offsetCreator;
 
     @GetMapping("")
     @ApiOperation("Return a page of orders within specified range")
@@ -54,10 +55,7 @@ public class OrderController {
         List<OrderResponseDto> page = orderService.getPage(size, offset);
         page.forEach(order -> order.add(linkTo(methodOn(OrderController.class).getById(order.getId())).withRel("getById")));
         int nextOffset = offset + size;
-        int prevOffset = offset - size;
-        if (prevOffset < 0) {
-            prevOffset = 0;
-        }
+        int prevOffset = offsetCreator.createPreviousOffset(offset, size);
         List<Link> links = Arrays.asList(
                 linkTo(methodOn(OrderController.class).getPage(size, offset)).withSelfRel(),
                 linkTo(methodOn(OrderController.class).getPage(size, nextOffset)).withRel("nextPage"),
