@@ -49,7 +49,4 @@ public class UserService {
         return mapper.entitiesToResponses(page);
     }
 
-    public Long getTotalCount() {
-        return userRepository.getTotalCount();
-    }
 }

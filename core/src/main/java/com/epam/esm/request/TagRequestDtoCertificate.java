@@ -10,8 +10,7 @@ import javax.validation.constraints.NotEmpty;
 @EqualsAndHashCode
 @Getter
 @Setter
-//two dtos
-//Objects
+
 public class TagRequestDtoCertificate {
 
 

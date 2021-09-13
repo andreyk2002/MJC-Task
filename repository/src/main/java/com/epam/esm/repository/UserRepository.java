@@ -48,7 +48,4 @@ public class UserRepository {
                 .getResultList();
     }
 
-    public Long getTotalCount() {
-        return entityManager.createQuery("select count(u) from User u", Long.class).getSingleResult();
-    }
 }
