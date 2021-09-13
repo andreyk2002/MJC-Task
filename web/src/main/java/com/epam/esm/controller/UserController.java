@@ -49,12 +49,18 @@ public class UserController {
             @ApiParam("number of order from which page starts") @RequestParam @PositiveOrZero(message = "40021") int offset,
             @ApiParam("maximal number of orders in one page") @RequestParam
             @Positive(message = "400221") @Max(value = MAX_PAGE, message = "400222") int size) {
+        long totalCount = userService.getTotalCount();
         List<UserResponseDto> page = userService.getPage(size, offset);
         page.forEach(user -> user.add(linkTo(methodOn(UserController.class).getById(user.getId())).withRel("getByID")));
+        int nextOffset = offset + size;
+        int prevOffset = offset - size;
+        if (prevOffset < 0) {
+            prevOffset += totalCount;
+        }
         List<Link> links = Arrays.asList(
-                linkTo(methodOn(UserController.class).getPage(size, offset)).withSelfRel(),
-                linkTo(methodOn(UserController.class).getPage(size, offset + size)).withRel("nextPage"),
-                linkTo(methodOn(UserController.class).getPage(size, offset - size)).withRel("prevPage")
+                linkTo(methodOn(UserController.class).getPage(offset, size)).withSelfRel(),
+                linkTo(methodOn(UserController.class).getPage(nextOffset, size)).withRel("nextPage"),
+                linkTo(methodOn(UserController.class).getPage(prevOffset, size)).withRel("prevPage")
         );
         CollectionModel<UserResponseDto> usersWithLinks = CollectionModel.of(page, links);
         return new ResponseEntity<>(usersWithLinks, HttpStatus.OK);

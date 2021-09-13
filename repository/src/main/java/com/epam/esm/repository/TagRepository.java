@@ -16,7 +16,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class TagRepository {
 
-    private static final String FIND_ALL = "SELECT t FROM GiftTag t";
+    private static final String FIND_ALL = "SELECT t FROM GiftTag t order by t.id asc";
 
     @PersistenceContext
     private EntityManager entityManager;

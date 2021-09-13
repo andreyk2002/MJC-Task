@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,6 +21,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -80,7 +83,10 @@ public class CertificateController {
                 .getCertificates(filter);
         certificates.forEach(cert ->
                 cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
-        CollectionModel<CertificateResponseDto> model = CollectionModel.of(certificates);
+        List<Link> links = new ArrayList<>(Collections.singletonList(
+                linkTo(methodOn(CertificateController.class).getCertificates(filter)).withSelfRel()
+        ));
+        CollectionModel<CertificateResponseDto> model = CollectionModel.of(certificates, links);
         return new ResponseEntity<>(model, HttpStatus.OK);
     }
 

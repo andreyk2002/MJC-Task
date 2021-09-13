@@ -48,4 +48,8 @@ public class UserService {
         List<User> page = userRepository.getPage(size, offset);
         return mapper.entitiesToResponses(page);
     }
+
+    public Long getTotalCount() {
+        return userRepository.getTotalCount();
+    }
 }

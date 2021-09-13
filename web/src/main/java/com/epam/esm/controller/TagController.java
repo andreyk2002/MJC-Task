@@ -91,10 +91,15 @@ public class TagController {
             @Max(value = MAX_PAGE, message = "400222") int size) {
         List<TagResponseDto> page = tagService.getPage(offset, size);
         page.forEach(tag -> tag.add(linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("findTag")));
+        int nextOffset = offset + size;
+        int prevOffset = offset - size;
+        if (prevOffset < 0) {
+            prevOffset = 0;
+        }
         List<Link> links = Arrays.asList(
                 linkTo(methodOn(TagController.class).getPage(offset, size)).withSelfRel(),
-                linkTo(methodOn(TagController.class).getPage(offset + size, size)).withRel("nextPage"),
-                linkTo(methodOn(TagController.class).getPage(offset - size, size)).withRel("prevPage"),
+                linkTo(methodOn(TagController.class).getPage(nextOffset, size)).withRel("nextPage"),
+                linkTo(methodOn(TagController.class).getPage(prevOffset, size)).withRel("prevPage"),
                 linkTo(methodOn(TagController.class).findTopUserTopTag()).withRel("topUserTopTag")
         );
         CollectionModel<TagResponseDto> tagsWithLinks = CollectionModel.of(page, links);

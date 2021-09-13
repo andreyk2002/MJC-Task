@@ -4,7 +4,9 @@ import com.epam.esm.entity.GiftCertificate;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.github.database.rider.spring.api.DBRider;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -17,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @DBRider
@@ -35,9 +37,7 @@ class CertificateRepositoryTest {
 
 
     @Test
-    // That test should be executed first otherwise generated id would be wrong
-    @Order(1)
-    @DataSet("/datasets/certificates.yml")
+    @DataSet(value = "/datasets/certificates.yml", cleanBefore = true)
     @ExpectedDataSet("/datasets/addedCertificate.yml")
     public void testAddCertificateShouldAddCertificate() {
         GiftCertificate giftCertificate = GiftCertificate.builder()
@@ -47,7 +47,7 @@ class CertificateRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/certificate.yml", disableConstraints = true)
+    @DataSet(value = "/datasets/certificate.yml", disableConstraints = true, cleanBefore = true)
     public void testGetByIdShouldReturnCertificateWhenItExisting() {
         long existingId = 420;
         GiftCertificate certificate = GiftCertificate.builder()
@@ -62,7 +62,7 @@ class CertificateRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/certificate.yml", disableConstraints = true)
+    @DataSet(value = "/datasets/certificate.yml", disableConstraints = true, cleanBefore = true)
     public void testGetByIdShouldReturnEmptyWhenCertificateNotExisting() {
         long notExistingId = 666;
         Optional<GiftCertificate> certificateOptional = repository.getById(notExistingId);
@@ -70,7 +70,7 @@ class CertificateRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/certificates.yml", disableConstraints = true)
+    @DataSet(value = "/datasets/certificates.yml", disableConstraints = true, cleanBefore = true)
     public void testGetAllShouldReturnAllCertificates() {
         GiftCertificate first = GiftCertificate.builder()
                 .id(1)
@@ -91,7 +91,7 @@ class CertificateRepositoryTest {
     }
 
     @Test
-    @DataSet(value = "/datasets/certificateForDeleting.yml")
+    @DataSet(value = "/datasets/certificateForDeleting.yml", cleanBefore = true)
     @ExpectedDataSet("/datasets/empty.yml")
     public void testDeleteShouldDeleteCertificate() {
         long existingId = 705;
@@ -99,7 +99,7 @@ class CertificateRepositoryTest {
     }
 
     @Test
-    @DataSet("/datasets/certificate.yml")
+    @DataSet(value = "/datasets/certificate.yml", cleanBefore = true)
     @ExpectedDataSet("/datasets/updatedCertificate.yml")
     public void testUpdateShouldUpdateCertificate() {
         long insertedId = 420;

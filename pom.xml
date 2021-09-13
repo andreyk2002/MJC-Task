@@ -138,6 +138,10 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
             <version>2.5.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -1,0 +1,230 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="User (generated)" id="1631533866025-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="certificate_tag"/>
+            </not>
+        </preConditions>
+        <createTable tableName="certificate_tag">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="certificate_id" type="BIGINT"/>
+            <column name="tag_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="gift_certificate"/>
+            </not>
+        </preConditions>
+        <createTable tableName="gift_certificate">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="TEXT"/>
+            <column name="price" type="DECIMAL(10)"/>
+            <column name="duration" type="INT"/>
+            <column name="create_date" type="datetime"/>
+            <column name="last_update_date" type="datetime"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="hibernate_sequence"/>
+            </not>
+        </preConditions>
+        <createTable tableName="hibernate_sequence">
+            <column name="next_val" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="order_certificate"/>
+            </not>
+        </preConditions>
+        <createTable tableName="order_certificate">
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="certificate_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tag"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tag">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-6">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_order"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user_order">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="order_price" type="DECIMAL(19, 2)"/>
+            <column name="purchase_date" type="datetime"/>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-8">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="FKj86u1x7csa8yd68ql2y1ibrou"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="FKj86u1x7csa8yd68ql2y1ibrou" tableName="user_order">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-9">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="FKk7mrxeei77rt3qv19k8gnphvq"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="FKk7mrxeei77rt3qv19k8gnphvq" tableName="order_certificate">
+            <column name="certificate_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-10">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="FKna5fh9ed972nxlc3fwkfe9sox"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="FKna5fh9ed972nxlc3fwkfe9sox" tableName="order_certificate">
+            <column name="order_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-11">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="certificateNameIndex"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="certificateNameIndex" tableName="gift_certificate">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-12">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="certificate_tag_ibfk_2_idx"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="certificate_tag_ibfk_2_idx" tableName="certificate_tag">
+            <column name="certificate_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-13">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="tagNameIndex"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="tagNameIndex" tableName="tag">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-14">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="tag_id"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="tag_id" tableName="certificate_tag">
+            <column name="tag_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-15">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FKj86u1x7csa8yd68ql2y1ibrou"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_order"
+                                 constraintName="FKj86u1x7csa8yd68ql2y1ibrou" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-16">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FKk7mrxeei77rt3qv19k8gnphvq"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="certificate_id" baseTableName="order_certificate"
+                                 constraintName="FKk7mrxeei77rt3qv19k8gnphvq" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="gift_certificate" validate="true"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-17">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FKna5fh9ed972nxlc3fwkfe9sox"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="order_id" baseTableName="order_certificate"
+                                 constraintName="FKna5fh9ed972nxlc3fwkfe9sox" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="user_order" validate="true"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-18">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="certificate_tag_ibfk_1"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="certificate_tag"
+                                 constraintName="certificate_tag_ibfk_1" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="tag" validate="true"/>
+    </changeSet>
+    <changeSet author="User (generated)" id="1631533866025-19">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="certificate_tag_ibfk_2"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="certificate_id" baseTableName="certificate_tag"
+                                 constraintName="certificate_tag_ibfk_2" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="gift_certificate" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

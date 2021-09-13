@@ -116,28 +116,8 @@ public class CertificateRepository {
         EntityType<GiftCertificate> certificateEntityType = metamodel.entity(GiftCertificate.class);
         Join<GiftCertificate, GiftTag> tasks = certificateRoot.join(
                 certificateEntityType.getSet("tags", GiftTag.class), JoinType.LEFT);
-        String keyword = "%" + filter.getKeyword() + "%";
-        String sortField = filter.getSortField();
-        String sortOrder = filter.getSortOrder();
-        Order order;
-        Path<Object> sort = certificateRoot.get(sortField);
-        if (sortOrder.equalsIgnoreCase("asc")) {
-            order = criteriaBuilder.asc(sort);
-        } else {
-            order = criteriaBuilder.desc(sort);
-        }
-        String tagName = filter.getTagName();
-        Predicate findInCertificates = criteriaBuilder.or(
-                criteriaBuilder.like(certificateRoot.get("name"), keyword),
-                criteriaBuilder.like(certificateRoot.get("description"), keyword)
-        );
-        Predicate searchPredicate = findInCertificates;
-        if (tagName != null) {
-            searchPredicate = criteriaBuilder.and(
-                    findInCertificates,
-                    criteriaBuilder.equal(tasks.get("name"), tagName)
-            );
-        }
+        Order order = createSortOrder(criteriaBuilder, certificateRoot, filter);
+        Predicate searchPredicate = createSearchPredicate(filter, criteriaBuilder, certificateRoot, tasks);
         criteriaQuery.select(certificateRoot)
                 .distinct(true)
                 .where(searchPredicate)
@@ -179,5 +159,39 @@ public class CertificateRepository {
         query.setParameter(1, tagIds);
         query.setParameter(2, (long) tagIds.size());
         return query.getResultList();
+    }
+
+    private Predicate createSearchPredicate(CertificateFilter filter, CriteriaBuilder criteriaBuilder, Root<GiftCertificate> certificateRoot,
+                                            Join<GiftCertificate, GiftTag> tasks) {
+
+        String keyword = "%" + filter.getKeyword() + "%";
+
+        String tagName = filter.getTagName();
+        Predicate findInCertificates = criteriaBuilder.or(
+                criteriaBuilder.like(certificateRoot.get("name"), keyword),
+                criteriaBuilder.like(certificateRoot.get("description"), keyword)
+        );
+        Predicate searchPredicate = findInCertificates;
+        if (tagName != null) {
+            searchPredicate = criteriaBuilder.and(
+                    findInCertificates,
+                    criteriaBuilder.equal(tasks.get("name"), tagName)
+            );
+        }
+        return searchPredicate;
+    }
+
+    private Order createSortOrder(CriteriaBuilder criteriaBuilder, Root<GiftCertificate> certificateRoot,
+                                  CertificateFilter filter) {
+        String sortField = filter.getSortField();
+        String sortOrder = filter.getSortOrder();
+        Order order;
+        Path<Object> sort = certificateRoot.get(sortField);
+        if (sortOrder.equalsIgnoreCase("asc")) {
+            order = criteriaBuilder.asc(sort);
+        } else {
+            order = criteriaBuilder.desc(sort);
+        }
+        return order;
     }
 }

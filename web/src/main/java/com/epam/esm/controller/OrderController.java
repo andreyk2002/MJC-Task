@@ -53,10 +53,15 @@ public class OrderController {
             @RequestParam @PositiveOrZero(message = "40021") int offset) {
         List<OrderResponseDto> page = orderService.getPage(size, offset);
         page.forEach(order -> order.add(linkTo(methodOn(OrderController.class).getById(order.getId())).withRel("getById")));
+        int nextOffset = offset + size;
+        int prevOffset = offset - size;
+        if (prevOffset < 0) {
+            prevOffset = 0;
+        }
         List<Link> links = Arrays.asList(
                 linkTo(methodOn(OrderController.class).getPage(size, offset)).withSelfRel(),
-                linkTo(methodOn(OrderController.class).getPage(size, offset + size)).withRel("nextPage"),
-                linkTo(methodOn(OrderController.class).getPage(size, offset - size)).withRel("prevPage")
+                linkTo(methodOn(OrderController.class).getPage(size, nextOffset)).withRel("nextPage"),
+                linkTo(methodOn(OrderController.class).getPage(size, prevOffset)).withRel("prevPage")
         );
         CollectionModel<OrderResponseDto> ordersWithLinks = CollectionModel.of(page, links);
         return new ResponseEntity<>(ordersWithLinks, HttpStatus.OK);
