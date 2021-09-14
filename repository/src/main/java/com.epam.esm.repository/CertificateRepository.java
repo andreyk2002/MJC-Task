@@ -5,7 +5,6 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftTag;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -38,7 +37,6 @@ public class CertificateRepository {
      * @param giftCertificate instance of certificate, needed to be added
      * @return ID of inserted certificate
      */
-    @Transactional
     public GiftCertificate addCertificate(GiftCertificate giftCertificate) {
         entityManager.persist(giftCertificate);
         entityManager.flush();
@@ -62,7 +60,7 @@ public class CertificateRepository {
      * @param giftCertificate instance of certificate, needed to be updated
      * @return instance of updated certificate
      */
-    @Transactional
+
     public GiftCertificate updateCertificate(GiftCertificate giftCertificate) {
         GiftCertificate updated = entityManager.merge(giftCertificate);
         entityManager.flush();

@@ -3,7 +3,6 @@ package com.epam.esm.repository;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -45,7 +44,6 @@ public class OrderRepository {
      * @param order order needed to be saved in the storage
      * @return inserted order
      */
-    @Transactional
     public Order addOrder(Order order) {
         entityManager.persist(order);
         return order;

@@ -11,6 +11,7 @@ import com.epam.esm.response.OrderResponseDto;
 import com.epam.esm.service.excepiton.UserNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -40,6 +41,7 @@ public class CartService {
      * @return instance of created order
      * @throws UserNotFoundException is user with specified id not exists
      */
+    @Transactional
     public OrderResponseDto createOrder(long userId, List<Long> certificates) {
         Optional<User> optionalUser = userRepository.getById(userId);
         List<Long> certificateRange = certificates.stream().sorted().distinct().collect(toList());

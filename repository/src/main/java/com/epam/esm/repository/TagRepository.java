@@ -4,7 +4,6 @@ import com.epam.esm.entity.GiftTag;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -50,7 +49,6 @@ public class TagRepository {
      * @param tag order needed to be saved in the storage
      * @return inserted tag
      */
-    @Transactional
     public GiftTag addTag(GiftTag tag) {
         entityManager.persist(tag);
         entityManager.flush();
@@ -63,7 +61,6 @@ public class TagRepository {
      *
      * @param giftTag instance of certificate, needed to be updated
      */
-    @Transactional
     public void updateTag(GiftTag giftTag) {
         entityManager.merge(giftTag);
         entityManager.flush();

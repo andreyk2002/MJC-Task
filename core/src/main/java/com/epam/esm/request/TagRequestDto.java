@@ -11,7 +11,7 @@ import javax.validation.constraints.NotEmpty;
 @Setter
 public class TagRequestDto {
 
-    @NotEmpty
+    @NotEmpty(message = "40001")
     private String name;
 
 }

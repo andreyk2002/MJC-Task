@@ -60,6 +60,7 @@ public class GiftTagService {
      * @param tagRequestDto Contains updated state of tag instance
      * @return instance of {@link TagResponseDto} which is already updated in repository
      */
+    @Transactional
     TagResponseDto updateTag(TagRequestDtoCertificate tagRequestDto) {
         GiftTag giftTag = mapper.certificateRequestToEntity(tagRequestDto);
         long id = tagRequestDto.getId();
@@ -77,6 +78,7 @@ public class GiftTagService {
      * @return instance of {@link TagResponseDto} which is added to repository
      * @throws TagAlreadyExistException if tag with specified id already  added to repository
      */
+    @Transactional
     public TagResponseDto addTag(TagRequestDtoCertificate tagRequestDto) {
         long id = tagRequestDto.getId();
         Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
@@ -94,6 +96,7 @@ public class GiftTagService {
      * @param tagRequestDto - instance needed to be added
      * @return instance of {@link TagResponseDto} which is added to repository
      */
+    @Transactional
     public TagResponseDto addTag(TagRequestDto tagRequestDto) {
         GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
         GiftTag addedTag = tagRepo.addTag(giftTag);
