@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.PositiveOrZero;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -138,7 +136,8 @@ public class CertificateController {
         return new ResponseEntity<>(updated, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}/price")
+
+    @PatchMapping("/{id}")
     @ApiOperation(value = "Updates price for certificate with specified id", response = ResponseEntity.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Certificates were successfully archived"),
@@ -147,10 +146,9 @@ public class CertificateController {
     })
     public ResponseEntity<CertificateResponseDto> updateCertificatePrice(
             @ApiParam(value = "Id of certificate, which price will be updated") @PathVariable long id,
-            @ApiParam(value = "New duration of certificate") @RequestBody @PositiveOrZero(message = "40013")
-            @Valid BigDecimal price) {
-        CertificateRequestDto newCertificate = CertificateRequestDto.builder().price(price).build();
-        CertificateResponseDto updated = certificateService.updateCertificate(id, newCertificate);
+            @ApiParam(value = "New duration of certificate") @RequestBody CertificateRequestDto giftCertificate) {
+        giftCertificate.setId(id);
+        CertificateResponseDto updated = certificateService.updateCertificate(id, giftCertificate);
         updated.add(
                 linkTo(methodOn(CertificateController.class).getById(id)).withRel("getById"),
                 linkTo(methodOn(CertificateController.class).deleteById(id)).withRel("deleteById")

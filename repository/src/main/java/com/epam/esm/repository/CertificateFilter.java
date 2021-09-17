@@ -16,7 +16,7 @@ public class CertificateFilter {
     @Pattern(regexp = "asc|desc", message = "400161")
     private String sortOrder = "asc";
 
-    @Pattern(regexp = "id|name|create_date", message = "400161")
+    @Pattern(regexp = "id|name|create_date", message = "400162")
     private String sortField = "id";
 
     private String keyword = "";

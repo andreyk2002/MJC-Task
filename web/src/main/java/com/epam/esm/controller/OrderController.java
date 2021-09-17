@@ -48,10 +48,10 @@ public class OrderController {
     })
     public ResponseEntity<CollectionModel<OrderResponseDto>> getPage(
             @ApiParam("maximal number of orders in one page")
-            @RequestParam @Max(value = MAX_PAGE, message = "400222")
+            @RequestParam(defaultValue = "10") @Max(value = MAX_PAGE, message = "400222")
             @Positive(message = "400221") int size,
             @ApiParam("number of order from which page starts")
-            @RequestParam @PositiveOrZero(message = "40021") int offset) {
+            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "40021") int offset) {
         List<OrderResponseDto> page = orderService.getPage(size, offset);
         page.forEach(order -> order.add(linkTo(methodOn(OrderController.class).getById(order.getId())).withRel("getById")));
         int nextOffset = offset + size;
@@ -79,5 +79,4 @@ public class OrderController {
         );
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
-
 }

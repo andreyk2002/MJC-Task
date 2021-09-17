@@ -1,6 +1,7 @@
 package com.epam.esm.controller;
 
 
+import com.epam.esm.certificates.Certificates;
 import com.epam.esm.response.OrderResponseDto;
 import com.epam.esm.service.CartService;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
 
 @Controller
 @RequestMapping("/cart")
@@ -38,8 +38,8 @@ public class CartController {
             @ApiParam("id of the user to which order belongs to")
             @PathVariable long userId,
             @ApiParam("list of certificates included in the order") @RequestBody
-            @Valid @NotEmpty(message = "40041") List<Long> certificates) {
-        OrderResponseDto order = cartService.createOrder(userId, certificates);
+            @Valid @NotEmpty(message = "40041") Certificates certificates) {
+        OrderResponseDto order = cartService.createOrder(userId, certificates.getCertificates());
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
 }

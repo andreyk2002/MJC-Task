@@ -86,9 +86,10 @@ public class TagController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     })
     public ResponseEntity<CollectionModel<TagResponseDto>> getPage(
-            @ApiParam("number of tag from which page starts") @RequestParam
+            @ApiParam("number of tag from which page starts") @RequestParam(defaultValue = "0")
             @PositiveOrZero(message = "40021") int offset,
-            @ApiParam("maximal number of orders in one page") @RequestParam @Positive(message = "400221")
+            @ApiParam("maximal number of orders in one page") @RequestParam(defaultValue = "10")
+            @Positive(message = "400221")
             @Max(value = MAX_PAGE, message = "400222") int size) {
         List<TagResponseDto> page = tagService.getPage(offset, size);
         page.forEach(tag -> tag.add(linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("findTag")));

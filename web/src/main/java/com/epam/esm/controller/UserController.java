@@ -48,8 +48,9 @@ public class UserController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     })
     public ResponseEntity<CollectionModel<UserResponseDto>> getPage(
-            @ApiParam("number of order from which page starts") @RequestParam @PositiveOrZero(message = "40021") int offset,
-            @ApiParam("maximal number of orders in one page") @RequestParam
+            @ApiParam("number of order from which page starts") @RequestParam(defaultValue = "0")
+            @PositiveOrZero(message = "40021") int offset,
+            @ApiParam("maximal number of orders in one page") @RequestParam(defaultValue = "10")
             @Positive(message = "400221") @Max(value = MAX_PAGE, message = "400222") int size) {
         List<UserResponseDto> page = userService.getPage(size, offset);
         page.forEach(user -> user.add(linkTo(methodOn(UserController.class).getById(user.getId())).withRel("getByID")));
