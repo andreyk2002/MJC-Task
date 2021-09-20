@@ -1,0 +1,4 @@
+gift_certificate:
+  - id: 420
+    name: "certificate"
+    price: 10

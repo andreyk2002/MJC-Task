@@ -1,0 +1,5 @@
+gift_certificate:
+  - id: 420
+    name: "changed name"
+    price: 23
+    description: "changed"
