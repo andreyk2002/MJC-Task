@@ -1,55 +1,69 @@
 package com.epam.esm.repository;
 
-import com.epam.esm.config.DbConfig;
 import com.epam.esm.entity.GiftCertificate;
+import com.github.database.rider.core.api.dataset.DataSet;
+import com.github.database.rider.core.api.dataset.ExpectedDataSet;
+import com.github.database.rider.spring.api.DBRider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DbConfig.class})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DataJpaTest(excludeAutoConfiguration = LiquibaseAutoConfiguration.class)
+@DBRider
 class CertificateRepositoryTest {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private final CertificateBuilder certificateBuilder = new CertificateBuilder();
-    private final RequestBuilder builder = new RequestBuilder();
-    private final RowMapper<GiftCertificate> certificateRowMapper = new CertificateRowMapper();
     private CertificateRepository repository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
-        repository = new CertificateRepository(jdbcTemplate, certificateRowMapper, builder);
+        repository = new CertificateRepository(entityManager);
+    }
+
+
+    @Test
+    @DataSet(value = "/datasets/certificates.yml", cleanBefore = true)
+    @ExpectedDataSet("/datasets/addedCertificate.yml")
+    public void testAddCertificateShouldAddCertificate() {
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .name("added")
+                .build();
+        repository.addCertificate(giftCertificate);
     }
 
     @Test
-    @Sql({"/deleteAllCertificates.sql", "/insertCertificateWithId420.sql"})
+    @DataSet(value = "/datasets/certificate.yml", disableConstraints = true, cleanBefore = true)
     public void testGetByIdShouldReturnCertificateWhenItExisting() {
-        GiftCertificate certificate = certificateBuilder.buildCertificate("certificate name");
         long existingId = 420;
+        GiftCertificate certificate = GiftCertificate.builder()
+                .id(existingId)
+                .name("certificate")
+                .price(new BigDecimal("10.00"))
+                .tags(Collections.emptySet())
+                .orders(Collections.emptySet())
+                .build();
         Optional<GiftCertificate> optionalCertificate = repository.getById(existingId);
-        Assertions.assertTrue(optionalCertificate.isPresent());
-        Assertions.assertTrue(equalsIgnoreIdAndDate(optionalCertificate.get(), certificate));
+        Assertions.assertEquals(Optional.of(certificate), optionalCertificate);
     }
 
     @Test
-    @Sql({"/deleteAllCertificates.sql"})
+    @DataSet(value = "/datasets/certificate.yml", disableConstraints = true, cleanBefore = true)
     public void testGetByIdShouldReturnEmptyWhenCertificateNotExisting() {
         long notExistingId = 666;
         Optional<GiftCertificate> certificateOptional = repository.getById(notExistingId);
@@ -57,63 +71,46 @@ class CertificateRepositoryTest {
     }
 
     @Test
-    @Sql({"/deleteAllCertificates.sql", "/insertCertificates.sql"})
+    @DataSet(value = "/datasets/certificates.yml", disableConstraints = true, cleanBefore = true)
     public void testGetAllShouldReturnAllCertificates() {
-        GiftCertificate first = certificateBuilder.buildCertificate("first");
-        GiftCertificate second = certificateBuilder.buildCertificate("second");
-        List<GiftCertificate> all = repository.getAll();
+        GiftCertificate first = GiftCertificate.builder()
+                .id(1)
+                .name("first")
+                .tags(Collections.emptySet())
+                .orders(Collections.emptySet())
+                .build();
+        GiftCertificate second = GiftCertificate.builder()
+                .id(2)
+                .name("second")
+                .tags(Collections.emptySet())
+                .orders(Collections.emptySet())
+                .build();
         List<GiftCertificate> expectedResult = Arrays.asList(first, second);
-        Assertions.assertEquals(expectedResult.size(), all.size());
-        Assertions.assertTrue(equalsIgnoreIdAndDate(expectedResult.get(0), all.get(0)));
-        Assertions.assertTrue(equalsIgnoreIdAndDate(expectedResult.get(1), all.get(1)));
+
+        List<GiftCertificate> all = repository.getPage(0, 100);
+        Assertions.assertEquals(expectedResult, all);
     }
 
     @Test
-    public void testAddCertificateShouldAddCertificate() {
-        GiftCertificate giftCertificate = certificateBuilder.buildCertificate("certificate123");
-        long insertedId = repository.addCertificate(giftCertificate);
-        Optional<GiftCertificate> insertedCertificate = repository.getById(insertedId);
-        giftCertificate.setId(insertedId);
-        Assertions.assertTrue(insertedCertificate.isPresent());
-        GiftCertificate inserted = insertedCertificate.get();
-        Assertions.assertTrue(equalsIgnoreIdAndDate(inserted, giftCertificate));
-
-    }
-
-    @Test
-    @Sql({"/deleteAllCertificates.sql", "/insertCertificateWithId420.sql"})
+    @DataSet(value = "/datasets/certificateForDeleting.yml", cleanBefore = true)
+    @ExpectedDataSet("/datasets/empty.yml")
     public void testDeleteShouldDeleteCertificate() {
-        long existingId = 420;
+        long existingId = 705;
         repository.deleteById(existingId);
-        Optional<GiftCertificate> deleted = repository.getById(existingId);
-        Assertions.assertTrue(deleted.isEmpty());
     }
 
     @Test
-    @Sql({"/deleteAllCertificates.sql", "/insertCertificateWithId420.sql"})
+    @DataSet(value = "/datasets/certificate.yml", cleanBefore = true)
+    @ExpectedDataSet("/datasets/updatedCertificate.yml")
     public void testUpdateShouldUpdateCertificate() {
-        GiftCertificate giftCertificate = certificateBuilder.buildCertificate("certificate name");
         long insertedId = 420;
-        giftCertificate.setDescription("changed");
-        giftCertificate.setName("changed");
-        giftCertificate.setId(insertedId);
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .id(insertedId)
+                .price(new BigDecimal("23"))
+                .name("changed name")
+                .description("changed")
+                .build();
         repository.updateCertificate(giftCertificate);
-        Optional<GiftCertificate> updated = repository.getById(insertedId);
-        Assertions.assertTrue(updated.isPresent());
-        GiftCertificate updatedCertificate = updated.get();
-        giftCertificate.setLastUpdateDate(updatedCertificate.getLastUpdateDate());
-        Assertions.assertEquals(updatedCertificate, giftCertificate);
     }
-
-
-    //We should ignore createDate and updateDate because they decided in repo.addCertificate()
-    private boolean equalsIgnoreIdAndDate(GiftCertificate first, GiftCertificate second) {
-        return Objects.equals(first.getName(), second.getName())
-                && Objects.equals(first.getDescription(), second.getDescription())
-                && Objects.equals(first.getPrice(), second.getPrice())
-                && Objects.equals(first.getDuration(), second.getDuration());
-
-    }
-
-
 }
+

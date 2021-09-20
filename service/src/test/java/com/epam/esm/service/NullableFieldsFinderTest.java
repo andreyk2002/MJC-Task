@@ -4,6 +4,8 @@ import com.epam.esm.entity.GiftTag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 class NullableFieldsFinderTest {
 
     private final NullableFieldsFinder fieldsFinder = new NullableFieldsFinder();
@@ -13,6 +15,7 @@ class NullableFieldsFinderTest {
     void getNullPropertyNamesShouldReturnNullPropertyNames() {
         GiftTag objectForTest = new GiftTag();
         String[] nullPropertyNames = fieldsFinder.getNullPropertyNames(objectForTest);
-        Assertions.assertArrayEquals(nullPropertyNames, new String[]{"name"});
+        Arrays.sort(nullPropertyNames);
+        Assertions.assertArrayEquals(nullPropertyNames, new String[]{"certificates", "name"});
     }
 }

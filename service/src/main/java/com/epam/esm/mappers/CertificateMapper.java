@@ -1,10 +1,10 @@
 package com.epam.esm.mappers;
 
 
-import com.epam.esm.dto.CertificateResponseDto;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.service.CertificateTagService;
-import com.epam.esm.validation.CertificateRequestDto;
+import com.epam.esm.request.CertificateRequestDto;
+import com.epam.esm.response.CertificateResponseDto;
+import lombok.Setter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -17,10 +17,11 @@ import java.util.List;
  * Provides functionality for transforming certificate entities from/to request and response dtos
  */
 @Mapper(componentModel = "spring")
+@Setter
 public abstract class CertificateMapper {
 
     @Autowired
-    protected CertificateTagService service;
+    protected TagMapper tagMapper;
 
     /**
      * Transforms instance of {@link GiftCertificate} type to instance of {@link CertificateResponseDto}
@@ -35,7 +36,8 @@ public abstract class CertificateMapper {
             @Mapping(target = "duration", source = "duration"),
             @Mapping(target = "createDate", source = "createDate"),
             @Mapping(target = "lastUpdateDate", source = "lastUpdateDate"),
-            @Mapping(target = "tags", expression = "java(service.getTagsByCertificateId(giftCertificate.getId()))")
+            @Mapping(target = "tags",
+                    expression = "java(tagMapper.entitiesToResponses(giftCertificate.getTags()))")
     })
     public abstract CertificateResponseDto entityToResponse(GiftCertificate giftCertificate);
 
@@ -55,10 +57,15 @@ public abstract class CertificateMapper {
      * @return instance of {@link GiftCertificate}, which has the same state that has passed instance
      */
     @Mappings({
+            @Mapping(target = "id", source = "id"),
             @Mapping(target = "name", source = "name"),
             @Mapping(target = "description", source = "description"),
             @Mapping(target = "price", source = "price"),
             @Mapping(target = "duration", source = "duration"),
+            @Mapping(target = "tags", expression =
+                    "java((tagMapper.requestsToEntities(certificate.getTags())))"),
     })
     public abstract GiftCertificate requestToEntity(CertificateRequestDto certificate);
+
+    public abstract List<GiftCertificate> requestsToEntities(List<CertificateRequestDto> certificates);
 }

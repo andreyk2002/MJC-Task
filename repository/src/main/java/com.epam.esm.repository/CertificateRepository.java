@@ -2,16 +2,16 @@ package com.epam.esm.repository;
 
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.GiftTag;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.time.LocalDateTime;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,18 +24,12 @@ import java.util.Optional;
 @Repository
 @AllArgsConstructor
 public class CertificateRepository {
-    private static final String DELETE_BY_ID = "DELETE FROM gift_certificate WHERE id = ?";
-    private static final String FIND_BY_ID = "SELECT * FROM gift_certificate WHERE id = ?";
-    private static final String FIND_ALL = "SELECT * FROM gift_certificate";
-    private static final String UPDATE_QUERY = "UPDATE gift_certificate SET name = ?," +
-            "description = ?, price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
-    private static final String ADD_QUERY = "INSERT INTO gift_certificate (name, description, price, duration," +
-            " create_date, last_update_date) VALUES(?,?,?,?,?,?)";
 
-    private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<GiftCertificate> certificateMapper;
-    private final RequestBuilder requestBuilder;
+    private static final String FIND_ALL = "SELECT c FROM GiftCertificate c";
 
+
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     /**
      * Adds an instance of {@link GiftCertificate} into the storage
@@ -43,26 +37,10 @@ public class CertificateRepository {
      * @param giftCertificate instance of certificate, needed to be added
      * @return ID of inserted certificate
      */
-    public long addCertificate(GiftCertificate giftCertificate) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(
-                (connection) -> {
-                    PreparedStatement statement =
-                            connection.prepareStatement(ADD_QUERY, new String[]{
-                                    "name", "description", "price", "duration", "create_date", "last_update_date"
-                            });
-
-                    statement.setString(1, giftCertificate.getName());
-                    statement.setString(2, giftCertificate.getDescription());
-                    statement.setBigDecimal(3, giftCertificate.getPrice());
-                    statement.setObject(4, giftCertificate.getDuration());
-                    statement.setObject(5, LocalDateTime.now());
-                    statement.setObject(6, LocalDateTime.now());
-                    return statement;
-                },
-                keyHolder);
-        Number key = keyHolder.getKey();
-        return key.longValue();
+    public GiftCertificate addCertificate(GiftCertificate giftCertificate) {
+        entityManager.persist(giftCertificate);
+        entityManager.flush();
+        return giftCertificate;
     }
 
 
@@ -72,34 +50,35 @@ public class CertificateRepository {
      * @param id - ID of certificate to be removed
      */
     public void deleteById(long id) {
-        jdbcTemplate.update(DELETE_BY_ID, id);
+        GiftCertificate certificate = entityManager.find(GiftCertificate.class, id);
+        entityManager.remove(certificate);
     }
 
     /**
      * Updates an instance of {@link GiftCertificate} in the storage
      *
      * @param giftCertificate instance of certificate, needed to be updated
+     * @return instance of updated certificate
      */
-    public void updateCertificate(GiftCertificate giftCertificate) {
-        jdbcTemplate.update(
-                UPDATE_QUERY,
-                giftCertificate.getName(),
-                giftCertificate.getDescription(),
-                giftCertificate.getPrice(),
-                giftCertificate.getDuration(),
-                giftCertificate.getCreateDate(),
-                LocalDateTime.now(),
-                giftCertificate.getId()
-        );
+
+    public GiftCertificate updateCertificate(GiftCertificate giftCertificate) {
+        GiftCertificate updated = entityManager.merge(giftCertificate);
+        entityManager.flush();
+        return updated;
     }
 
     /**
-     * Get list of all certificates, which are present in the storage
+     * Return a page of certificates within specified range
      *
-     * @return List of all present certificates
+     * @param size   -  maximal number of certificates in one page
+     * @param offset - number of user from which page starts
+     * @return List of all certificates located within specified range
      */
-    public List<GiftCertificate> getAll() {
-        return jdbcTemplate.query(FIND_ALL, certificateMapper);
+    public List<GiftCertificate> getPage(int offset, int size) {
+        return entityManager.createQuery(FIND_ALL, GiftCertificate.class)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     /**
@@ -110,32 +89,107 @@ public class CertificateRepository {
      * else returns {@link Optional#empty()}
      */
     public Optional<GiftCertificate> getById(long id) {
-        try {
-            GiftCertificate giftCertificate = jdbcTemplate.queryForObject(FIND_BY_ID, certificateMapper, id);
-            return Optional.ofNullable(giftCertificate);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        GiftCertificate certificate = entityManager.find(GiftCertificate.class, id);
+        return Optional.ofNullable(certificate);
     }
 
     /**
      * Searches list of all certificates depends on keyword (part of name or description) or/and tag name
      * in specified order
      *
-     * @param keyword   part of name or description which certificates should contain. In case if keyword is null
-     *                  all certificates are specified to this criteria
-     * @param tagName   name of the tag which certificate should contain. In case if keyword is null
-     *                  all certificates are specified to this criteria
-     * @param sortOrder type of sort order (ascending, descending)
-     * @param sortField name of the field by which certificates should be ordered
+     * @param filter stores information about which criterias of selecting certificates.
+     *               May include tagName -  name of the tag which certificate should contain,
+     *               keyword - part of the name or description which certificate should have
+     *               sortOrder -  type of sort order (ascending, descending),
+     *               sortField - name of the field by which certificates should be ordered
      * @return List of certificates which applied to the mentioned criterias
      */
-    public List<GiftCertificate> getAllSorted(String keyword, String tagName, String sortOrder, String sortField) {
-        RequestBuilderResult requestBuilderResult =
-                requestBuilder.buildSortRequest(keyword, tagName, sortOrder, sortField);
-        String query = requestBuilderResult.getQuery();
-        String[] params = requestBuilderResult.getParams();
-        return jdbcTemplate.query(query, certificateMapper, (Object[]) params);
+
+
+    public List<GiftCertificate> getAllSorted(CertificateFilter filter) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> certificateRoot = criteriaQuery.from(GiftCertificate.class);
+        Metamodel metamodel = entityManager.getMetamodel();
+        EntityType<GiftCertificate> certificateEntityType = metamodel.entity(GiftCertificate.class);
+        Join<GiftCertificate, GiftTag> tasks = certificateRoot.join(
+                certificateEntityType.getSet("tags", GiftTag.class), JoinType.LEFT);
+        Order order = createSortOrder(criteriaBuilder, certificateRoot, filter);
+        Predicate searchPredicate = createSearchPredicate(filter, criteriaBuilder, certificateRoot, tasks);
+        criteriaQuery.select(certificateRoot)
+                .distinct(true)
+                .where(searchPredicate)
+                .orderBy(order);
+        return entityManager.createQuery(criteriaQuery)
+                .setFirstResult(filter.getOffset())
+                .setMaxResults(filter.getPageSize())
+                .getResultList();
     }
 
+    /**
+     * Searches certificates which ids are present in specified list
+     *
+     * @param certificatesIds list of needed certificates ids
+     * @return all certificates, which ids are present in specified list
+     */
+    public List<GiftCertificate> findInRange(List<Long> certificatesIds) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> query = criteriaBuilder.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> certificateRoot = query.from(GiftCertificate.class);
+        query.select(certificateRoot).where(certificateRoot.in(certificatesIds));
+        return entityManager
+                .createQuery(query)
+                .getResultList();
+    }
+
+
+    /**
+     * Searches certificates which tags ids are present in specified list
+     *
+     * @param tagIds ids all of which certificates should contain
+     * @return all certificates, which contain all needed tags
+     */
+    public List<GiftCertificate> findByTags(List<Long> tagIds) {
+        TypedQuery<GiftCertificate> query = entityManager.createQuery(
+                "select gc from GiftCertificate gc JOIN gc.tags t" +
+                        " WHERE t.id IN ?1" +
+                        " group by gc.id having count(t.id) = ?2", GiftCertificate.class);
+        query.setParameter(1, tagIds);
+        query.setParameter(2, (long) tagIds.size());
+        return query.getResultList();
+    }
+
+    private Predicate createSearchPredicate(CertificateFilter filter, CriteriaBuilder criteriaBuilder, Root<GiftCertificate> certificateRoot,
+                                            Join<GiftCertificate, GiftTag> tasks) {
+
+        String keyword = "%" + filter.getKeyword() + "%";
+
+        String tagName = filter.getTagName();
+        Predicate findInCertificates = criteriaBuilder.or(
+                criteriaBuilder.like(certificateRoot.get("name"), keyword),
+                criteriaBuilder.like(certificateRoot.get("description"), keyword)
+        );
+        Predicate searchPredicate = findInCertificates;
+        if (tagName != null) {
+            searchPredicate = criteriaBuilder.and(
+                    findInCertificates,
+                    criteriaBuilder.equal(tasks.get("name"), tagName)
+            );
+        }
+        return searchPredicate;
+    }
+
+    private Order createSortOrder(CriteriaBuilder criteriaBuilder, Root<GiftCertificate> certificateRoot,
+                                  CertificateFilter filter) {
+        String sortField = filter.getSortField();
+        String sortOrder = filter.getSortOrder();
+        Order order;
+        Path<Object> sort = certificateRoot.get(sortField);
+        if (sortOrder.equalsIgnoreCase("asc")) {
+            order = criteriaBuilder.asc(sort);
+        } else {
+            order = criteriaBuilder.desc(sort);
+        }
+        return order;
+    }
 }

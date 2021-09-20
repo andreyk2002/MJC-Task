@@ -1,21 +1,30 @@
 package com.epam.esm.controller;
 
 
-import com.epam.esm.dto.TagResponseDto;
+import com.epam.esm.request.TagRequestDto;
+import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.GiftTagService;
-import com.epam.esm.validation.TagRequestDto;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.Arrays;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/tags")
@@ -23,7 +32,9 @@ import java.util.List;
 @Validated
 public class TagController {
 
+    private static final int MAX_PAGE = 100;
     private final GiftTagService tagService;
+    private final OffsetCreator offsetCreator;
 
 
     @DeleteMapping("/{id}")
@@ -37,6 +48,11 @@ public class TagController {
     public ResponseEntity<TagResponseDto> deleteById(@ApiParam(value = "id of the specified tag", required = true)
                                                      @PathVariable long id) {
         TagResponseDto deleteTag = tagService.deleteById(id);
+        deleteTag.add(
+                linkTo(methodOn(TagController.class).getById(id)).withRel("getById"),
+                linkTo(methodOn(TagController.class).deleteById(id)).withSelfRel(),
+                linkTo(methodOn(TagController.class).findTopUserTopTag()).withRel("topUserTopTag")
+        );
         return new ResponseEntity<>(deleteTag, HttpStatus.OK);
     }
 
@@ -51,19 +67,42 @@ public class TagController {
     public ResponseEntity<TagResponseDto> getById(@ApiParam(value = "id of the specified tag", required = true)
                                                   @PathVariable long id) {
         TagResponseDto tag = tagService.getById(id);
+        tag.add(
+                linkTo(methodOn(TagController.class).getById(id)).withSelfRel(),
+                linkTo(methodOn(TagController.class).deleteById(id)).withRel("deleteTag"),
+                linkTo(methodOn(TagController.class).findTopUserTopTag()).withRel("topUserTopTag")
+        );
         return new ResponseEntity<>(tag, HttpStatus.OK);
     }
 
     @GetMapping("")
-    @ApiOperation(value = "Returns list of all available tags", response = List.class)
+    @ApiOperation(value = " Return a page of tags within specified range",
+            response = ResponseEntity.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Requested tag was successfully found"),
+            @ApiResponse(code = 200, message = "Page were successfully find"),
+            @ApiResponse(code = 40021, message = "Page offset were negative"),
+            @ApiResponse(code = 400221, message = "Page size were not positive"),
+            @ApiResponse(code = 400222, message = "Page size exceeded maximal limit"),
             @ApiResponse(code = 500, message = "Application failed to process the request")
-    }
-    )
-    public ResponseEntity<List<TagResponseDto>> getAll() {
-        List<TagResponseDto> tags = tagService.getAllTags();
-        return new ResponseEntity<>(tags, HttpStatus.OK);
+    })
+    public ResponseEntity<CollectionModel<TagResponseDto>> getPage(
+            @ApiParam("number of tag from which page starts") @RequestParam(defaultValue = "0")
+            @PositiveOrZero(message = "40021") int offset,
+            @ApiParam("maximal number of orders in one page") @RequestParam(defaultValue = "10")
+            @Positive(message = "400221")
+            @Max(value = MAX_PAGE, message = "400222") int size) {
+        List<TagResponseDto> page = tagService.getPage(offset, size);
+        page.forEach(tag -> tag.add(linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("findTag")));
+        int nextOffset = offset + size;
+        int prevOffset = offsetCreator.createPreviousOffset(offset, size);
+        List<Link> links = Arrays.asList(
+                linkTo(methodOn(TagController.class).getPage(offset, size)).withSelfRel(),
+                linkTo(methodOn(TagController.class).getPage(nextOffset, size)).withRel("nextPage"),
+                linkTo(methodOn(TagController.class).getPage(prevOffset, size)).withRel("prevPage"),
+                linkTo(methodOn(TagController.class).findTopUserTopTag()).withRel("topUserTopTag")
+        );
+        CollectionModel<TagResponseDto> tagsWithLinks = CollectionModel.of(page, links);
+        return new ResponseEntity<>(tagsWithLinks, HttpStatus.OK);
     }
 
     @PostMapping(value = "")
@@ -78,8 +117,32 @@ public class TagController {
     public ResponseEntity<TagResponseDto> addTag(
             @ApiParam(value = "tag for adding", required = true)
             @RequestBody @Valid TagRequestDto tagRequestDto) {
-        TagResponseDto tagResponseDto = tagService.addTag(tagRequestDto);
-        return new ResponseEntity<>(tagResponseDto, HttpStatus.CREATED);
+        TagResponseDto tag = tagService.addTag(tagRequestDto);
+        tag.add(
+                linkTo(methodOn(TagController.class).addTag(tagRequestDto)).withSelfRel(),
+                linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("getById"),
+                linkTo(methodOn(TagController.class).deleteById(tag.getId())).withRel("deleteById"),
+                linkTo(methodOn(TagController.class).findTopUserTopTag()).withRel("topUserTopTag")
+        );
+        return new ResponseEntity<>(tag, HttpStatus.CREATED);
+    }
+
+    @GetMapping(value = "/topUserTopTag")
+    @ApiOperation(value = "Searches for the most widely used tag of a user with the highest cost of all orders",
+            response = ResponseEntity.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Requested tag was successfully find"),
+            @ApiResponse(code = 500, message = "Application failed to process the request")
+    }
+    )
+    public ResponseEntity<TagResponseDto> findTopUserTopTag() {
+        TagResponseDto topUserTopTag = tagService.getTopUserTopTag();
+        topUserTopTag.add(
+                linkTo(methodOn(TagController.class).getById(topUserTopTag.getId())).withRel("getById"),
+                linkTo(methodOn(TagController.class).deleteById(topUserTopTag.getId())).withRel("deleteById"),
+                linkTo(methodOn(TagController.class).findTopUserTopTag()).withSelfRel()
+        );
+        return new ResponseEntity<>(topUserTopTag, HttpStatus.OK);
     }
 
 }

@@ -1,13 +1,13 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.TagMapper;
-import com.epam.esm.repository.CertificateTagRepository;
 import com.epam.esm.repository.TagRepository;
+import com.epam.esm.request.TagRequestDto;
+import com.epam.esm.request.TagRequestDtoCertificate;
+import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.TagAlreadyExistException;
 import com.epam.esm.service.excepiton.TagNotFoundException;
-import com.epam.esm.validation.TagRequestDto;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,18 +25,8 @@ import java.util.Optional;
 public class GiftTagService {
 
     private final TagRepository tagRepo;
-    private final CertificateTagRepository certificateTagRepo;
-    private final TagMapper mapper;
 
-    /**
-     * Gets all available tags
-     *
-     * @return list of all tags, available in the repository
-     */
-    public List<TagResponseDto> getAllTags() {
-        List<GiftTag> tags = tagRepo.getAll();
-        return mapper.entitiesToRequests(tags);
-    }
+    private final TagMapper mapper;
 
 
     /**
@@ -48,7 +38,6 @@ public class GiftTagService {
     @Transactional
     public TagResponseDto deleteById(long id) {
         TagResponseDto tagToDelete = getById(id);
-        certificateTagRepo.deleteByTagId(id);
         tagRepo.deleteById(id);
         return tagToDelete;
     }
@@ -71,30 +60,68 @@ public class GiftTagService {
      * @param tagRequestDto Contains updated state of tag instance
      * @return instance of {@link TagResponseDto} which is already updated in repository
      */
-    TagResponseDto updateTag(TagRequestDto tagRequestDto) {
-        GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
+    @Transactional
+    TagResponseDto updateTag(TagRequestDtoCertificate tagRequestDto) {
+        GiftTag giftTag = mapper.certificateRequestToEntity(tagRequestDto);
         long id = tagRequestDto.getId();
         Optional<GiftTag> optional = tagRepo.getById(id);
         return optional.map(tag -> {
             tagRepo.updateTag(giftTag);
             return getById(id);
-        }).orElseGet(() -> getById(tagRepo.addTag(giftTag)));
+        }).orElseGet(() -> mapper.entityToResponse(tagRepo.addTag(giftTag)));
     }
 
     /**
-     * Adds a requested instance of tag to repository
+     * Adds a requested instance of tag (with id) to repository
      *
      * @param tagRequestDto - instance needed to be added
-     * @return instance of {@link TagResponseDto} which is already added to repository
+     * @return instance of {@link TagResponseDto} which is added to repository
+     * @throws TagAlreadyExistException if tag with specified id already  added to repository
      */
-    public TagResponseDto addTag(TagRequestDto tagRequestDto) {
+    @Transactional
+    public TagResponseDto addTag(TagRequestDtoCertificate tagRequestDto) {
         long id = tagRequestDto.getId();
         Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
         optionalGiftTag.ifPresent(giftTag -> {
             throw new TagAlreadyExistException();
         });
+        GiftTag giftTag = mapper.certificateRequestToEntity(tagRequestDto);
+        GiftTag addedTag = tagRepo.addTag(giftTag);
+        return mapper.entityToResponse(addedTag);
+    }
+
+    /**
+     * Adds a requested instance of tag (without id) to repository
+     *
+     * @param tagRequestDto - instance needed to be added
+     * @return instance of {@link TagResponseDto} which is added to repository
+     */
+    @Transactional
+    public TagResponseDto addTag(TagRequestDto tagRequestDto) {
         GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
-        long insertId = tagRepo.addTag(giftTag);
-        return getById(insertId);
+        GiftTag addedTag = tagRepo.addTag(giftTag);
+        return mapper.entityToResponse(addedTag);
+    }
+
+    /**
+     * Gets the most widely used id of user with the highest total sum of orders
+     *
+     * @return most widely used id of user with the highest total sum of orders
+     */
+    public TagResponseDto getTopUserTopTag() {
+        GiftTag topUserTopTag = tagRepo.getTopUserTopTag();
+        return mapper.entityToResponse(topUserTopTag);
+    }
+
+    /**
+     * Return a page of tags within specified range
+     *
+     * @param size   -  maximal number of tags in one page
+     * @param offset - number of tags from which page starts
+     * @return List of all tags located within specified range
+     */
+    public List<TagResponseDto> getPage(int offset, int size) {
+        List<GiftTag> page = tagRepo.getPage(offset, size);
+        return mapper.entitiesToResponses(page);
     }
 }
