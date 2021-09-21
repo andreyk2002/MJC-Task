@@ -61,8 +61,8 @@ public class CertificateController {
             @ApiResponse(code = 500, message = "Application failed to process the request")
     }
     )
-    public ResponseEntity<CertificateResponseDto> getById(@ApiParam(value = "id of the specified certificate",
-            required = true) @PathVariable long id) {
+    public ResponseEntity<CertificateResponseDto> getById(
+            @ApiParam(value = "id of the specified certificate", required = true) @PathVariable long id) {
         CertificateResponseDto certificate = certificateService.getById(id);
         certificate.add(
                 linkTo(methodOn(CertificateController.class).getById(id)).withSelfRel(),
