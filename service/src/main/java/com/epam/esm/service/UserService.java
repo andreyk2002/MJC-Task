@@ -3,11 +3,13 @@ package com.epam.esm.service;
 import com.epam.esm.entity.User;
 import com.epam.esm.mappers.UserMapper;
 import com.epam.esm.repository.UserRepository;
+import com.epam.esm.request.UserRequestDto;
 import com.epam.esm.response.UserResponseDto;
 import com.epam.esm.service.excepiton.UserNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,4 +51,16 @@ public class UserService {
         return mapper.entitiesToResponses(page);
     }
 
+    public UserResponseDto findByLogin(String login) {
+        Optional<User> optionalUser = userRepository.findByLogin(login);
+        return optionalUser.map(mapper::entityToResponse)
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    @Transactional
+    public UserResponseDto registerUser(UserRequestDto userRequestDto) {
+        User user = mapper.requestToEntity(userRequestDto);
+        User addedUser = userRepository.createUser(user);
+        return mapper.entityToResponse(addedUser);
+    }
 }

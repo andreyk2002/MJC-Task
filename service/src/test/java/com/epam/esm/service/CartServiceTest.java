@@ -1,5 +1,6 @@
 package com.epam.esm.service;
 
+import com.epam.esm.UserRole;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
@@ -64,8 +65,8 @@ class CartServiceTest {
                 .builder().id(6).price(new BigDecimal("2")).build();
         List<CertificateResponseDto> responses = Arrays.asList(firstCertificateResponse, secondCertificateResponse);
         List<Long> certificateIds = Arrays.asList(4L, 6L);
-        User user = new User(userId, "name");
-        UserResponseDto userResponse = new UserResponseDto(userId, "name");
+        User user = User.builder().id(userId).name("name").role(UserRole.USER).build();
+        UserResponseDto userResponse = new UserResponseDto(userId, "name", UserRole.USER);
 
         OrderResponseDto expectedOrder = OrderResponseDto.builder()
                 .id(1)

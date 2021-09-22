@@ -1,5 +1,6 @@
 package com.epam.esm.mappers;
 
+import com.epam.esm.UserRole;
 import com.epam.esm.entity.User;
 import com.epam.esm.response.UserResponseDto;
 import org.junit.jupiter.api.Assertions;
@@ -14,20 +15,20 @@ class UserMapperTest {
 
     @Test
     void entityToResponse() {
-        User user = new User(1, "alex");
+        User user = User.builder().name("alex").id(1).role(UserRole.ADMIN).build();
         UserResponseDto userResponseDto = userMapper.entityToResponse(user);
-        UserResponseDto expected = new UserResponseDto(1, "alex");
+        UserResponseDto expected = new UserResponseDto(1, "alex", UserRole.ADMIN);
         Assertions.assertEquals(expected, userResponseDto);
     }
 
     @Test
     void entitiesToResponses() {
-        User firstUser = new User(1, "alex");
-        User secondUser = new User(2, "james");
+        User firstUser = User.builder().name("alex").id(1).role(UserRole.ADMIN).build();
+        User secondUser = User.builder().name("james").id(2).role(UserRole.USER).build();
         List<User> users = Arrays.asList(firstUser, secondUser);
 
-        UserResponseDto firstUserResponse = new UserResponseDto(1, "alex");
-        UserResponseDto secondUserResponse = new UserResponseDto(2, "james");
+        UserResponseDto firstUserResponse = new UserResponseDto(1, "alex", UserRole.ADMIN);
+        UserResponseDto secondUserResponse = new UserResponseDto(2, "james", UserRole.USER);
         List<UserResponseDto> userResponses = Arrays.asList(firstUserResponse, secondUserResponse);
 
         List<UserResponseDto> result = userMapper.entitiesToResponses(users);

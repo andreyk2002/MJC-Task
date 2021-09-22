@@ -1,6 +1,7 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.localization.Localizer;
+import com.epam.esm.security.UserAuthException;
 import com.epam.esm.service.excepiton.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,20 @@ public class ControllerExceptionHandler {
     private static final Logger LOGGER = LogManager.getLogger(ControllerExceptionHandler.class);
 
     private final Localizer localizer;
+
+    @ExceptionHandler(value = {UserAuthException.class})
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    public ErrorMessage userAuthException(UserAuthException e, WebRequest webRequest) {
+        LOGGER.error(e.getMessage(), e);
+        int errorCode = e.getErrorCode();
+        String localizedMessage = localizer.getLocalizedMessage(errorCode);
+        return new ErrorMessage(
+                errorCode,
+                LocalDateTime.now(),
+                localizedMessage,
+                webRequest.getDescription(false)
+        );
+    }
 
     @ExceptionHandler(value = {ConstraintViolationException.class,})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)

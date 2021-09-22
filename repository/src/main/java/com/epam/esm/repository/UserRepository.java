@@ -48,4 +48,16 @@ public class UserRepository {
                 .getResultList();
     }
 
+    public Optional<User> findByLogin(String login) {
+        User optUser = entityManager.createQuery("select u from User u where u.login = ?1", User.class)
+                .setParameter(1, login)
+                .getSingleResult();
+        return Optional.ofNullable(optUser);
+    }
+
+    public User createUser(User user) {
+        entityManager.persist(user);
+        entityManager.flush();
+        return user;
+    }
 }

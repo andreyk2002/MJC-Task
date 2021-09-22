@@ -1,5 +1,6 @@
 package com.epam.esm.service;
 
+import com.epam.esm.UserRole;
 import com.epam.esm.entity.User;
 import com.epam.esm.mappers.UserMapper;
 import com.epam.esm.repository.UserRepository;
@@ -37,12 +38,12 @@ class UserServiceTest {
 
     @Test
     void testGetPageShouldReturnValidPage() {
-        User firstUser = new User(1, "alex");
-        User secondUser = new User(2, "james");
+        User firstUser = User.builder().name("alex").id(1).role(UserRole.ADMIN).build();
+        User secondUser = User.builder().name("james").id(2).role(UserRole.USER).build();
         List<User> users = Arrays.asList(firstUser, secondUser);
 
-        UserResponseDto firstUserDto = new UserResponseDto(1, "alex");
-        UserResponseDto secondUserDto = new UserResponseDto(2, "james");
+        UserResponseDto firstUserDto = new UserResponseDto(1, "alex", UserRole.ADMIN);
+        UserResponseDto secondUserDto = new UserResponseDto(1, "james", UserRole.USER);
         List<UserResponseDto> allExpected = Arrays.asList(firstUserDto, secondUserDto);
 
 
@@ -60,8 +61,8 @@ class UserServiceTest {
     @Test
     void testGetByIdShouldReturnUserWhenExists() {
         long existingId = 1;
-        User user = new User(existingId, "alex");
-        UserResponseDto expectedResult = new UserResponseDto(existingId, "alex");
+        User user = User.builder().name("alex").id(existingId).role(UserRole.ADMIN).build();
+        UserResponseDto expectedResult = new UserResponseDto(existingId, "alex", UserRole.ADMIN);
 
         when(userRepository.getById(existingId)).thenReturn(Optional.of(user));
         when(userMapper.entityToResponse(any())).thenReturn(expectedResult);

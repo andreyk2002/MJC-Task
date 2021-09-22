@@ -1,5 +1,6 @@
 package com.epam.esm.response;
 
+import com.epam.esm.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,4 +15,5 @@ public class UserResponseDto extends RepresentationModel<UserResponseDto> {
 
     private long id;
     private String name;
+    private UserRole userRole;
 }

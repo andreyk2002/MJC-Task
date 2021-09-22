@@ -1,9 +1,7 @@
 package com.epam.esm.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.epam.esm.UserRole;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -14,6 +12,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "user")
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,5 +21,19 @@ public class User {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "login")
+    private String login;
 
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
+
+
+    @PrePersist
+    public void updateRole() {
+        this.role = UserRole.USER;
+    }
 }
