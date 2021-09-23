@@ -1,12 +1,12 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.localization.Localizer;
-import com.epam.esm.security.UserAuthException;
 import com.epam.esm.service.excepiton.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,11 +30,11 @@ public class ControllerExceptionHandler {
 
     private final Localizer localizer;
 
-    @ExceptionHandler(value = {UserAuthException.class})
+    @ExceptionHandler(value = {AccessDeniedException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public ErrorMessage userAuthException(UserAuthException e, WebRequest webRequest) {
+    public ErrorMessage userAuthException(AccessDeniedException e, WebRequest webRequest) {
         LOGGER.error(e.getMessage(), e);
-        int errorCode = e.getErrorCode();
+        int errorCode = HttpStatus.UNAUTHORIZED.value();
         String localizedMessage = localizer.getLocalizedMessage(errorCode);
         return new ErrorMessage(
                 errorCode,

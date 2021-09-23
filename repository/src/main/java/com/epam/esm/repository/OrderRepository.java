@@ -1,5 +1,6 @@
 package com.epam.esm.repository;
 
+import com.epam.esm.UserRole;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import org.springframework.stereotype.Repository;
@@ -20,6 +21,7 @@ import java.util.Optional;
 public class OrderRepository {
 
     private static final String FIND_ALL = "SELECT o FROM Order o";
+    public static final String FIND_BY_LOGIN = "select o from Order o join o.user u where u.login = ?1";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -58,7 +60,16 @@ public class OrderRepository {
      * @return List of all orders located within specified range
      */
     public List<Order> getPage(int size, int offset) {
+        UserRole admin = UserRole.ADMIN;
         return entityManager.createQuery(FIND_ALL, Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
+    }
+
+    public List<Order> getUserPage(int size, int offset, String login) {
+        return entityManager.createQuery(FIND_BY_LOGIN, Order.class)
+                .setParameter(1, login)
                 .setFirstResult(offset)
                 .setMaxResults(size)
                 .getResultList();

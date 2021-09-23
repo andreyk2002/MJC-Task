@@ -14,6 +14,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,7 @@ public class CertificateController {
     private final CertificateService certificateService;
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation(value = "Removes certificate by specified id", response = ResponseEntity.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Certificate was successfully removed"),
@@ -90,6 +92,7 @@ public class CertificateController {
 
 
     @PostMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation(value = "Add specified certificate", response = ResponseEntity.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Certificate was successfully found"),
@@ -118,6 +121,7 @@ public class CertificateController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation(value = "Updates state of certificate with specified id", response = ResponseEntity.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Certificate was successfully updated"),
@@ -138,13 +142,14 @@ public class CertificateController {
 
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation(value = "Updates price for certificate with specified id", response = ResponseEntity.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Certificates were successfully archived"),
             @ApiResponse(code = 40013, message = "Certificate price was negative"),
             @ApiResponse(code = 500, message = "Application failed to process the request")
     })
-    public ResponseEntity<CertificateResponseDto> updateCertificatePrice(
+    public ResponseEntity<CertificateResponseDto> updateCertificatePatch(
             @ApiParam(value = "Id of certificate, which price will be updated") @PathVariable long id,
             @ApiParam(value = "New duration of certificate") @RequestBody CertificateRequestDto giftCertificate) {
         giftCertificate.setId(id);

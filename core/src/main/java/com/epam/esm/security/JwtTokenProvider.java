@@ -39,7 +39,6 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    //TODO: LocalDateTime
     public String createToken(String login, UserRole userRole) {
         Claims claims = Jwts.claims().setSubject(login);
         claims.put("role", userRole);
@@ -77,6 +76,7 @@ public class JwtTokenProvider {
     public String getLogin(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
+
 
     public String resolveToken(HttpServletRequest request) {
         return request.getHeader(authorizationHeader);

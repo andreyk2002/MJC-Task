@@ -17,6 +17,7 @@ public interface UserMapper {
     @Mappings({
             @Mapping(target = "id", source = "id"),
             @Mapping(target = "name", source = "name"),
+            @Mapping(target = "role", source = "role")
     })
     UserResponseDto entityToResponse(User user);
 
@@ -34,7 +35,7 @@ public interface UserMapper {
     @Mappings({
             @Mapping(target = "name", source = "name"),
             @Mapping(target = "login", source = "login"),
-            @Mapping(target = "passwordHash", source = "passwordHash")
+            @Mapping(target = "passwordHash", source = "password")
     })
     User requestToEntity(UserRequestDto userRequestDto);
 

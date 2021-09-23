@@ -1,8 +1,11 @@
 package com.epam.esm.service;
 
+import com.epam.esm.UserRole;
 import com.epam.esm.entity.Order;
+import com.epam.esm.entity.User;
 import com.epam.esm.mappers.OrderMapper;
 import com.epam.esm.repository.OrderRepository;
+import com.epam.esm.repository.UserRepository;
 import com.epam.esm.response.OrderResponseDto;
 import com.epam.esm.service.excepiton.OrderNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -16,8 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.verify;
@@ -35,6 +37,9 @@ class OrderServiceTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
 
     @Test
     void testGetAllShouldReturnAllOrders() {
@@ -46,15 +51,18 @@ class OrderServiceTest {
         Order firstOrder = Order.builder().id(1).build();
         Order secondOrder = Order.builder().id(2).build();
         List<Order> orders = Arrays.asList(firstOrder, secondOrder);
-
+        String adminLogin = "adminLogin";
+        User admin = User.builder().id(1).login(adminLogin).role(UserRole.ADMIN).build();
         when(orderRepository.getPage(anyInt(), anyInt())).thenReturn(orders);
         when(orderMapper.entitiesToResponse(anyList())).thenReturn(expectedOrders);
+        when(userRepository.findByLogin(anyString())).thenReturn(Optional.ofNullable(admin));
 
-        List<OrderResponseDto> all = orderService.getPage(size, offset);
+        List<OrderResponseDto> all = orderService.getPage(size, offset, adminLogin);
 
         Assertions.assertEquals(expectedOrders, all);
         verify(orderRepository).getPage(size, offset);
         verify(orderMapper).entitiesToResponse(orders);
+        verify(userRepository).findByLogin(adminLogin);
     }
 
     @Test

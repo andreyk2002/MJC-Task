@@ -1,11 +1,15 @@
 package com.epam.esm.service;
 
 
+import com.epam.esm.UserRole;
 import com.epam.esm.entity.Order;
+import com.epam.esm.entity.User;
 import com.epam.esm.mappers.OrderMapper;
 import com.epam.esm.repository.OrderRepository;
+import com.epam.esm.repository.UserRepository;
 import com.epam.esm.response.OrderResponseDto;
 import com.epam.esm.service.excepiton.OrderNotFoundException;
+import com.epam.esm.service.excepiton.UserNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +26,7 @@ public class OrderService {
 
     private final OrderMapper mapper;
     private final OrderRepository orderRepository;
-
+    private final UserRepository userRepository;
     /**
      * Searches order by specified id
      *
@@ -41,10 +45,18 @@ public class OrderService {
      *
      * @param size   -  maximal number of orders in one page
      * @param offset - number of order from which page starts
+     * @param login
      * @return List of all orders located within specified range
      */
-    public List<OrderResponseDto> getPage(int size, int offset) {
-        List<Order> page = orderRepository.getPage(size, offset);
+    public List<OrderResponseDto> getPage(int size, int offset, String login) {
+        List<Order> page;
+        Optional<User> user = userRepository.findByLogin(login);
+        UserRole role = user.map(User::getRole).orElseThrow(UserNotFoundException::new);
+        if (role == UserRole.ADMIN) {
+            page = orderRepository.getPage(size, offset);
+        } else {
+            page = orderRepository.getUserPage(size, offset, login);
+        }
         return mapper.entitiesToResponse(page);
     }
 }

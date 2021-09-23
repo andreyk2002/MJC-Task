@@ -1,6 +1,7 @@
 package com.epam.esm.controller;
 
 
+import com.epam.esm.paging.OffsetCreator;
 import com.epam.esm.request.TagRequestDto;
 import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.GiftTagService;
@@ -13,6 +14,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +40,7 @@ public class TagController {
 
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation(value = "Removes tag by specified id", response = ResponseEntity.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully removed specified tag"),
@@ -106,6 +109,7 @@ public class TagController {
     }
 
     @PostMapping(value = "")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation(value = "Add specified tag", response = ResponseEntity.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Requested tag was successfully added"),

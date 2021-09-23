@@ -1,6 +1,8 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.paging.OffsetCreator;
 import com.epam.esm.response.OrderResponseDto;
+import com.epam.esm.security.JwtTokenProvider;
 import com.epam.esm.service.OrderService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -11,7 +13,6 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -34,10 +36,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Validated
 public class OrderController {
 
+    private final JwtTokenProvider jwtTokenProvider;
     private final OrderService orderService;
-    private final static int MAX_PAGE = 100;
     private final OffsetCreator offsetCreator;
+    private final static int MAX_PAGE = 100;
 
+    //TODO: order dividing
     @GetMapping("")
     @ApiOperation("Return a page of orders within specified range")
     @ApiResponses(value = {
@@ -52,22 +56,24 @@ public class OrderController {
             @RequestParam(defaultValue = "10") @Max(value = MAX_PAGE, message = "400222")
             @Positive(message = "400221") int size,
             @ApiParam("number of order from which page starts")
-            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "40021") int offset) {
-        List<OrderResponseDto> page = orderService.getPage(size, offset);
+            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "40021") int offset,
+            HttpServletRequest request) {
+        String token = jwtTokenProvider.resolveToken(request);
+        String login = jwtTokenProvider.getLogin(token);
+        List<OrderResponseDto> page = orderService.getPage(size, offset, login);
         page.forEach(order -> order.add(linkTo(methodOn(OrderController.class).getById(order.getId())).withRel("getById")));
         int nextOffset = offset + size;
         int prevOffset = offsetCreator.createPreviousOffset(offset, size);
         List<Link> links = Arrays.asList(
-                linkTo(methodOn(OrderController.class).getPage(size, offset)).withSelfRel(),
-                linkTo(methodOn(OrderController.class).getPage(size, nextOffset)).withRel("nextPage"),
-                linkTo(methodOn(OrderController.class).getPage(size, prevOffset)).withRel("prevPage")
+                linkTo(methodOn(OrderController.class).getPage(size, offset, request)).withSelfRel(),
+                linkTo(methodOn(OrderController.class).getPage(size, nextOffset, request)).withRel("nextPage"),
+                linkTo(methodOn(OrderController.class).getPage(size, prevOffset, request)).withRel("prevPage")
         );
         CollectionModel<OrderResponseDto> ordersWithLinks = CollectionModel.of(page, links);
         return new ResponseEntity<>(ordersWithLinks, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ApiOperation("Searches order by specified id")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Order was successfully created"),
