@@ -41,7 +41,7 @@ public class OrderController {
     private final OffsetCreator offsetCreator;
     private final static int MAX_PAGE = 100;
 
-    //TODO: order dividing
+
     @GetMapping("")
     @ApiOperation("Return a page of orders within specified range")
     @ApiResponses(value = {

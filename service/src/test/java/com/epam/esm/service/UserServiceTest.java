@@ -4,6 +4,7 @@ import com.epam.esm.UserRole;
 import com.epam.esm.entity.User;
 import com.epam.esm.mappers.UserMapper;
 import com.epam.esm.repository.UserRepository;
+import com.epam.esm.request.UserRequestDto;
 import com.epam.esm.response.UserResponseDto;
 import com.epam.esm.service.excepiton.UserNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -34,6 +35,55 @@ class UserServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+
+    @Test
+    void testFindByLoginShouldThrowFindByNotExistingLogin() {
+        String notExistingLogin = "sfda";
+        when(userRepository.findByLogin(any())).thenReturn(Optional.empty());
+        Assertions.assertThrows(UserNotFoundException.class, () -> userService.findByLogin(notExistingLogin));
+        verify(userRepository).findByLogin(notExistingLogin);
+    }
+
+    @Test
+    void testFindByLoginShouldFindByExistingLogin() {
+        String existing = "lll";
+        User userByLogin = User.builder().id(1).login(existing).name("Alex").role(UserRole.USER).build();
+        UserResponseDto responseDto = new UserResponseDto(1, "Alex", UserRole.USER);
+        when(userRepository.findByLogin(any())).thenReturn(Optional.of(userByLogin));
+        when(userMapper.entityToResponse(any())).thenReturn(responseDto);
+
+        UserResponseDto result = userService.findByLogin(existing);
+        Assertions.assertEquals(result, responseDto);
+        verify(userRepository).findByLogin(existing);
+        verify(userMapper).entityToResponse(userByLogin);
+    }
+
+    @Test
+    void testRegisterUserShouldRegisterUser() {
+        UserRequestDto userToRegister = new UserRequestDto("name", "login", "password");
+        User mappedUser = User.builder().name("name").login("login").passwordHash("password").build();
+        User addedUser = User.builder()
+                .id(1)
+                .name("name")
+                .role(UserRole.USER)
+                .passwordHash("password")
+                .login("login")
+                .build();
+        UserResponseDto registeredUser = new UserResponseDto(1, "name", UserRole.USER);
+        when(userMapper.requestToEntity(any())).thenReturn(mappedUser);
+        when(userRepository.createUser(any())).thenReturn(addedUser);
+        when(userMapper.entityToResponse(any())).thenReturn(registeredUser);
+
+        UserResponseDto result = userService.registerUser(userToRegister);
+        Assertions.assertEquals(result, registeredUser);
+
+        verify(userMapper).requestToEntity(userToRegister);
+        verify(userRepository).createUser(mappedUser);
+        verify(userMapper).entityToResponse(addedUser);
+
+
+    }
 
 
     @Test
