@@ -80,27 +80,27 @@ class CartServiceTest {
                 .orderPrice(new BigDecimal("3"))
                 .certificates(certificates)
                 .build();
-        when(certificateRepository.findInRange(anyList())).thenReturn(certificates);
-        when(userRepository.getById(anyLong())).thenReturn(Optional.of(user));
-        when(orderRepository.addOrder(any())).thenReturn(order);
+        when(certificateRepository.findAllInIdRange(anyList())).thenReturn(certificates);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(orderRepository.save(any())).thenReturn(order);
         when(orderMapper.entityToResponse(any())).thenReturn(expectedOrder);
 
         OrderResponseDto createdOrder = cartService.createOrder(userId, certificateIds);
 
         Assertions.assertEquals(expectedOrder, createdOrder);
 
-        verify(userRepository).getById(userId);
-        verify(certificateRepository).findInRange(eq(certificateIds));
-        verify(orderRepository).addOrder(eq(order));
+        verify(userRepository).findById(userId);
+        verify(certificateRepository).findAllInIdRange(eq(certificateIds));
+        verify(orderRepository).save(eq(order));
         verify(orderMapper).entityToResponse(order);
     }
 
     @Test
     void createOrderShouldThrowWhenUserNotFound() {
         long notExistingId = 666;
-        when(userRepository.getById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
         Assertions.assertThrows(UserNotFoundException.class,
                 () -> cartService.createOrder(notExistingId, Collections.emptyList()));
-        verify(userRepository).getById(notExistingId);
+        verify(userRepository).findById(notExistingId);
     }
 }

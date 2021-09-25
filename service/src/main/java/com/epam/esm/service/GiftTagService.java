@@ -9,6 +9,7 @@ import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.TagAlreadyExistException;
 import com.epam.esm.service.excepiton.TagNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +51,7 @@ public class GiftTagService {
      * @throws TagNotFoundException if tag not found in repository
      */
     public TagResponseDto getById(long id) {
-        Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
+        Optional<GiftTag> optionalGiftTag = tagRepo.findById(id);
         return optionalGiftTag.map(mapper::entityToResponse).orElseThrow(() -> new TagNotFoundException(id));
     }
 
@@ -63,12 +64,8 @@ public class GiftTagService {
     @Transactional
     TagResponseDto updateTag(TagRequestDtoCertificate tagRequestDto) {
         GiftTag giftTag = mapper.certificateRequestToEntity(tagRequestDto);
-        long id = tagRequestDto.getId();
-        Optional<GiftTag> optional = tagRepo.getById(id);
-        return optional.map(tag -> {
-            tagRepo.updateTag(giftTag);
-            return getById(id);
-        }).orElseGet(() -> mapper.entityToResponse(tagRepo.addTag(giftTag)));
+        GiftTag updated = tagRepo.save(giftTag);
+        return mapper.entityToResponse(updated);
     }
 
     /**
@@ -81,12 +78,12 @@ public class GiftTagService {
     @Transactional
     public TagResponseDto addTag(TagRequestDtoCertificate tagRequestDto) {
         long id = tagRequestDto.getId();
-        Optional<GiftTag> optionalGiftTag = tagRepo.getById(id);
+        Optional<GiftTag> optionalGiftTag = tagRepo.findById(id);
         optionalGiftTag.ifPresent(giftTag -> {
             throw new TagAlreadyExistException();
         });
         GiftTag giftTag = mapper.certificateRequestToEntity(tagRequestDto);
-        GiftTag addedTag = tagRepo.addTag(giftTag);
+        GiftTag addedTag = tagRepo.save(giftTag);
         return mapper.entityToResponse(addedTag);
     }
 
@@ -99,7 +96,7 @@ public class GiftTagService {
     @Transactional
     public TagResponseDto addTag(TagRequestDto tagRequestDto) {
         GiftTag giftTag = mapper.requestToEntity(tagRequestDto);
-        GiftTag addedTag = tagRepo.addTag(giftTag);
+        GiftTag addedTag = tagRepo.save(giftTag);
         return mapper.entityToResponse(addedTag);
     }
 
@@ -120,8 +117,8 @@ public class GiftTagService {
      * @param offset - number of tags from which page starts
      * @return List of all tags located within specified range
      */
-    public List<TagResponseDto> getPage(int offset, int size) {
-        List<GiftTag> page = tagRepo.getPage(offset, size);
+    public List<TagResponseDto> getPage(Pageable pageable) {
+        List<GiftTag> page = tagRepo.findAll(pageable).toList();
         return mapper.entitiesToResponses(page);
     }
 }

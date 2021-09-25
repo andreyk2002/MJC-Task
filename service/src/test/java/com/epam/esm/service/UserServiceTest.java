@@ -13,6 +13,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -72,14 +75,14 @@ class UserServiceTest {
                 .build();
         UserResponseDto registeredUser = new UserResponseDto(1, "name", UserRole.USER);
         when(userMapper.requestToEntity(any())).thenReturn(mappedUser);
-        when(userRepository.createUser(any())).thenReturn(addedUser);
+        when(userRepository.save(any())).thenReturn(addedUser);
         when(userMapper.entityToResponse(any())).thenReturn(registeredUser);
 
         UserResponseDto result = userService.registerUser(userToRegister);
         Assertions.assertEquals(result, registeredUser);
 
         verify(userMapper).requestToEntity(userToRegister);
-        verify(userRepository).createUser(mappedUser);
+        verify(userRepository).save(mappedUser);
         verify(userMapper).entityToResponse(addedUser);
 
 
@@ -98,11 +101,12 @@ class UserServiceTest {
 
 
         int size = 2;
-        int offset = 0;
-        when(userRepository.getPage(size, offset)).thenReturn(users);
+        int page = 0;
+        Pageable pageable = PageRequest.of(page, size);
+        when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(users));
         when(userMapper.entitiesToResponses(anyList())).thenReturn(allExpected);
 
-        List<UserResponseDto> all = userService.getPage(size, offset);
+        List<UserResponseDto> all = userService.getPage(pageable);
 
         Assertions.assertEquals(allExpected, all);
         verify(userMapper).entitiesToResponses(users);
@@ -114,13 +118,13 @@ class UserServiceTest {
         User user = User.builder().name("alex").id(existingId).role(UserRole.ADMIN).build();
         UserResponseDto expectedResult = new UserResponseDto(existingId, "alex", UserRole.ADMIN);
 
-        when(userRepository.getById(existingId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(existingId)).thenReturn(Optional.of(user));
         when(userMapper.entityToResponse(any())).thenReturn(expectedResult);
 
         UserResponseDto result = userService.getById(existingId);
         Assertions.assertEquals(expectedResult, result);
 
-        verify(userRepository).getById(existingId);
+        verify(userRepository).findById(existingId);
         verify(userMapper).entityToResponse(user);
 
     }
@@ -128,11 +132,11 @@ class UserServiceTest {
     @Test
     void testGetByIdShouldThrowWhenNotFound() {
         long notExistingId = 666;
-        when(userRepository.getById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(UserNotFoundException.class, () -> userService.getById(notExistingId));
 
-        verify(userRepository).getById(notExistingId);
+        verify(userRepository).findById(notExistingId);
     }
 
 }

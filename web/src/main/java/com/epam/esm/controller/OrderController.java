@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -56,20 +58,21 @@ public class OrderController {
             @RequestParam(defaultValue = "10") @Max(value = MAX_PAGE, message = "400222")
             @Positive(message = "400221") int size,
             @ApiParam("number of order from which page starts")
-            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "40021") int offset,
+            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "40021") int page,
             HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(page, size);
         String token = jwtTokenProvider.resolveToken(request);
         String login = jwtTokenProvider.getLogin(token);
-        List<OrderResponseDto> page = orderService.getPage(size, offset, login);
-        page.forEach(order -> order.add(linkTo(methodOn(OrderController.class).getById(order.getId())).withRel("getById")));
-        int nextOffset = offset + size;
-        int prevOffset = offsetCreator.createPreviousOffset(offset, size);
+        List<OrderResponseDto> ordersPage = orderService.getPage(pageable, login);
+        ordersPage.forEach(order -> order.add(linkTo(methodOn(OrderController.class).getById(order.getId())).withRel("getById")));
+        int nextPage = page + 1;
+        int prevPage = offsetCreator.createPreviousOffset(page);
         List<Link> links = Arrays.asList(
-                linkTo(methodOn(OrderController.class).getPage(size, offset, request)).withSelfRel(),
-                linkTo(methodOn(OrderController.class).getPage(size, nextOffset, request)).withRel("nextPage"),
-                linkTo(methodOn(OrderController.class).getPage(size, prevOffset, request)).withRel("prevPage")
+                linkTo(methodOn(OrderController.class).getPage(size, page, request)).withSelfRel(),
+                linkTo(methodOn(OrderController.class).getPage(size, nextPage, request)).withRel("nextPage"),
+                linkTo(methodOn(OrderController.class).getPage(size, prevPage, request)).withRel("prevPage")
         );
-        CollectionModel<OrderResponseDto> ordersWithLinks = CollectionModel.of(page, links);
+        CollectionModel<OrderResponseDto> ordersWithLinks = CollectionModel.of(ordersPage, links);
         return new ResponseEntity<>(ordersWithLinks, HttpStatus.OK);
     }
 

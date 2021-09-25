@@ -5,15 +5,15 @@ import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.github.database.rider.spring.api.DBRider;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,15 +26,9 @@ import java.util.Optional;
 @DBRider
 class CertificateRepositoryTest {
 
+    @Autowired
     private CertificateRepository repository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @BeforeEach
-    void setUp() {
-        repository = new CertificateRepository(entityManager);
-    }
 
 
     @Test
@@ -44,7 +38,7 @@ class CertificateRepositoryTest {
         GiftCertificate giftCertificate = GiftCertificate.builder()
                 .name("added")
                 .build();
-        repository.addCertificate(giftCertificate);
+        repository.save(giftCertificate);
     }
 
     @Test
@@ -58,7 +52,7 @@ class CertificateRepositoryTest {
                 .tags(Collections.emptySet())
                 .orders(Collections.emptySet())
                 .build();
-        Optional<GiftCertificate> optionalCertificate = repository.getById(existingId);
+        Optional<GiftCertificate> optionalCertificate = repository.findById(existingId);
         Assertions.assertEquals(Optional.of(certificate), optionalCertificate);
     }
 
@@ -66,7 +60,7 @@ class CertificateRepositoryTest {
     @DataSet(value = "/datasets/certificate.yml", disableConstraints = true, cleanBefore = true)
     public void testGetByIdShouldReturnEmptyWhenCertificateNotExisting() {
         long notExistingId = 666;
-        Optional<GiftCertificate> certificateOptional = repository.getById(notExistingId);
+        Optional<GiftCertificate> certificateOptional = repository.findById(notExistingId);
         Assertions.assertFalse(certificateOptional.isPresent());
     }
 
@@ -86,8 +80,10 @@ class CertificateRepositoryTest {
                 .orders(Collections.emptySet())
                 .build();
         List<GiftCertificate> expectedResult = Arrays.asList(first, second);
-
-        List<GiftCertificate> all = repository.getPage(0, 100);
+        int page = 0;
+        int size = 100;
+        Pageable p = PageRequest.of(page, size);
+        List<GiftCertificate> all = repository.findAll(p).toList();
         Assertions.assertEquals(expectedResult, all);
     }
 
@@ -110,7 +106,7 @@ class CertificateRepositoryTest {
                 .name("changed name")
                 .description("changed")
                 .build();
-        repository.updateCertificate(giftCertificate);
+        repository.save(giftCertificate);
     }
 }
 

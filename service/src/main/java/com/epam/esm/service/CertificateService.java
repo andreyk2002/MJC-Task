@@ -4,8 +4,8 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.CertificateMapper;
 import com.epam.esm.mappers.TagMapper;
-import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.repository.CertificateRepository;
+import com.epam.esm.repository.specification.CertificateSpecification;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.request.TagRequestDtoCertificate;
 import com.epam.esm.response.CertificateResponseDto;
@@ -13,6 +13,8 @@ import com.epam.esm.response.TagResponseDto;
 import com.epam.esm.service.excepiton.CertificateNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +51,7 @@ public class CertificateService {
         List<GiftTag> giftTags = tagMapper.responsesToEntities(updatedTags);
         GiftCertificate giftCertificate = mapper.requestToEntity(certificateDto);
         giftCertificate.setTags(new HashSet<>(giftTags));
-        GiftCertificate certificate = certificateRepo.addCertificate(giftCertificate);
+        GiftCertificate certificate = certificateRepo.save(giftCertificate);
         return mapper.entityToResponse(certificate);
     }
 
@@ -76,7 +78,7 @@ public class CertificateService {
      */
     @Transactional
     public CertificateResponseDto updateCertificate(long certificateId, CertificateRequestDto certificateRequest) {
-        Optional<GiftCertificate> optionalUpdated = certificateRepo.getById(certificateId);
+        Optional<GiftCertificate> optionalUpdated = certificateRepo.findById(certificateId);
         return optionalUpdated.map(updated -> {
             GiftCertificate newCertificate = mapper.requestToEntity(certificateRequest);
             String[] nullPropertyNames = nullableFieldsFinder.getNullPropertyNames(newCertificate);
@@ -88,7 +90,7 @@ public class CertificateService {
                 List<GiftTag> giftTags = tagMapper.responsesToEntities(updatedTags);
                 updated.setTags(new HashSet<>(giftTags));
             }
-            GiftCertificate certificate = certificateRepo.updateCertificate(updated);
+            GiftCertificate certificate = certificateRepo.save(updated);
             return mapper.entityToResponse(certificate);
         }).orElseGet(() -> addCertificate(certificateRequest));
     }
@@ -101,7 +103,7 @@ public class CertificateService {
      * @throws CertificateNotFoundException if certificate not found in repository
      */
     public CertificateResponseDto getById(long id) {
-        Optional<GiftCertificate> optionalGiftCertificate = certificateRepo.getById(id);
+        Optional<GiftCertificate> optionalGiftCertificate = certificateRepo.findById(id);
         return optionalGiftCertificate.map(mapper::entityToResponse)
                 .orElseThrow(() -> new CertificateNotFoundException(id));
     }
@@ -117,10 +119,12 @@ public class CertificateService {
      *               sortField - name of the field by which certificates should be ordered
      * @return List of certificates which applied to the mentioned criterias
      */
-    public List<CertificateResponseDto> getCertificates(CertificateFilter filter) {
-        List<GiftCertificate> certificates = certificateRepo.getAllSorted(filter);
+    public List<CertificateResponseDto> getCertificates(Pageable pageable, String keyword, String tagName) {
+        Specification<GiftCertificate> specification = new CertificateSpecification(tagName, keyword);
+        List<GiftCertificate> certificates = certificateRepo.findAll(specification, pageable).toList();
         return mapper.entitiesToResponses(certificates);
     }
+
 
     /**
      * Searches certificates which tags ids are present in specified list

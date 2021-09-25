@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -50,19 +52,21 @@ public class UserController {
     })
     public ResponseEntity<CollectionModel<UserResponseDto>> getPage(
             @ApiParam("number of order from which page starts") @RequestParam(defaultValue = "0")
-            @PositiveOrZero(message = "40021") int offset,
+            @PositiveOrZero(message = "40021") int page,
             @ApiParam("maximal number of orders in one page") @RequestParam(defaultValue = "10")
             @Positive(message = "400221") @Max(value = MAX_PAGE, message = "400222") int size) {
-        List<UserResponseDto> page = userService.getPage(size, offset);
-        page.forEach(user -> user.add(linkTo(methodOn(UserController.class).getById(user.getId())).withRel("getByID")));
-        int nextOffset = offset + size;
-        int prevOffset = offsetCreator.createPreviousOffset(offset, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<UserResponseDto> usersPage = userService.getPage(pageable);
+        usersPage.forEach(user -> user.add(linkTo(methodOn(UserController.class).getById(user.getId())).withRel("getByID")));
+        int nextPage = page + 1;
+        int prevOffset = offsetCreator.createPreviousOffset(page);
         List<Link> links = Arrays.asList(
-                linkTo(methodOn(UserController.class).getPage(offset, size)).withSelfRel(),
-                linkTo(methodOn(UserController.class).getPage(nextOffset, size)).withRel("nextPage"),
+                linkTo(methodOn(UserController.class).getPage(page, size)).withSelfRel(),
+                linkTo(methodOn(UserController.class).getPage(nextPage, size)).withRel("nextPage"),
                 linkTo(methodOn(UserController.class).getPage(prevOffset, size)).withRel("prevPage")
         );
-        CollectionModel<UserResponseDto> usersWithLinks = CollectionModel.of(page, links);
+        CollectionModel<UserResponseDto> usersWithLinks = CollectionModel.of(usersPage, links);
         return new ResponseEntity<>(usersWithLinks, HttpStatus.OK);
     }
 

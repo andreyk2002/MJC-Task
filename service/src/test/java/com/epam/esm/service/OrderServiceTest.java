@@ -14,12 +14,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.verify;
@@ -53,40 +57,40 @@ class OrderServiceTest {
         List<Order> orders = Arrays.asList(firstOrder, secondOrder);
         String adminLogin = "adminLogin";
         User admin = User.builder().id(1).login(adminLogin).role(UserRole.ADMIN).build();
-        when(orderRepository.getPage(anyInt(), anyInt())).thenReturn(orders);
+        Pageable pageable = PageRequest.of(offset, size);
+        when(orderRepository.findAll(pageable)).thenReturn(new PageImpl<>(orders));
         when(orderMapper.entitiesToResponse(anyList())).thenReturn(expectedOrders);
         when(userRepository.findByLogin(anyString())).thenReturn(Optional.ofNullable(admin));
 
-        List<OrderResponseDto> all = orderService.getPage(size, offset, adminLogin);
+        List<OrderResponseDto> all = orderService.getPage(pageable, adminLogin);
 
         Assertions.assertEquals(expectedOrders, all);
-        verify(orderRepository).getPage(size, offset);
         verify(orderMapper).entitiesToResponse(orders);
         verify(userRepository).findByLogin(adminLogin);
     }
 
     @Test
     void testGetByIdShouldReturnOrderWhenExists() {
-        int existingId = 1;
+        long existingId = 1;
         Order order = Order.builder().id(existingId).build();
         OrderResponseDto expectedOrderResponse = OrderResponseDto.builder().id(existingId).build();
-        when(orderRepository.getById(anyLong())).thenReturn(Optional.of(order));
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(orderMapper.entityToResponse(any())).thenReturn(expectedOrderResponse);
         OrderResponseDto resultOrder = orderService.getById(existingId);
 
         Assertions.assertEquals(expectedOrderResponse, resultOrder);
 
-        verify(orderRepository).getById(existingId);
+        verify(orderRepository).findById(existingId);
         verify(orderMapper).entityToResponse(order);
     }
 
     @Test
     void testGetByIdShouldThrowWhenNotExists() {
-        int notExistingId = 4242424;
-        when(orderRepository.getById(anyLong())).thenReturn(Optional.empty());
+        long notExistingId = 4242424;
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(OrderNotFoundException.class, () -> orderService.getById(notExistingId));
 
-        verify(orderRepository).getById(notExistingId);
+        verify(orderRepository).findById(notExistingId);
     }
 }

@@ -10,6 +10,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -90,21 +93,22 @@ public class TagController {
     })
     public ResponseEntity<CollectionModel<TagResponseDto>> getPage(
             @ApiParam("number of tag from which page starts") @RequestParam(defaultValue = "0")
-            @PositiveOrZero(message = "40021") int offset,
+            @PositiveOrZero(message = "40021") int page,
             @ApiParam("maximal number of orders in one page") @RequestParam(defaultValue = "10")
             @Positive(message = "400221")
             @Max(value = MAX_PAGE, message = "400222") int size) {
-        List<TagResponseDto> page = tagService.getPage(offset, size);
-        page.forEach(tag -> tag.add(linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("findTag")));
-        int nextOffset = offset + size;
-        int prevOffset = offsetCreator.createPreviousOffset(offset, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+        List<TagResponseDto> tagsPage = tagService.getPage(pageable);
+        tagsPage.forEach(tag -> tag.add(linkTo(methodOn(TagController.class).getById(tag.getId())).withRel("findTag")));
+        int nextPage = page + 1;
+        int prevPage = offsetCreator.createPreviousOffset(page);
         List<Link> links = Arrays.asList(
-                linkTo(methodOn(TagController.class).getPage(offset, size)).withSelfRel(),
-                linkTo(methodOn(TagController.class).getPage(nextOffset, size)).withRel("nextPage"),
-                linkTo(methodOn(TagController.class).getPage(prevOffset, size)).withRel("prevPage"),
+                linkTo(methodOn(TagController.class).getPage(page, size)).withSelfRel(),
+                linkTo(methodOn(TagController.class).getPage(nextPage, size)).withRel("nextPage"),
+                linkTo(methodOn(TagController.class).getPage(prevPage, size)).withRel("prevPage"),
                 linkTo(methodOn(TagController.class).findTopUserTopTag()).withRel("topUserTopTag")
         );
-        CollectionModel<TagResponseDto> tagsWithLinks = CollectionModel.of(page, links);
+        CollectionModel<TagResponseDto> tagsWithLinks = CollectionModel.of(tagsPage, links);
         return new ResponseEntity<>(tagsWithLinks, HttpStatus.OK);
     }
 

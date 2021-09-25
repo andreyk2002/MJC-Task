@@ -43,9 +43,9 @@ public class CartService {
      */
     @Transactional
     public OrderResponseDto createOrder(long userId, List<Long> certificates) {
-        Optional<User> optionalUser = userRepository.getById(userId);
+        Optional<User> optionalUser = userRepository.findById(userId);
         List<Long> certificateRange = certificates.stream().sorted().distinct().collect(toList());
-        List<GiftCertificate> giftCertificates = certificateRepository.findInRange(certificateRange);
+        List<GiftCertificate> giftCertificates = certificateRepository.findAllInIdRange(certificateRange);
         BigDecimal totalPrice = giftCertificates.stream()
                 .map(GiftCertificate::getPrice)
                 .reduce(new BigDecimal("0"), BigDecimal::add);
@@ -55,7 +55,7 @@ public class CartService {
                     .orderPrice(totalPrice)
                     .certificates(giftCertificates)
                     .build();
-            Order addedOrder = orderRepository.addOrder(order);
+            Order addedOrder = orderRepository.save(order);
             return orderMapper.entityToResponse(addedOrder);
         }).orElseThrow(() -> new UserNotFoundException(userId));
     }

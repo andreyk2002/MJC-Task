@@ -7,6 +7,7 @@ import com.epam.esm.request.UserRequestDto;
 import com.epam.esm.response.UserResponseDto;
 import com.epam.esm.service.excepiton.UserNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -34,7 +35,7 @@ public class UserService {
      *                               id is not present in the storage
      */
     public UserResponseDto getById(long id) {
-        Optional<User> optionalUser = userRepository.getById(id);
+        Optional<User> optionalUser = userRepository.findById(id);
         return optionalUser.map(mapper::entityToResponse)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
@@ -46,8 +47,8 @@ public class UserService {
      * @param offset - number of user from which page starts
      * @return List of all users located within specified range
      */
-    public List<UserResponseDto> getPage(int size, int offset) {
-        List<User> page = userRepository.getPage(size, offset);
+    public List<UserResponseDto> getPage(Pageable pageable) {
+        List<User> page = userRepository.findAll(pageable).toList();
         return mapper.entitiesToResponses(page);
     }
 
@@ -60,7 +61,7 @@ public class UserService {
     @Transactional
     public UserResponseDto registerUser(UserRequestDto userRequestDto) {
         User user = mapper.requestToEntity(userRequestDto);
-        User addedUser = userRepository.createUser(user);
+        User addedUser = userRepository.save(user);
         return mapper.entityToResponse(addedUser);
     }
 }

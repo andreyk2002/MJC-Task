@@ -11,6 +11,8 @@ import com.epam.esm.response.OrderResponseDto;
 import com.epam.esm.service.excepiton.OrderNotFoundException;
 import com.epam.esm.service.excepiton.UserNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,7 +37,7 @@ public class OrderService {
      * @throws OrderNotFoundException if order with specified id not present in repository
      */
     public OrderResponseDto getById(long id) {
-        Optional<Order> optionalOrder = orderRepository.getById(id);
+        Optional<Order> optionalOrder = orderRepository.findById(id);
         return optionalOrder.map(mapper::entityToResponse)
                 .orElseThrow(() -> new OrderNotFoundException(id));
     }
@@ -48,15 +50,15 @@ public class OrderService {
      * @param login
      * @return List of all orders located within specified range
      */
-    public List<OrderResponseDto> getPage(int size, int offset, String login) {
-        List<Order> page;
+    public List<OrderResponseDto> getPage(Pageable pageable, String login) {
+        Page<Order> page;
         Optional<User> user = userRepository.findByLogin(login);
         UserRole role = user.map(User::getRole).orElseThrow(UserNotFoundException::new);
         if (role == UserRole.ADMIN) {
-            page = orderRepository.getPage(size, offset);
+            page = orderRepository.findAll(pageable);
         } else {
-            page = orderRepository.getUserPage(size, offset, login);
+            page = orderRepository.findAllByUserLogin(pageable, login);
         }
-        return mapper.entitiesToResponse(page);
+        return mapper.entitiesToResponse(page.toList());
     }
 }

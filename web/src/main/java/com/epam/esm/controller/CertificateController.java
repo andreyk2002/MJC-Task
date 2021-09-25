@@ -1,7 +1,6 @@
 package com.epam.esm.controller;
 
 
-import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.response.CertificateResponseDto;
 import com.epam.esm.service.CertificateService;
@@ -10,6 +9,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -77,14 +77,15 @@ public class CertificateController {
     @GetMapping("")
     @ApiOperation(value = "Searches list of all certificates depends on keyword (part of name or description)" +
             " or/and tag name in specified order", response = ResponseEntity.class)
-    public ResponseEntity<CollectionModel<CertificateResponseDto>> getCertificates(@Validated CertificateFilter filter) {
+    public ResponseEntity<CollectionModel<CertificateResponseDto>> getCertificates
+            (@Validated Pageable pageable, @RequestParam(defaultValue = "") String keyword, String tagName) {
 
         List<CertificateResponseDto> certificates = certificateService
-                .getCertificates(filter);
+                .getCertificates(pageable, keyword, tagName);
         certificates.forEach(cert ->
                 cert.add(linkTo(methodOn(CertificateController.class).getById(cert.getId())).withRel("findTag")));
         List<Link> links = new ArrayList<>(Collections.singletonList(
-                linkTo(methodOn(CertificateController.class).getCertificates(filter)).withSelfRel()
+                linkTo(methodOn(CertificateController.class).getCertificates(pageable, keyword, tagName)).withSelfRel()
         ));
         CollectionModel<CertificateResponseDto> model = CollectionModel.of(certificates, links);
         return new ResponseEntity<>(model, HttpStatus.OK);

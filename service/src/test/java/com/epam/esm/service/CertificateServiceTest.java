@@ -4,8 +4,8 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftTag;
 import com.epam.esm.mappers.CertificateMapper;
 import com.epam.esm.mappers.TagMapper;
-import com.epam.esm.repository.CertificateFilter;
 import com.epam.esm.repository.CertificateRepository;
+import com.epam.esm.repository.specification.CertificateSpecification;
 import com.epam.esm.request.CertificateRequestDto;
 import com.epam.esm.request.TagRequestDtoCertificate;
 import com.epam.esm.response.CertificateResponseDto;
@@ -17,6 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -62,7 +67,7 @@ class CertificateServiceTest {
         CertificateRequestDto requestDto = buildCertificateRequest();
         when(mapper.requestToEntity(any())).thenReturn(addedCertificate);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
-        when(certificateRepo.addCertificate(any())).thenReturn(addedCertificate);
+        when(certificateRepo.save(any())).thenReturn(addedCertificate);
         when(tagService.updateTag(any())).thenReturn(firstTagResponse)
                 .thenReturn(secondTagResponse);
         when(tagMapper.responsesToEntities(any())).thenReturn(new ArrayList<>(tagEntities));
@@ -73,17 +78,17 @@ class CertificateServiceTest {
 
         verify(mapper).requestToEntity(requestDto);
         verify(mapper).entityToResponse(addedCertificate);
-        verify(certificateRepo).addCertificate(addedCertificate);
+        verify(certificateRepo).save(addedCertificate);
         verify(tagMapper).responsesToEntities(tagResponses);
     }
 
     @Test
     void testDeleteByIdShouldThrowWhenCertificateNotExist() {
         long id = 10;
-        when(certificateRepo.getById(anyLong())).thenReturn(Optional.empty());
+        when(certificateRepo.findById(anyLong())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(CertificateNotFoundException.class, () -> service.deleteById(id));
-        verify(certificateRepo).getById(id);
+        verify(certificateRepo).findById(id);
     }
 
     @Test
@@ -95,14 +100,14 @@ class CertificateServiceTest {
         CertificateResponseDto responseDto = buildCertificateResponse(id, responses);
         GiftCertificate addedCertificate = buildCertificate(id, tagEntities);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
-        when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(addedCertificate));
+        when(certificateRepo.findById(anyLong())).thenReturn(Optional.of(addedCertificate));
 
 
         CertificateResponseDto certificateResponseDto = service.deleteById(id);
         Assertions.assertEquals(responseDto, certificateResponseDto);
 
         verify(mapper).entityToResponse(eq(addedCertificate));
-        verify(certificateRepo).getById(id);
+        verify(certificateRepo).findById(id);
     }
 
 
@@ -122,18 +127,18 @@ class CertificateServiceTest {
         CertificateRequestDto requestDto = buildCertificateRequest();
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(mapper.requestToEntity(any())).thenReturn(addedCertificate);
-        when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(addedCertificate));
-        when(certificateRepo.updateCertificate(any())).thenReturn(addedCertificate);
+        when(certificateRepo.findById(anyLong())).thenReturn(Optional.of(addedCertificate));
+        when(certificateRepo.save(any())).thenReturn(addedCertificate);
         when(tagService.updateTag(any())).thenReturn(firstTagResponse).thenReturn(secondTagResponse);
         when(tagMapper.responsesToEntities(any())).thenReturn(new ArrayList<>(tagEntities));
 
         CertificateResponseDto updated = service.updateCertificate(id, requestDto);
         Assertions.assertEquals(responseDto, updated);
 
-        verify(certificateRepo).updateCertificate(addedCertificate);
+        verify(certificateRepo).save(addedCertificate);
         verify(mapper).requestToEntity(requestDto);
         verify(mapper).entityToResponse(addedCertificate);
-        verify(certificateRepo).getById(id);
+        verify(certificateRepo).findById(id);
         verify(tagMapper).responsesToEntities(tagResponses);
     }
 
@@ -147,26 +152,26 @@ class CertificateServiceTest {
         requestDto.setTags(null);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
         when(mapper.requestToEntity(any())).thenReturn(addedCertificate);
-        when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(addedCertificate));
-        when(certificateRepo.updateCertificate(any())).thenReturn(addedCertificate);
+        when(certificateRepo.findById(anyLong())).thenReturn(Optional.of(addedCertificate));
+        when(certificateRepo.save(any())).thenReturn(addedCertificate);
 
         CertificateResponseDto updated = service.updateCertificate(id, requestDto);
         Assertions.assertEquals(responseDto, updated);
 
-        verify(certificateRepo).updateCertificate(addedCertificate);
+        verify(certificateRepo).save(addedCertificate);
         verify(mapper).requestToEntity(requestDto);
         verify(mapper).entityToResponse(addedCertificate);
-        verify(certificateRepo).getById(id);
+        verify(certificateRepo).findById(id);
     }
 
     @Test
     void testGetByIdShouldThrowWhenNotFound() {
         long id = 1;
-        when(certificateRepo.getById(anyLong())).thenReturn(Optional.empty());
+        when(certificateRepo.findById(anyLong())).thenReturn(Optional.empty());
 
 
         Assertions.assertThrows(CertificateNotFoundException.class, () -> service.getById(id));
-        verify(certificateRepo).getById(id);
+        verify(certificateRepo).findById(id);
     }
 
     @Test
@@ -178,13 +183,13 @@ class CertificateServiceTest {
         CertificateResponseDto responseDto = buildCertificateResponse(id, responses);
         GiftCertificate giftCertificate = buildCertificate(id, tagEntities);
         when(mapper.entityToResponse(any())).thenReturn(responseDto);
-        when(certificateRepo.getById(anyLong())).thenReturn(Optional.of(giftCertificate));
+        when(certificateRepo.findById(anyLong())).thenReturn(Optional.of(giftCertificate));
 
 
         CertificateResponseDto result = service.getById(id);
         Assertions.assertEquals(responseDto, result);
         verify(mapper).entityToResponse(giftCertificate);
-        verify(certificateRepo).getById(id);
+        verify(certificateRepo).findById(id);
     }
 
     @Test
@@ -201,25 +206,17 @@ class CertificateServiceTest {
                 .id(secondId).name("fad").build();
         List<CertificateResponseDto> responses = Arrays.asList(firstResponse, secondResponse);
         List<GiftCertificate> certificates = Arrays.asList(firstCertificate, secondCertificate);
-
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("name"));
+        String keyword = "";
+        String tagName = "";
+        Specification<GiftCertificate> specification = new CertificateSpecification(keyword, tagName);
         when(mapper.entitiesToResponses(any())).thenReturn(responses);
-        when(certificateRepo.getAllSorted(any())).thenReturn(certificates);
+        when(certificateRepo.findAll(specification, pageable)).thenReturn(new PageImpl<>(certificates));
 
-        String testTagName = "";
-        String testKeyword = "";
-        String testSortString = "b";
-        CertificateFilter filter = CertificateFilter.builder()
-                .tagName(testTagName)
-                .keyword(testKeyword)
-                .sortField(testSortString)
-                .pageSize(10)
-                .offset(0)
-                .build();
-        List<CertificateResponseDto> results = service.getCertificates(filter);
+        List<CertificateResponseDto> results = service.getCertificates(pageable, keyword, tagName);
         Assertions.assertEquals(responses, results);
 
         verify(mapper).entitiesToResponses(certificates);
-        verify(certificateRepo).getAllSorted(filter);
     }
 
     @Test
