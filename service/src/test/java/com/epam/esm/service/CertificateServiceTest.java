@@ -211,11 +211,13 @@ class CertificateServiceTest {
         String tagName = "";
         Specification<GiftCertificate> specification = new CertificateSpecification(keyword, tagName);
         when(mapper.entitiesToResponses(any())).thenReturn(responses);
-        when(certificateRepo.findAll(specification, pageable)).thenReturn(new PageImpl<>(certificates));
+        when(certificateRepo.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(certificates));
 
         List<CertificateResponseDto> results = service.getCertificates(pageable, keyword, tagName);
         Assertions.assertEquals(responses, results);
 
+        verify(certificateRepo).findAll(specification, pageable);
         verify(mapper).entitiesToResponses(certificates);
     }
 

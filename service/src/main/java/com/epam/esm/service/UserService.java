@@ -43,8 +43,7 @@ public class UserService {
     /**
      * Return a page of users within specified range
      *
-     * @param size   -  maximal number of users in one page
-     * @param offset - number of user from which page starts
+     * @param pageable - specifies the page number and page size
      * @return List of all users located within specified range
      */
     public List<UserResponseDto> getPage(Pageable pageable) {

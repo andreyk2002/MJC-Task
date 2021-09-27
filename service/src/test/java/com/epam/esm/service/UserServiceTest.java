@@ -103,13 +103,14 @@ class UserServiceTest {
         int size = 2;
         int page = 0;
         Pageable pageable = PageRequest.of(page, size);
-        when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(users));
+        when(userRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(users));
         when(userMapper.entitiesToResponses(anyList())).thenReturn(allExpected);
 
         List<UserResponseDto> all = userService.getPage(pageable);
 
         Assertions.assertEquals(allExpected, all);
         verify(userMapper).entitiesToResponses(users);
+        verify(userRepository).findAll(pageable);
     }
 
     @Test

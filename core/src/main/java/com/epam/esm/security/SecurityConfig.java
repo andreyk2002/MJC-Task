@@ -1,17 +1,16 @@
 package com.epam.esm.security;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -31,19 +30,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .and()
                 .authorizeRequests()
+                .mvcMatchers("/").permitAll()
                 .antMatchers("/").permitAll()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers("/github_login").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
-                .apply(jwtConfigurer)
-                .and().exceptionHandling(e -> e
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))).oauth2Login();
+                .oauth2Login()
+                .and()
+                .apply(jwtConfigurer);
+    }
+
+    @Bean
+    public PrincipalExtractor principalExtractor(UserDetailsService service) {
+        return map -> {
+            return new SecurityUser("", "", null);
+        };
     }
 
     @Bean

@@ -58,7 +58,7 @@ class OrderServiceTest {
         String adminLogin = "adminLogin";
         User admin = User.builder().id(1).login(adminLogin).role(UserRole.ADMIN).build();
         Pageable pageable = PageRequest.of(offset, size);
-        when(orderRepository.findAll(pageable)).thenReturn(new PageImpl<>(orders));
+        when(orderRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(orders));
         when(orderMapper.entitiesToResponse(anyList())).thenReturn(expectedOrders);
         when(userRepository.findByLogin(anyString())).thenReturn(Optional.ofNullable(admin));
 
@@ -67,6 +67,7 @@ class OrderServiceTest {
         Assertions.assertEquals(expectedOrders, all);
         verify(orderMapper).entitiesToResponse(orders);
         verify(userRepository).findByLogin(adminLogin);
+        verify(orderRepository).findAll(pageable);
     }
 
     @Test

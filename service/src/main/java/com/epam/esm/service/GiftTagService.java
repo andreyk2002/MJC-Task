@@ -56,7 +56,7 @@ public class GiftTagService {
     }
 
     /**
-     * Updates instance of specified tag. If no tag found new instance will be create
+     * Updates instance of specified tag. If no tag found new instance will be created
      *
      * @param tagRequestDto Contains updated state of tag instance
      * @return instance of {@link TagResponseDto} which is already updated in repository
@@ -113,8 +113,7 @@ public class GiftTagService {
     /**
      * Return a page of tags within specified range
      *
-     * @param size   -  maximal number of tags in one page
-     * @param offset - number of tags from which page starts
+     * @param pageable - specifies the page number and page size
      * @return List of all tags located within specified range
      */
     public List<TagResponseDto> getPage(Pageable pageable) {

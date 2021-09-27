@@ -48,7 +48,7 @@ class GiftTagServiceTest {
         TagResponseDto firstResponse = new TagResponseDto(firstId, "first");
         TagResponseDto secondResponse = new TagResponseDto(secondId, "second");
 
-        when(tagRepository.findAll(pageable)).thenReturn(new PageImpl<>(
+        when(tagRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(
                 Arrays.asList(firstGiftTag, secondGiftTag)
         ));
         when(mapper.entitiesToResponses(anyList())).thenReturn(Arrays.asList(firstResponse, secondResponse));
@@ -58,6 +58,7 @@ class GiftTagServiceTest {
         List<TagResponseDto> allTags = service.getPage(pageable);
         Assertions.assertEquals(allTags, all);
         verify(mapper).entitiesToResponses(Arrays.asList(firstGiftTag, secondGiftTag));
+        verify(tagRepository).findAll(pageable);
     }
 
     @Test

@@ -29,10 +29,11 @@ public class OrderService {
     private final OrderMapper mapper;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+
     /**
      * Searches order by specified id
      *
-     * @param id - ID of the order to be find
+     * @param id - ID of the order to be finded
      * @return instance of order with specified id
      * @throws OrderNotFoundException if order with specified id not present in repository
      */
@@ -45,9 +46,7 @@ public class OrderService {
     /**
      * Return a page of orders within specified range
      *
-     * @param size   -  maximal number of orders in one page
-     * @param offset - number of order from which page starts
-     * @param login
+     * @param pageable - specifies the page number and page size
      * @return List of all orders located within specified range
      */
     public List<OrderResponseDto> getPage(Pageable pageable, String login) {

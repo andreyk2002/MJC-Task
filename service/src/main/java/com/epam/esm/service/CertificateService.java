@@ -112,11 +112,9 @@ public class CertificateService {
      * Searches list of all certificates depends on keyword (part of name or description) or/and tag name
      * in specified order
      *
-     * @param filter stores information about which criterias of selecting certificates.
-     *               May include tagName -  name of the tag which certificate should contain,
-     *               keyword - part of the name or description which certificate should have
-     *               sortOrder -  type of sort order (ascending, descending),
-     *               sortField - name of the field by which certificates should be ordered
+     * @param pageable - specifies the page number and page size
+     * @param keyword  - part of the name or description which certificates should contain
+     * @param tagName  - name of the tag which certificates should contain
      * @return List of certificates which applied to the mentioned criterias
      */
     public List<CertificateResponseDto> getCertificates(Pageable pageable, String keyword, String tagName) {

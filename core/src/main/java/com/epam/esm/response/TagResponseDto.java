@@ -7,7 +7,7 @@ import org.springframework.hateoas.RepresentationModel;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class TagResponseDto extends RepresentationModel<TagResponseDto> {
 
     private long id;
