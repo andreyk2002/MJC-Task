@@ -36,14 +36,14 @@ public class CartService {
     /**
      * Creates order for user with specified id
      *
-     * @param userId       - id to which order belongs to
+     * @param userLogin    - login of user who makes order
      * @param certificates - ids of certificates which included to order
      * @return instance of created order
      * @throws UserNotFoundException is user with specified id not exists
      */
     @Transactional
-    public OrderResponseDto createOrder(long userId, List<Long> certificates) {
-        Optional<User> optionalUser = userRepository.findById(userId);
+    public OrderResponseDto createOrder(String userLogin, List<Long> certificates) {
+        Optional<User> optionalUser = userRepository.findByLogin(userLogin);
         List<Long> certificateRange = certificates.stream().sorted().distinct().collect(toList());
         List<GiftCertificate> giftCertificates = certificateRepository.findAllInIdRange(certificateRange);
         BigDecimal totalPrice = giftCertificates.stream()
@@ -57,7 +57,7 @@ public class CartService {
                     .build();
             Order addedOrder = orderRepository.save(order);
             return orderMapper.entityToResponse(addedOrder);
-        }).orElseThrow(() -> new UserNotFoundException(userId));
+        }).orElseThrow(() -> new UserNotFoundException(userLogin));
     }
 
 

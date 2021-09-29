@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -65,7 +65,8 @@ class CartServiceTest {
                 .builder().id(6).price(new BigDecimal("2")).build();
         List<CertificateResponseDto> responses = Arrays.asList(firstCertificateResponse, secondCertificateResponse);
         List<Long> certificateIds = Arrays.asList(4L, 6L);
-        User user = User.builder().id(userId).name("name").role(UserRole.USER).build();
+        String userLogin = "login";
+        User user = User.builder().id(userId).name("name").login(userLogin).role(UserRole.USER).build();
         UserResponseDto userResponse = new UserResponseDto(userId, "name", UserRole.USER);
 
         OrderResponseDto expectedOrder = OrderResponseDto.builder()
@@ -80,16 +81,17 @@ class CartServiceTest {
                 .orderPrice(new BigDecimal("3"))
                 .certificates(certificates)
                 .build();
+
         when(certificateRepository.findAllInIdRange(anyList())).thenReturn(certificates);
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(userRepository.findByLogin(anyString())).thenReturn(Optional.of(user));
         when(orderRepository.save(any())).thenReturn(order);
         when(orderMapper.entityToResponse(any())).thenReturn(expectedOrder);
 
-        OrderResponseDto createdOrder = cartService.createOrder(userId, certificateIds);
+        OrderResponseDto createdOrder = cartService.createOrder(userLogin, certificateIds);
 
         Assertions.assertEquals(expectedOrder, createdOrder);
 
-        verify(userRepository).findById(userId);
+        verify(userRepository).findByLogin(userLogin);
         verify(certificateRepository).findAllInIdRange(eq(certificateIds));
         verify(orderRepository).save(eq(order));
         verify(orderMapper).entityToResponse(order);
@@ -97,10 +99,10 @@ class CartServiceTest {
 
     @Test
     void createOrderShouldThrowWhenUserNotFound() {
-        long notExistingId = 666;
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        String notExistingLogin = "login";
+        when(userRepository.findByLogin(notExistingLogin)).thenReturn(Optional.empty());
         Assertions.assertThrows(UserNotFoundException.class,
-                () -> cartService.createOrder(notExistingId, Collections.emptyList()));
-        verify(userRepository).findById(notExistingId);
+                () -> cartService.createOrder(notExistingLogin, Collections.emptyList()));
+        verify(userRepository).findByLogin(notExistingLogin);
     }
 }

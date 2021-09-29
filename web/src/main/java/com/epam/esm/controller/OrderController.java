@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,18 +59,17 @@ public class OrderController {
             @Positive(message = "400221") int size,
             @ApiParam("number of order from which page starts")
             @RequestParam(defaultValue = "0") @PositiveOrZero(message = "40021") int page,
-            HttpServletRequest request) {
+            Principal userPrinciple) {
         Pageable pageable = PageRequest.of(page, size);
-        String token = jwtTokenProvider.resolveToken(request);
-        String login = jwtTokenProvider.getLogin(token);
+        String login = userPrinciple.getName();
         List<OrderResponseDto> ordersPage = orderService.getPage(pageable, login);
         ordersPage.forEach(order -> order.add(linkTo(methodOn(OrderController.class).getById(order.getId())).withRel("getById")));
         int nextPage = page + 1;
         int prevPage = offsetCreator.createPreviousOffset(page);
         List<Link> links = Arrays.asList(
-                linkTo(methodOn(OrderController.class).getPage(size, page, request)).withSelfRel(),
-                linkTo(methodOn(OrderController.class).getPage(size, nextPage, request)).withRel("nextPage"),
-                linkTo(methodOn(OrderController.class).getPage(size, prevPage, request)).withRel("prevPage")
+                linkTo(methodOn(OrderController.class).getPage(size, page, userPrinciple)).withSelfRel(),
+                linkTo(methodOn(OrderController.class).getPage(size, nextPage, userPrinciple)).withRel("nextPage"),
+                linkTo(methodOn(OrderController.class).getPage(size, prevPage, userPrinciple)).withRel("prevPage")
         );
         CollectionModel<OrderResponseDto> ordersWithLinks = CollectionModel.of(ordersPage, links);
         return new ResponseEntity<>(ordersWithLinks, HttpStatus.OK);
@@ -82,6 +81,7 @@ public class OrderController {
             @ApiResponse(code = 200, message = "Order was successfully created"),
             @ApiResponse(code = 40431, message = "Order with specified id not found"),
             @ApiResponse(code = 500, message = "Application failed to process the request")
+
     })
     public ResponseEntity<OrderResponseDto> getById(@ApiParam("id of the order to be find") @PathVariable long id) {
         OrderResponseDto order = orderService.getById(id);
