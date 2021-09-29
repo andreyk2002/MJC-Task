@@ -45,6 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .apply(jwtConfigurer);
     }
 
+    //TODO remove
     @Bean
     public PrincipalExtractor principalExtractor(UserDetailsService service) {
         return map -> {
