@@ -1,5 +1,6 @@
-package com.epam.esm.security;
+package com.epam.esm.config;
 
+import com.epam.esm.security.JwtConfigurer;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 @EnableGlobalMethodSecurity(
         prePostEnabled = true,
         securedEnabled = true,
@@ -32,8 +33,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .mvcMatchers("/").permitAll()
                 .antMatchers("/").permitAll()
+                .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()
                 .anyRequest()
